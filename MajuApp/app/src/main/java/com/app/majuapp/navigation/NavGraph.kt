@@ -19,7 +19,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
-import com.app.majuapp.screen.HomeScreen
+import com.app.majuapp.screen.home.HomeScreen
 import com.app.majuapp.screen.MainScreen
 
 @OptIn(ExperimentalSharedTransitionApi::class)
