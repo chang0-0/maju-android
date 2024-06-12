@@ -13,7 +13,6 @@ fun HomeScreen(
 ) {
 
     HomeScreenContent()
-
 } // End of HomeScreen()
 
 @Composable
