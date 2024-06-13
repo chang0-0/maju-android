@@ -1,26 +1,28 @@
 package com.app.majuapp.screen.home
 
-import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
@@ -39,6 +41,8 @@ import com.app.majuapp.R
 import com.app.majuapp.component.HomeScreenRoundedCard
 import com.app.majuapp.component.HomeScreenSpacer
 import com.app.majuapp.component.Loader
+import com.app.majuapp.ui.theme.SkyBlue
+import com.app.majuapp.ui.theme.SpiroDiscoBall
 import com.app.majuapp.ui.theme.defaultPadding
 import com.app.majuapp.ui.theme.roundedCornerPadding
 
@@ -56,57 +60,134 @@ private fun HomeScreenContent() {
     val context = LocalContext.current
     val brightGrayColor = ContextCompat.getColor(context, R.color.bright_gray)
 
-    LazyColumn(
-        modifier = Modifier.fillMaxSize().padding(top = defaultPadding),
-        contentPadding = PaddingValues(horizontal = defaultPadding)
-    ) {
-        item {
-            HomeScreenRoundedCard(
-                modifier = Modifier, color = CardDefaults.cardColors(containerColor = Color.Blue)
-            )
-            HomeScreenSpacer()
-            Text(
-                stringResource(id = R.string.home_screen_how_wether),
-                fontSize = 20.sp,
-                fontWeight = FontWeight.SemiBold
-            )
-            HomeScreenSpacer()
-            HomeScreenRoundedCard(
-                modifier = Modifier.border(
-                    width = 2.dp, color = Color(brightGrayColor), shape = RoundedCornerShape(
-                        roundedCornerPadding
-                    )
-                ), color = CardDefaults.cardColors(containerColor = Color.Transparent)
-            )
-            HomeScreenSpacer()
-        }
-        items(homeCategoryList.chunked(2)) { rowItems ->
-            RowOfCategoryBox(rowItems)
+    Surface(modifier = Modifier.fillMaxSize().padding(top = 64.dp)) {
+        LazyColumn(
+            contentPadding = PaddingValues(horizontal = defaultPadding)
+        ) {
+            item {
+                HomeScreenRoundedCard(
+                    // 홈 화면 날씨 카드
+                    modifier = Modifier,
+                    color = arrayListOf(SpiroDiscoBall, SkyBlue),
+                ) {
+                    HomeScreenWeatherBox("")
+                }
+                HomeScreenSpacer()
+                Text(
+                    stringResource(id = R.string.home_screen_how_wether),
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    // style = MaterialTheme.typography.bodyLarge,
+                )
+                HomeScreenSpacer()
+                HomeScreenRoundedCard(
+                    // 홈 화면 알림 카드
+                    modifier = Modifier.border(
+                        width = 2.dp, color = Color(brightGrayColor), shape = RoundedCornerShape(
+                            roundedCornerPadding
+                        )
+                    ),
+                    color = arrayListOf(Color.Transparent, Color.Transparent),
+                ) {
+                    HomeScreenNoticeBox("")
+                }
+                HomeScreenSpacer()
+            }
+            items(homeCategoryList.chunked(2)) { rowItems ->
+                RowOfCategoryBox(rowItems)
+            }
         }
     }
 } // End of HomeScreenContent()
 
 @Composable
-private fun RowOfCategoryBox(categoryList: List<Category>) {
-    Log.d(TAG, "RowOfCategoryBox: $categoryList")
+private fun HomeScreenWeatherBox(weatherData: String) {
+    val context = LocalContext.current
+    Row(
+        modifier = Modifier.fillMaxSize().padding(defaultPadding),
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Column(
+            modifier = Modifier.wrapContentSize()
+                .padding(start = defaultPadding, top = defaultPadding),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                text = "서울시 성동구",
+                fontSize = 24.sp,
+                fontWeight = FontWeight.SemiBold,
+                color = Color.White
+            )
+            Text(text = "27℃", fontSize = 60.sp, fontWeight = FontWeight.Bold, color = Color.White)
+        }
+        SubcomposeAsyncImage(
+            modifier = Modifier.padding(10.dp),
+            model = ImageRequest.Builder(context)
+                .data(R.drawable.ic_sunny) // 날씨 아이콘 표시
+                .crossfade(true).build(),
+            contentScale = ContentScale.Fit,
+            contentDescription = weatherData,
+        )
+    }
+} // End of HomeScreenWeatherBox()
 
+@Composable
+private fun HomeScreenNoticeBox(weatherData: String) {
+    val context = LocalContext.current
+    Column(modifier = Modifier.fillMaxSize().padding(defaultPadding)) {
+        Box(
+            modifier = Modifier.clip(RoundedCornerShape(roundedCornerPadding)).fillMaxWidth()
+                .height(120.dp).background(Color.Blue)
+        ) {
+            SubcomposeAsyncImage(
+                modifier = Modifier.fillMaxSize().clip(RoundedCornerShape(12.dp)),
+                model = ImageRequest.Builder(context)
+                    .data("https://cdn.woman.chosun.com/news/photo/202309/112221_118277_4824.jpg")
+                    .crossfade(true).build(),
+                contentScale = ContentScale.Crop,
+                alignment = Alignment.TopCenter,
+                contentDescription = weatherData,
+            )
+        }
+        Row(
+            modifier = Modifier.fillMaxSize(),
+            verticalAlignment = Alignment.Bottom,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Text(
+                "임영웅 콘서트",
+                fontWeight = FontWeight.Bold,
+                fontSize = 20.sp,
+                modifier = Modifier.align(Alignment.Bottom)
+            )
+            Text(
+                text = "2024년 6월 11일",
+                fontSize = 12.sp,
+                fontWeight = FontWeight.Light,
+                modifier = Modifier.align(Alignment.Bottom).padding(10.dp)
+            )
+        }
+    }
+
+} // End of HomeScreenNoticeBox()
+
+@Composable
+private fun RowOfCategoryBox(categoryList: List<Category>) {
     Row(
         modifier = Modifier.fillMaxWidth().padding(bottom = 24.dp),
         horizontalArrangement = Arrangement.spacedBy(24.dp),
     ) {
         categoryList.forEach { categoryBox ->
             Box(
-                modifier = Modifier.weight(1f).aspectRatio(1f),
+                modifier = Modifier.weight(1f).aspectRatio(1f)
+                    .clip(RoundedCornerShape(roundedCornerPadding)),
                 contentAlignment = Alignment.Center
             ) {
-                SubcomposeAsyncImage(modifier = Modifier.clip(
-                    RoundedCornerShape(
-                        roundedCornerPadding
-                    )
-                )
-                    .clickable {
 
-                    },
+                SubcomposeAsyncImage(modifier = Modifier.blur(radius = 1.2.dp).clickable {
+
+                },
                     model = ImageRequest.Builder(LocalContext.current).data(categoryBox.imageUrl)
                         .crossfade(true).build(),
                     contentDescription = categoryBox.imageUrl,
@@ -114,6 +195,9 @@ private fun RowOfCategoryBox(categoryList: List<Category>) {
                     loading = {
                         Loader()
                     })
+                Box(
+                    modifier = Modifier.background(Color.DarkGray.copy(alpha = 0.4f)).fillMaxSize()
+                )
                 Text(
                     fontWeight = FontWeight.Bold,
                     fontSize = 38.sp,
@@ -128,24 +212,6 @@ private fun RowOfCategoryBox(categoryList: List<Category>) {
             }
         }
     }
-
-//    LazyVerticalGrid(
-//        modifier = Modifier.padding(bottom = 10.dp)
-//            .wrapContentHeight(),
-//        horizontalArrangement = Arrangement.spacedBy(10.dp),
-//        verticalArrangement = Arrangement.spacedBy(10.dp),
-//        columns = GridCells.Fixed(2),
-//        userScrollEnabled = false,
-//    ) {
-//        items(homeCategoryList.size, span = { index -> GridItemSpan(1) }) { index ->
-//            HomeScreenCategoryItem(
-//                modifier = Modifier,
-//                categoryItem = homeCategoryList[index],
-//            ) {
-//
-//            }
-//        }
-//    }
 } // End of NestedLazyVerticalGrid()
 
 @Composable
@@ -164,36 +230,7 @@ private val homeCategoryList = listOf(
     Category(
         "문화",
         "https://images.unsplash.com/photo-1454908027598-28c44b1716c1?q=80&w=2340&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
-    ),
-    Category(
-        "등산",
-        "https://images.unsplash.com/photo-1551632811-561732d1e306?q=80&w=2340&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
-    ),
-    Category(
-        "전시회",
-        "https://images.unsplash.com/photo-1518998053901-5348d3961a04?q=80&w=2274&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
-    ),
-    Category(
-        "전시회",
-        "https://images.unsplash.com/photo-1518998053901-5348d3961a04?q=80&w=2274&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
-    ),
-    Category(
-        "전시회",
-        "https://images.unsplash.com/photo-1518998053901-5348d3961a04?q=80&w=2274&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
-    ),
-    Category(
-        "전시회",
-        "https://images.unsplash.com/photo-1518998053901-5348d3961a04?q=80&w=2274&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
-    ),
-    Category(
-        "전시회",
-        "https://images.unsplash.com/photo-1518998053901-5348d3961a04?q=80&w=2274&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
-    ),
-    Category(
-        "전시회",
-        "https://images.unsplash.com/photo-1518998053901-5348d3961a04?q=80&w=2274&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
-    ),
-
     )
+)
 
 data class Category(val title: String, val imageUrl: String)
