@@ -32,3 +32,20 @@ val Typography = Typography(
     )
     */
 )
+
+data class CustomHeaderTypography(
+    val h1: TextStyle = TextStyle(
+        fontSize = 28.sp
+    ),
+    val h2: TextStyle = TextStyle(fontSize = 28.sp)
+)
+
+data class CustomBodyTypography(
+    val body20: TextStyle = TextStyle(
+        fontSize = 20.sp
+    ),
+
+    val body16: TextStyle = TextStyle(
+        fontSize = 16.sp
+    ),
+)
