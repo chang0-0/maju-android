@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -79,7 +80,7 @@ private fun HomeScreenContent() {
                     fontWeight = FontWeight.SemiBold,
                     // style = MaterialTheme.typography.bodyLarge,
                 )
-                HomeScreenSpacer()
+                Spacer(modifier = Modifier.height(18.dp))
                 HomeScreenRoundedCard(
                     // 홈 화면 알림 카드
                     modifier = Modifier.border(
@@ -119,7 +120,15 @@ private fun HomeScreenWeatherBox(weatherData: String) {
                 fontWeight = FontWeight.SemiBold,
                 color = Color.White
             )
-            Text(text = "27℃", fontSize = 60.sp, fontWeight = FontWeight.Bold, color = Color.White)
+            Text(
+                text = "27℃",
+                fontSize = 60.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color.White,
+                modifier = Modifier.align(
+                    Alignment.Start
+                )
+            )
         }
         SubcomposeAsyncImage(
             modifier = Modifier.padding(10.dp),
