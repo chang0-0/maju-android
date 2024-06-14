@@ -1,3 +1,6 @@
 <resources>
     <string name="app_name">Maju App</string>
+
+    // Home
+    <string name="home_screen_how_wether">오늘 날씨에 이건 어때요?</string>
 </resources>

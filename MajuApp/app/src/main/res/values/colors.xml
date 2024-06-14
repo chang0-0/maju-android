@@ -7,4 +7,9 @@
     <color name="teal_700">#FF018786</color>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+
+
+    <color name="bright_gray">#EEEEEEEE</color>
+    <color name="SpiroDiscoBall">#23C5FF</color>
+    <color name="SkyBlue">#67E1D2 </color>
 </resources>
