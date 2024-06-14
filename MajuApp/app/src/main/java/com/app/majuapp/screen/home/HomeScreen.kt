@@ -30,10 +30,10 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
+import androidx.navigation.ExperimentalSafeArgsApi
 import androidx.navigation.NavController
 import coil.compose.SubcomposeAsyncImage
 import coil.request.ImageRequest
@@ -52,11 +52,11 @@ private const val TAG = "HomeScreen_창영"
 fun HomeScreen(
     navController: NavController
 ) {
-    HomeScreenContent()
+    HomeScreenContent(navController)
 } // End of HomeScreen()
 
 @Composable
-private fun HomeScreenContent() {
+private fun HomeScreenContent(navController: NavController) {
     val context = LocalContext.current
     val brightGrayColor = ContextCompat.getColor(context, R.color.bright_gray)
 
@@ -94,7 +94,7 @@ private fun HomeScreenContent() {
                 HomeScreenSpacer()
             }
             items(homeCategoryList.chunked(2)) { rowItems ->
-                RowOfCategoryBox(rowItems)
+                RowOfCategoryBox(rowItems, navController)
             }
         }
     }
@@ -172,8 +172,11 @@ private fun HomeScreenNoticeBox(weatherData: String) {
 
 } // End of HomeScreenNoticeBox()
 
+@OptIn(ExperimentalSafeArgsApi::class)
 @Composable
-private fun RowOfCategoryBox(categoryList: List<Category>) {
+private fun RowOfCategoryBox(categoryList: List<Category>, navController: NavController) {
+    val context = LocalContext.current
+
     Row(
         modifier = Modifier.fillMaxWidth().padding(bottom = 24.dp),
         horizontalArrangement = Arrangement.spacedBy(24.dp),
@@ -181,13 +184,15 @@ private fun RowOfCategoryBox(categoryList: List<Category>) {
         categoryList.forEach { categoryBox ->
             Box(
                 modifier = Modifier.weight(1f).aspectRatio(1f)
-                    .clip(RoundedCornerShape(roundedCornerPadding)),
-                contentAlignment = Alignment.Center
+                    .clip(RoundedCornerShape(roundedCornerPadding)).clickable {
+                        navController.navigate("walk_screen") {
+                            launchSingleTop = true
+                            restoreState = true
+                        }
+                    },
+                contentAlignment = Alignment.Center,
             ) {
-
-                SubcomposeAsyncImage(modifier = Modifier.blur(radius = 1.2.dp).clickable {
-
-                },
+                SubcomposeAsyncImage(modifier = Modifier.blur(radius = 1.2.dp),
                     model = ImageRequest.Builder(LocalContext.current).data(categoryBox.imageUrl)
                         .crossfade(true).build(),
                     contentDescription = categoryBox.imageUrl,
@@ -213,14 +218,6 @@ private fun RowOfCategoryBox(categoryList: List<Category>) {
         }
     }
 } // End of NestedLazyVerticalGrid()
-
-@Composable
-@Preview
-private fun HomeScreenPreview() {
-    Surface(modifier = Modifier.background(Color.White)) {
-        HomeScreenContent()
-    }
-} // End of HomeScreenPreview()
 
 private val homeCategoryList = listOf(
     Category(

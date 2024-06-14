@@ -12,6 +12,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.app.majuapp.screen.MainScreen
 import com.app.majuapp.screen.home.HomeScreen
+import com.app.majuapp.screen.walk.WalkScreen
 
 @OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
@@ -40,6 +41,12 @@ fun SetUpNavGraph(
                 route = Screen.Main.route
             ) {
                 MainScreen(navController = navController)
+            }
+
+            composable(
+                route = Screen.Walk.route
+            ) {
+                WalkScreen(navController = navController)
             }
         }
 
