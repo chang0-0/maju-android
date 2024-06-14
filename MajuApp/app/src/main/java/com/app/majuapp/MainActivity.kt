@@ -18,12 +18,13 @@ import dagger.hilt.android.AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
+        WindowCompat.setDecorFitsSystemWindows(window, false)
+
         setContent {
             MajuAppTheme {
                 StatusBarColorChange()
-                val navController = rememberNavController()
-                SetUpNavGraph(navController)
+                 val navController = rememberNavController()
+                 SetUpNavGraph(navController)
             }
         }
     } // End of onCreate()
