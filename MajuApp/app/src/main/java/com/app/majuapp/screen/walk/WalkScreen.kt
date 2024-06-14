@@ -1,7 +1,19 @@
 package com.app.majuapp.screen.walk
 
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.width
+import androidx.compose.material3.Button
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.app.majuapp.R
 import com.app.majuapp.component.WalkScreenChooseStartDialog
@@ -14,10 +26,46 @@ fun WalkScreen(navController: NavController) {
 @Composable
 private fun WalkScreenContent(navController: NavController) {
     val context = LocalContext.current
+    var showDialog = remember { mutableStateOf(true) }
 
-    WalkScreenChooseStartDialog(
-        context.getString(R.string.walk_screen_choose_start_dialog_title),
-        context.getString(R.string.walk_screen_choose_start_dialog_content),
-        {},
-        {})
+    Surface(modifier = Modifier.fillMaxSize()) {
+        Column(
+            modifier = Modifier.fillMaxSize(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            Button(modifier = Modifier.width(100.dp), onClick = {
+                showDialog.value = true
+            }) {
+                Text(text = "Show Dialog")
+            }
+        }
+    }
+
+    if (showDialog.value) {
+        WalkScreenChooseStartDialog(
+            context.getString(R.string.walk_screen_choose_start_dialog_title),
+            context.getString(R.string.walk_screen_choose_start_dialog_content),
+            onClickDismiss = {
+                showDialog.value = false
+                navController.popBackStack()
+            },
+            onClickConfirm = {
+                showDialog.value = false
+            }
+        )
+    }
+
+
+//    WalkScreenChooseStartDialog(
+//        context.getString(R.string.walk_screen_choose_start_dialog_title),
+//        context.getString(R.string.walk_screen_choose_start_dialog_content),
+//        onClickDismiss = {
+//            showDialog.value = false
+//            navController.popBackStack()
+//        },
+//        onClickConfirm = {
+//            showDialog.value = false
+//        }
+//    )
 } // End of WalkScreenContent()

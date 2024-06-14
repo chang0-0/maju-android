@@ -146,7 +146,7 @@ private fun HomeScreenNoticeBox(weatherData: String) {
     Column(modifier = Modifier.fillMaxSize().padding(defaultPadding)) {
         Box(
             modifier = Modifier.clip(RoundedCornerShape(roundedCornerPadding)).fillMaxWidth()
-                .height(120.dp).background(Color.Blue)
+                .height(120.dp)
         ) {
             SubcomposeAsyncImage(
                 modifier = Modifier.fillMaxSize().clip(RoundedCornerShape(12.dp)),
@@ -193,9 +193,13 @@ private fun RowOfCategoryBox(categoryList: List<Category>, navController: NavCon
             Box(
                 modifier = Modifier.weight(1f).aspectRatio(1f)
                     .clip(RoundedCornerShape(roundedCornerPadding)).clickable {
-                        navController.navigate("walk_screen") {
-                            launchSingleTop = true
-                            restoreState = true
+                        when (categoryBox.title) {
+                            "산책" -> {
+                                navController.navigate("walk_screen") {
+                                    launchSingleTop = true
+                                    restoreState = true
+                                }
+                            }
                         }
                     },
                 contentAlignment = Alignment.Center,

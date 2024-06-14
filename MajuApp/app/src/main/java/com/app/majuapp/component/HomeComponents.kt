@@ -47,7 +47,7 @@ fun HomeScreenRoundedCard(modifier: Modifier, color: List<Color>, content: @Comp
 fun HomeScreenCategoryItem(categoryItem: Category, onClick: (String) -> Unit) {
     Box(
         modifier = Modifier
-            .aspectRatio(1f).background(Color.Blue),
+            .aspectRatio(1f),
         contentAlignment = Alignment.Center
     ) {
         SubcomposeAsyncImage(modifier = Modifier.clip(RoundedCornerShape(12.dp))

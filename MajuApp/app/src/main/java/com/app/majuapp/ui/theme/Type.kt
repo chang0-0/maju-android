@@ -18,12 +18,10 @@ val googleFontProvider = GoogleFont.Provider(
 
 
 val notoSansKoreanFontFamily = FontFamily(
-    Font(googleFont = GoogleFont("Noto Sans KR"), fontProvider = googleFontProvider)
-//    androidx.compose.ui.text.font.Font(
-//        R.font.noto_sans_korean_medium,
-//        FontWeight.Bold,
-//        FontStyle.Normal
-//    )
+    Font(
+        googleFont = GoogleFont("Noto Sans KR"),
+        fontProvider = googleFontProvider
+    )
 )
 
 val robotoFont = FontFamily(
