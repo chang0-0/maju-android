@@ -78,7 +78,6 @@ private fun HomeScreenContent(navController: NavController) {
                     stringResource(id = R.string.home_screen_how_wether),
                     fontSize = 20.sp,
                     fontWeight = FontWeight.SemiBold,
-                    // style = MaterialTheme.typography.bodyLarge,
                 )
                 Spacer(modifier = Modifier.height(18.dp))
                 HomeScreenRoundedCard(

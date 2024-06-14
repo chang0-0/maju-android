@@ -11,5 +11,7 @@
 
     <color name="bright_gray">#EEEEEEEE</color>
     <color name="SpiroDiscoBall">#23C5FF</color>
-    <color name="SkyBlue">#67E1D2 </color>
+    <color name="SkyBlue">#67E1D2</color>
+    <color name="GoldenPoppy">#FFC300</color>
+    <color name="TaupeGray">#FF888888</color>
 </resources>
