@@ -1,6 +1,5 @@
 package com.app.majuapp.component
 
-import android.view.Window
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
@@ -11,6 +10,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -19,19 +19,15 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.ReadOnlyComposable
-import androidx.compose.runtime.SideEffect
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -39,7 +35,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
-import androidx.compose.ui.window.DialogWindowProvider
 import com.app.majuapp.ui.theme.GoldenPoppy
 import com.app.majuapp.ui.theme.MajuAppTheme
 import com.app.majuapp.ui.theme.SonicSilver
@@ -62,11 +57,15 @@ fun WalkScreenChooseStartDialog(
     var graphicVisible = remember { mutableStateOf(false) }
     LaunchedEffect(Unit) { graphicVisible.value = true }
 
+    var showDialog = remember { mutableStateOf(true) }
+    var animateIn = remember { mutableStateOf(false) }
+    LaunchedEffect(Unit) { animateIn.value = true }
 
     AnimatedVisibility(
-        visible = graphicVisible.value, enter = expandVertically(
+        visible = graphicVisible.value,
+        enter = expandVertically(
             animationSpec = spring(stiffness = Spring.StiffnessMediumLow),
-            expandFrom = Alignment.CenterVertically
+            expandFrom = Alignment.CenterVertically,
         )
     ) {
         Dialog(
@@ -76,18 +75,10 @@ fun WalkScreenChooseStartDialog(
                 dismissOnClickOutside = false,
             ),
         ) {
-            val dialogWindow = getDialogWindow()
-
-            SideEffect {
-                dialogWindow.let { window ->
-                    window?.setDimAmount(0f)
-                    window?.setWindowAnimations(-1)
-                }
-            }
-
             Box(
                 contentAlignment = Alignment.Center,
                 modifier = Modifier.shadow(8.dp, shape = RoundedCornerShape(16.dp))
+                    .background(Color.Black.copy(alpha = .9f))
                     .clip(RoundedCornerShape(dialogCornerPadding)).background(White)
                     .padding(
                         start = dialogDefaultPadding,
@@ -95,8 +86,7 @@ fun WalkScreenChooseStartDialog(
                         top = dialogDefaultPadding,
                         bottom = 16.dp
                     ),
-
-                ) {
+            ) {
                 Column(
                     modifier = Modifier.fillMaxWidth().wrapContentHeight(),
                     horizontalAlignment = Alignment.CenterHorizontally,
@@ -122,24 +112,55 @@ fun WalkScreenChooseStartDialog(
                     Spacer(modifier = Modifier.height(18.dp))
                     Row(
                         modifier = Modifier,
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
                         WalkComponentButton("돌아가기", TaupeGray, onClickDismiss, Modifier.weight(1f))
                         WalkComponentButton(
-                            "선택하기", GoldenPoppy, onClickConfirm, Modifier.weight(1f)
+                            "선택하기",
+                            GoldenPoppy,
+                            onClickConfirm,
+                            Modifier.weight(1f)
                         )
                     }
                 }
             }
         }
+
+        DisposableEffect(Unit) {
+            onDispose {
+                showAnimatedDialog.value = false
+            }
+        }
     }
 } // End of WalkScreenChooseStartDialogue()
 
-
-@ReadOnlyComposable
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun getDialogWindow(): Window? = (LocalView.current.parent as? DialogWindowProvider)?.window
+fun PartialBottomSheet() {
+    var showBottomSheet by remember { mutableStateOf(false) }
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = false)
+
+    Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
+        Button(
+            onClick = { showBottomSheet = true }
+        ) {
+            Text("")
+        }
+
+        if (showBottomSheet) {
+            ModalBottomSheet(
+                modifier = Modifier.fillMaxHeight(),
+                sheetState = sheetState,
+                onDismissRequest = { showBottomSheet = false }
+            ) {
+                Text(
+                    "Swipe up to open sheet. Swipe down to dismiss.",
+                    modifier = Modifier.padding(16.dp)
+                )
+            }
+        }
+    }
+} // End of PartialBottomSheet()
 
 
 @Composable

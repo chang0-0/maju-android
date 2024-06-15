@@ -157,6 +157,17 @@ dependencies {
 
     // Google Fonts
     implementation("androidx.compose.ui:ui-text-google-fonts:1.6.1")
+
+    // Google Map
+    implementation("com.google.maps.android:maps-compose:5.0.3")
+
+    // Optionally, you can include the Compose utils library for Clustering,
+    // Street View metadata checks, etc.
+    implementation("com.google.maps.android:maps-compose-utils:5.0.3")
+
+    // Optionally, you can include the widgets library for ScaleBar, etc.
+    implementation("com.google.maps.android:maps-compose-widgets:5.0.3")
+
 }
 
 kapt {
