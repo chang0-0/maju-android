@@ -40,4 +40,12 @@ sealed class Screen(
         unSelectedIcon = Icons.Outlined.DirectionsWalk,
         onClick = null,
     )
+
+    data object Test : Screen(
+        route = "test_screen",
+        title = "Test",
+        selectedIcon = Icons.Filled.DirectionsWalk,
+        unSelectedIcon = Icons.Outlined.DirectionsWalk,
+        onClick = null,
+    )
 }// End of Screen class

@@ -10,6 +10,7 @@ val Purple40 = Color(0xFF6650a4)
 val PurpleGrey40 = Color(0xFF625b71)
 val Pink40 = Color(0xFF7D5260)
 
+val brightGray = Color(0xFFEEEEEE)
 val LightGray = Color(0xA5A5A532)
 val SpiroDiscoBall = Color(0xFF23C5FF)
 val SkyBlue = Color(0xFF67E1D2)
@@ -18,3 +19,15 @@ val TaupeGray = Color(0xFF888888)
 
 val White = Color(0xFFFFFFFF)
 val SonicSilver = Color(0xFF767676)
+
+// 날씨 흐림
+val SpanishGray = Color(0xFF9D9D9D)
+val OuterSpace = Color(0xFF474747)
+
+// 날씨 눈
+val Capri = Color(0xFF00BCFF)
+val WinterWizard = Color(0xFF00BCFF)
+
+// 날씨 비
+val CoolGrey = Color(0xFF898AA4)
+val MediumElectricBlue = Color(0xFF004C91)

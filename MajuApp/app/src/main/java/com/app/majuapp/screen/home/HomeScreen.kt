@@ -59,7 +59,7 @@ fun HomeScreen(
 @Composable
 private fun HomeScreenContent(navController: NavController) {
     val context = LocalContext.current
-    val brightGrayColor = ContextCompat.getColor(context, R.color.bright_gray)
+    val brightGrayColor = ContextCompat.getColor(context, R.color.brightGray)
 
     Surface(modifier = Modifier.fillMaxSize().padding(top = 64.dp)) {
         LazyColumn(

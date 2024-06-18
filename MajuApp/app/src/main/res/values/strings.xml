@@ -7,4 +7,6 @@
     // Walk
     <string name="walk_screen_choose_start_dialog_title">출발지 선택</string>
     <string name="walk_screen_choose_start_dialog_content">지도 위에 현재 위치를\n 선택해주세요!</string>
+    <string name="walk_screen_dialog_choose_promenade_title">산책로 선택</string>
+    <string name="walk_screen_dialog_choose_promenade_content">어떤 산책로로 걸어볼까요?\n 옆으로 넘겨서 산책로를 선택해보세요!</string>
 </resources>

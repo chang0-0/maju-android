@@ -9,9 +9,23 @@
     <color name="white">#FFFFFFFF</color>
 
 
-    <color name="bright_gray">#EEEEEEEE</color>
-    <color name="SpiroDiscoBall">#23C5FF</color>
-    <color name="SkyBlue">#67E1D2</color>
+    <color name="brightGray">#EEEEEEEE</color>
+    <color name="SpiroDiscoBall">#FF23C5FF</color>
+    <color name="SkyBlue">#FF67E1D2</color>
     <color name="GoldenPoppy">#FFC300</color>
     <color name="TaupeGray">#FF888888</color>
+
+    // 날씨 흐림
+    <color name="SpanishGray">#FF9D9D9D</color>
+    <color name="OuterSpace">#FF474747</color>
+
+
+    // 날씨 눈
+    <color name="WinterWizard">#FF92E2FF</color>
+    <color name="Capri">#FF00BCFF</color>
+
+
+    // 날씨 비
+    <color name="CoolGrey">#FF898AA4</color>
+    <color name="MediumElectricBlue">#FF004C91</color>
 </resources>
