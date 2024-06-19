@@ -12,4 +12,5 @@ val Pink40 = Color(0xFF7D5260)
 
 val LightGray = Color(0xA5A5A532)
 val SpiroDiscoBall = Color(0xFF23C5FF)
+val DullSpiroDiscoBall = Color(0xFF008BBD)
 val SkyBlue = Color(0xFF67E1D2)

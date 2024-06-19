@@ -12,6 +12,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.app.majuapp.screen.MainScreen
 import com.app.majuapp.screen.home.HomeScreen
+import com.app.majuapp.screen.preference.PreferenceScreen
 
 @OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
@@ -28,7 +29,7 @@ fun SetUpNavGraph(
     SharedTransitionLayout {
         NavHost(
             navController = navController,
-            startDestination = Screen.Home.route,
+            startDestination = Screen.Preference.route,
         ) {
             composable(
                 route = Screen.Home.route
@@ -40,6 +41,12 @@ fun SetUpNavGraph(
                 route = Screen.Main.route
             ) {
                 MainScreen(navController = navController)
+            }
+
+            composable(
+                route = Screen.Preference.route
+            ) {
+                PreferenceScreen(navController = navController)
             }
         }
 

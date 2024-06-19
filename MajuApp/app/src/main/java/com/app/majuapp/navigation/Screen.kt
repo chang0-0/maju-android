@@ -3,8 +3,10 @@ package com.app.majuapp.navigation
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.BookmarkBorder
 import androidx.compose.material.icons.outlined.Home
+import androidx.compose.material.icons.outlined.StarBorder
 import androidx.compose.ui.graphics.vector.ImageVector
 
 sealed class Screen(
@@ -27,6 +29,14 @@ sealed class Screen(
         title = "Main",
         selectedIcon = Icons.Filled.Bookmark,
         unSelectedIcon = Icons.Outlined.BookmarkBorder,
+        onClick = null,
+    )
+
+    data object Preference : Screen(
+        route = "preference_screen",
+        title = "Preference",
+        selectedIcon = Icons.Filled.Star,
+        unSelectedIcon = Icons.Outlined.StarBorder,
         onClick = null,
     )
 }// End of Screen class
