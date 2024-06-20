@@ -20,7 +20,13 @@ val googleFontProvider = GoogleFont.Provider(
 val notoSansKoreanFontFamily = FontFamily(
     Font(
         googleFont = GoogleFont("Noto Sans KR"),
-        fontProvider = googleFontProvider
+        fontProvider = googleFontProvider,
+    )
+)
+
+val pretendardFontFamily = FontFamily(
+    androidx.compose.ui.text.font.Font(
+        R.font.pretendard_variable
     )
 )
 

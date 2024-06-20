@@ -30,6 +30,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -37,13 +38,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import com.app.majuapp.R
 import com.app.majuapp.ui.theme.GoldenPoppy
 import com.app.majuapp.ui.theme.MajuAppTheme
 import com.app.majuapp.ui.theme.OuterSpace
 import com.app.majuapp.ui.theme.SonicSilver
-import com.app.majuapp.ui.theme.TaupeGray
 import com.app.majuapp.ui.theme.White
-import com.app.majuapp.ui.theme.brightGray
+import com.app.majuapp.ui.theme.BrightGray
 import com.app.majuapp.ui.theme.defaultPadding
 import com.app.majuapp.ui.theme.dialogButtonRoundedCorner
 import com.app.majuapp.ui.theme.dialogCornerPadding
@@ -53,6 +54,9 @@ import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.compose.CameraPositionState
 import com.google.maps.android.compose.GoogleMap
+import com.google.maps.android.compose.MapProperties
+import com.google.maps.android.compose.MapType
+import com.google.maps.android.compose.MapUiSettings
 import com.google.maps.android.compose.rememberCameraPositionState
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -63,18 +67,24 @@ fun WalkScreenChooseStartDialog(
     onClickDismiss: () -> Unit,
     onClickConfirm: () -> Unit,
 ) {
+    // Context
+    val context = LocalContext.current
 
-    var showAnimatedDialog = remember { mutableStateOf(false) }
+    var showAnimatedDialog by remember { mutableStateOf(false) }
     var graphicVisible = remember { mutableStateOf(false) }
     LaunchedEffect(Unit) { graphicVisible.value = true }
 
-    var showDialog = remember { mutableStateOf(true) }
     var animateIn = remember { mutableStateOf(false) }
     LaunchedEffect(Unit) { animateIn.value = true }
 
+    /* GoogleMap */
     val seoul = LatLng(37.5744, 126.9771)
     val cameraPositionState: CameraPositionState = rememberCameraPositionState {
         position = CameraPosition.fromLatLngZoom(seoul, 16f)
+    }
+    var uiSettings by remember { mutableStateOf(MapUiSettings()) }
+    val properties by remember {
+        mutableStateOf(MapProperties(mapType = MapType.NORMAL))
     }
 
     AnimatedVisibility(
@@ -112,7 +122,7 @@ fun WalkScreenChooseStartDialog(
                         fontSize = 22.sp,
                         fontWeight = FontWeight.ExtraBold
                     )
-                    Spacer(modifier = Modifier.height(18.dp))
+                    Spacer(modifier = Modifier.height(4.dp))
                     Text(
                         text = content,
                         fontSize = 16.sp,
@@ -127,39 +137,59 @@ fun WalkScreenChooseStartDialog(
                     Box(
                         modifier = Modifier.clip(RoundedCornerShape(roundedCornerPadding))
                             .fillMaxWidth().height(260.dp).border(
-                                2.dp, brightGray, shape = RoundedCornerShape(roundedCornerPadding)
-                            ).padding(defaultPadding),
-                        contentAlignment = Alignment.BottomCenter
+                                2.dp, BrightGray, shape = RoundedCornerShape(roundedCornerPadding)
+                            ).padding(defaultPadding), contentAlignment = Alignment.BottomCenter
                     ) {
-                        Text(
-                            modifier = Modifier.align(Alignment.TopCenter),
-                            text = "보라매공원 산책로",
-                            fontSize = 16.sp,
-                            fontWeight = FontWeight.ExtraLight,
-                            color = SonicSilver,
-                            textAlign = TextAlign.Center
-                        )
-                        Spacer(modifier = Modifier.height(18.dp))
-                        Box(
-                            modifier = Modifier.clip(RoundedCornerShape(roundedCornerPadding))
-                                .height(200.dp).background(
-                                    OuterSpace, shape = RoundedCornerShape(roundedCornerPadding)
-                                ),
-                            contentAlignment = Alignment.BottomCenter,
+                        Column(
+                            modifier = Modifier.fillMaxWidth().fillMaxHeight(),
+                            verticalArrangement = Arrangement.Center,
+                            horizontalAlignment = Alignment.CenterHorizontally
                         ) {
-                            GoogleMap(
-                                modifier = Modifier.fillMaxSize(),
-                                cameraPositionState = cameraPositionState
+                            Text(
+                                text = "보라매공원 산책로",
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = Color.Black,
+                                textAlign = TextAlign.Center
                             )
+                            Spacer(modifier = Modifier.fillMaxWidth().height(18.dp))
+                            Box(
+                                modifier = Modifier.clip(RoundedCornerShape(roundedCornerPadding))
+                                    .fillMaxWidth()
+                                    .height(200.dp).background(
+                                        OuterSpace, shape = RoundedCornerShape(roundedCornerPadding)
+                                    ),
+                                contentAlignment = Alignment.BottomCenter,
+                            ) {
+                                GoogleMap(
+                                    modifier = Modifier.fillMaxSize(),
+                                    cameraPositionState = cameraPositionState,
+                                    properties = properties,
+                                    uiSettings = uiSettings.copy(zoomControlsEnabled = false)
+                                )
+                            }
                         }
                     }
                     Spacer(modifier = Modifier.height(18.dp))
                     Row(
-                        modifier = Modifier, horizontalArrangement = Arrangement.spacedBy(12.dp)
+                        modifier = Modifier.padding(start = defaultPadding, end = defaultPadding),
+                        Arrangement.spacedBy(8.dp)
                     ) {
-                        WalkComponentButton("돌아가기", TaupeGray, onClickDismiss, Modifier.weight(1f))
+                        /*
+                            산책로 결과에 따라 보여지는 버튼 Text 다름
+                         */
+//                        WalkComponentButton(
+//                            buttonText = "돌아가기",
+//                            GoldenPoppy,
+//                            onClickConfirm,
+//                            Modifier.weight(1f)
+//                        )
+
                         WalkComponentButton(
-                            "선택하기", GoldenPoppy, onClickConfirm, Modifier.weight(1f)
+                            buttonText = context.getString(R.string.walk_screen_dialog_start_dialog_start_button_content),
+                            GoldenPoppy,
+                            onClickConfirm,
+                            Modifier.weight(1f)
                         )
                     }
                 }
@@ -168,7 +198,7 @@ fun WalkScreenChooseStartDialog(
 
         DisposableEffect(Unit) {
             onDispose {
-                showAnimatedDialog.value = false
+                showAnimatedDialog = false
             }
         }
     }
@@ -189,7 +219,7 @@ fun PartialBottomSheet(sheetState: SheetState, onDismissRequest: () -> Unit) {
 
 
 @Composable
-private fun WalkComponentButton(
+fun WalkComponentButton(
     buttonText: String, buttonColor: Color, onClickConfirm: () -> Unit, modifier: Modifier
 ) {
     Button(shape = RoundedCornerShape(dialogButtonRoundedCorner),
