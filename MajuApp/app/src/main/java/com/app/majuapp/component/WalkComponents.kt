@@ -207,7 +207,6 @@ fun WalkScreenChooseStartDialog(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PartialBottomSheet(sheetState: SheetState, onDismissRequest: () -> Unit) {
-
     ModalBottomSheet(modifier = Modifier.fillMaxHeight(),
         sheetState = sheetState,
         onDismissRequest = { onDismissRequest }) {
