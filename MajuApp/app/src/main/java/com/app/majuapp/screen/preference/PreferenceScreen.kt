@@ -1,6 +1,5 @@
 package com.app.majuapp.screen.preference
 
-import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -21,14 +20,11 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -39,6 +35,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import coil.compose.SubcomposeAsyncImage
 import coil.request.ImageRequest
@@ -48,13 +45,12 @@ import com.app.majuapp.data.model.SelectableImage
 import com.app.majuapp.navigation.Screen
 import com.app.majuapp.ui.theme.DullSpiroDiscoBall
 import com.app.majuapp.ui.theme.SpiroDiscoBall
-import com.app.majuapp.ui.theme.roundedCornerPadding
 import com.cheonjaeung.compose.grid.SimpleGridCells
 import com.cheonjaeung.compose.grid.VerticalGrid
 
 @Composable
 fun PreferenceScreen(
-    navController: NavController = rememberNavController()
+    navController: NavHostController
 ) {
     //TODO by _root_ide_package_.androidx.compose.runtime.remember() REAL DATA
     val dummyList = List(9) {
@@ -107,6 +103,7 @@ fun PreferenceScreen(
                 onClick = {
                     /*TODO register account and go home function */
                     navController.navigate(Screen.Home.route)
+//                    navController.navigate(Screen.Culture.route)
                 }) {
                 Text(
                     fontWeight = FontWeight.Bold,
@@ -136,9 +133,7 @@ fun SelectableCategoryGrid(
                 selectableImage = item,
                 item.isSelectedState
             ) {
-                Log.d("recomposition", "clicked")
                 item.toggle()
-                Log.d("recomposition", "after Clicked ${item.isSelectedState}")
             }
         }
     }
@@ -173,7 +168,11 @@ fun SelectableImageButton(
             Box(
                 modifier = Modifier
                     .background(SpiroDiscoBall.copy(alpha = 0.6f))
-                    .border(width = 3.dp, color = DullSpiroDiscoBall, shape = RoundedCornerShape(roundedCornerSize))
+                    .border(
+                        width = 3.dp,
+                        color = DullSpiroDiscoBall,
+                        shape = RoundedCornerShape(roundedCornerSize)
+                    )
                     .fillMaxSize()
             )
         }
@@ -191,5 +190,5 @@ fun SelectableImageButton(
 @Preview
 @Composable
 fun PreviewPreferenceScreen() {
-    PreferenceScreen()
+    PreferenceScreen(rememberNavController())
 } // End of PreviewPreferenceScreen
