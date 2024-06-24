@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -62,11 +63,14 @@ fun CultureCard(
         "오페라 갈라",
         "세종 대극장",
         "2024-12-07"
-    )
+    ),
+    favoriteButtonFlag: Boolean = true,
+    onClick: () -> Unit = {}
 ) {
     Card(
         modifier = Modifier
             .wrapContentHeight(align = Alignment.Top)
+            .clickable { onClick() }
             .fillMaxWidth()
             .border(
                 width = 3.dp,
@@ -80,25 +84,11 @@ fun CultureCard(
             modifier = Modifier.height(IntrinsicSize.Min),
             horizontalArrangement = Arrangement.SpaceEvenly
         ) {
-            Card(
+            NetworkImageCard(
+                networkUrl = culture.sumnailUrl,
                 modifier = Modifier
-                    .width(120.dp)
-                    .aspectRatio(1f),
-                colors = CardDefaults.cardColors(containerColor = Color.Transparent)
-            ) {
-                val context = LocalContext.current
-                SubcomposeAsyncImage(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .clip(RoundedCornerShape(16.dp)),
-                    model = ImageRequest.Builder(context)
-                        .data(culture.sumnailUrl)
-                        .crossfade(true).build(),
-                    contentScale = ContentScale.Crop,
-                    alignment = Alignment.TopCenter,
-                    contentDescription = "",
-                )
-            } // Item 1
+                    .width(120.dp),
+            )
             Box(
                 modifier = Modifier
                     .width(16.dp)
@@ -113,57 +103,54 @@ fun CultureCard(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Box(
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(4.dp))
-                            .background(CategoryBackgroundColor)
-                            .padding(4.dp),
-
-                        ) {
-                        Text(
-                            text = culture.category,
-                            style = TextStyle(color = Color.White),
+                    CultureDetailCategoryChip(cultureDetailCategory = culture.category)
+                    if (favoriteButtonFlag)
+                        Icon(
+                            imageVector = Icons.Outlined.FavoriteBorder,
+                            contentDescription = "favorite"
                         )
-                    }
-                    Icon(
-                        imageVector = Icons.Outlined.FavoriteBorder,
-                        contentDescription = "favorite"
-                    )
                 }
-                Spacer(modifier = Modifier.weight(1f)) // this is required to push below composables to bottom
+                Spacer(modifier = Modifier.weight(1f))
                 Text(
                     fontWeight = FontWeight.Bold,
                     fontSize = 20.sp,
                     text = culture.title,
                     textAlign = TextAlign.Center,
+                    maxLines = 1
                 )
-                Spacer(modifier = Modifier.weight(1f)) // this is required to push below composables to bottom
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(
-                        imageVector = Icons.Outlined.LocationOn,
-                        contentDescription = "location",
-                        modifier = Modifier.size(16.dp),
-                        tint = HighlightColor
-                    )
-                    Text(culture.location, fontSize = 14.sp)
-                }
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(
-                        imageVector = Icons.Outlined.AccessTime,
-                        contentDescription = "time",
-                        modifier = Modifier.size(16.dp),
-                        tint = HighlightColor
-                    )
-                    Text(culture.time, fontSize = 14.sp)
-                }
+                Spacer(modifier = Modifier.weight(1f))
+
+                SingleLineTextWithIconOnStart(
+                    textContent = culture.location,
+                    iconDescription = "location",
+                    imageVector = Icons.Outlined.LocationOn,
+                    iconTint = HighlightColor,
+                    size = 14,
+                    intervalSize = 4.dp
+                )
+                SingleLineTextWithIconOnStart(
+                    textContent = culture.time,
+                    iconDescription = "time",
+                    imageVector = Icons.Outlined.AccessTime,
+                    iconTint = HighlightColor,
+                    size = 14,
+                    intervalSize = 4.dp
+                )
             } // Item 2
         }
     }
-}
+} // End of CultureCard
 
 
 @Preview
 @Composable
-fun PreviewPreferenceScreen() {
-    CultureCard()
-} // End of PreviewPreferenceScreen
+fun PreviewCultureCard() {
+    CultureCard(CultureModel(
+        0,
+        "뮤지컬/오페라",
+        "https://cdn.woman.chosun.com/news/photo/202309/112221_118277_4824.jpg",
+        "오페라 갈라",
+        "세종 대극장",
+        "2024-12-07"
+    ))
+} // End of PreviewCultureCard

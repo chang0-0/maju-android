@@ -21,17 +21,20 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.compose.rememberNavController
 import com.app.majuapp.component.CultureCard
 import com.app.majuapp.data.model.CultureModel
 import com.app.majuapp.navigation.Screen
 import com.app.majuapp.screen.MainScreen
 import com.app.majuapp.screen.home.HomeScreen
+import com.app.majuapp.util.dummyList
 
 @Composable
 fun CultureScreen(navController: NavHostController) {
@@ -40,60 +43,21 @@ fun CultureScreen(navController: NavHostController) {
         modifier = Modifier
             .fillMaxSize()
             .padding(top = 40.dp, start = 24.dp, end = 24.dp)
-    ){
+    ) {
         //TODO Replace real Data
-        val dummyList = listOf(
-            CultureModel(
-            0,
-            "뮤지컬/오페라",
-            "https://cdn.woman.chosun.com/news/photo/202309/112221_118277_4824.jpg",
-            "오페라 갈라",
-            "세종 대극장",
-            "2024-12-07"
-        ), CultureModel(
-                0,
-                "클래식",
-                "https://cdn.woman.chosun.com/news/photo/202309/112221_118277_4824.jpg",
-                "송년음악회",
-                "세종 대극장",
-                "2024-12-07"
-            ), CultureModel(
-                0,
-                "축제",
-                "https://cdn.woman.chosun.com/news/photo/202309/112221_118277_4824.jpg",
-                "오페라 갈라",
-                "세종 대극장",
-                "2024-12-07"
-            ), CultureModel(
-                0,
-                "뮤지컬/오페라",
-                "https://cdn.woman.chosun.com/news/photo/202309/112221_118277_4824.jpg",
-                "오페라 갈라",
-                "세종 대극장",
-                "2024-12-07"
-            ), CultureModel(
-                0,
-                "뮤지컬/오페라",
-                "https://cdn.woman.chosun.com/news/photo/202309/112221_118277_4824.jpg",
-                "오페라 갈라",
-                "세종 대극장",
-                "2024-12-07"
-            ), CultureModel(
-                0,
-                "뮤지컬/오페라",
-                "https://cdn.woman.chosun.com/news/photo/202309/112221_118277_4824.jpg",
-                "오페라 갈라",
-                "세종 대극장",
-                "2024-12-07"
-            )
-        )
 
         LazyColumn(verticalArrangement = Arrangement.spacedBy(16.dp)) {
             items(dummyList) { culture ->
-                CultureCard(culture)
+                CultureCard(culture) { navController.navigate(Screen.CultureDetail.route) }
             }
         }
     }
 
 
 } // End of CultureScreen
+
+@Preview
+@Composable
+fun PreviewCultureScreen() {
+    CultureScreen(navController = rememberNavController())
+}

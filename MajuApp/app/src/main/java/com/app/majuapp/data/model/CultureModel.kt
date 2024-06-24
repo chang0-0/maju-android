@@ -7,4 +7,5 @@ data class CultureModel(
     val title: String,
     val location: String,
     val time: String,
+    val moneyInfo: String = ""
 )

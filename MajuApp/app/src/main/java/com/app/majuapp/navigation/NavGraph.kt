@@ -21,6 +21,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.app.majuapp.screen.MainScreen
+import com.app.majuapp.screen.culture.CultureDetailScreen
+import com.app.majuapp.screen.culture.CultureMapScreen
 import com.app.majuapp.screen.culture.CultureScreen
 import com.app.majuapp.screen.home.HomeScreen
 import com.app.majuapp.screen.preference.PreferenceScreen
@@ -31,7 +33,7 @@ fun SetUpNavGraph(
     navController: NavHostController
 ) {
     val screenList = listOf(
-        Screen.Home, Screen.Culture
+        Screen.CultureMap, Screen.Culture
     )
     var selectedItemIndex by rememberSaveable {
         mutableStateOf(0)
@@ -76,7 +78,6 @@ fun SetUpNavGraph(
                     val currentDestination = navBackStackEntry?.destination
 
                     screenList.forEachIndexed { index, screen ->
-                        Log.d("BNA", "${index}, ${selectedItemIndex}, $screen")
                         NavigationBarItem(
                             selected = selectedItemIndex == index,
                             onClick = {
@@ -112,7 +113,7 @@ fun SetUpNavGraph(
 //        SharedTransitionLayout {
             NavHost(
                 navController = navController,
-                startDestination = Screen.Preference.route,
+                startDestination = Screen.CultureMap.route,
                 modifier = Modifier.padding(paddingValues)
             ) {
 
@@ -139,6 +140,18 @@ fun SetUpNavGraph(
                 ) {
                     CultureScreen(navController = navController)
                 }
+
+                composable(
+                    route = Screen.CultureDetail.route
+                ) {
+                    CultureDetailScreen(navController = navController)
+                }
+
+                composable(
+                    route = Screen.CultureMap.route
+                ) {
+                    CultureMapScreen(navController = navController)
+                }
             } // NavHost
 //        } // SharedTransitionLayout
     }
@@ -148,7 +161,7 @@ fun SetUpNavGraph(
 fun shouldShowBottomBar(navController: NavHostController): Boolean {
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     return when (navBackStackEntry?.destination?.route) {
-        Screen.Home.route, Screen.Culture.route -> true
+        Screen.CultureMap.route, Screen.Culture.route -> true
         else -> false
     }
 }
