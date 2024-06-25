@@ -14,4 +14,10 @@
     <string name="walk_screen_dialog_start_dialog_no_course">주변 산책로가\n존재하지 않습니다.</string>
     <string name="walk_screen_dialog_start_dialog_no_course_button_content">홈으로 돌아가기</string>
 
+    <string name="walk_screen_walking_finish_button_content">산책 종료</string>
+    <string name="walk_screen_walking_bottom_sheet_box_distanced_traveled">이동 거리</string>
+    <string name="walk_screen_walking_bottom_sheet_box_step_count_title">걸음 수</string>
+    <string name="walk_screen_walking_bottom_sheet_box_distanced_traveled_unit">km</string>
+    <string name="walk_screen_walking_bottom_sheet_box_step_count_unit">걸음</string>
+
 </resources>

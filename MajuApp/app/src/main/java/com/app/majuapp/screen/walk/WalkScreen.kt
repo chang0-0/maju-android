@@ -1,5 +1,9 @@
 package com.app.majuapp.screen.walk
 
+import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.FastOutLinearInEasing
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -7,16 +11,15 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons.Filled
-import androidx.compose.material.icons.filled.ExpandLess
-import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material3.BottomSheetScaffold
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -37,6 +40,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -48,10 +52,12 @@ import androidx.navigation.NavController
 import com.app.majuapp.R
 import com.app.majuapp.component.WalkScreenChooseStartDialog
 import com.app.majuapp.ui.theme.BrightGray
+import com.app.majuapp.ui.theme.SilverSand
 import com.app.majuapp.ui.theme.SonicSilver
 import com.app.majuapp.ui.theme.SpiroDiscoBall
 import com.app.majuapp.ui.theme.White
 import com.app.majuapp.ui.theme.defaultPadding
+import com.app.majuapp.ui.theme.notoSansKoreanFontFamily
 import kotlinx.coroutines.launch
 
 private const val TAG = "WalkScreen_창영"
@@ -73,11 +79,17 @@ private fun WalkScreenContent(navController: NavController) {
     /* BottomSheet*/
     val scaffoldState = rememberBottomSheetScaffoldState()
     val bottomSheetScope = rememberCoroutineScope()
+    var bottomSheetStateOrdinal by remember { mutableIntStateOf(scaffoldState.bottomSheetState.currentValue.ordinal) }
 
+    /* Icon Button */
+    val rotationState by animateFloatAsState(
+        targetValue = if (scaffoldState.bottomSheetState.currentValue.ordinal == 1) 180f else 0f
+    )
 
     Surface(modifier = Modifier.fillMaxSize().background(White)) {
         BottomSheetScaffold(scaffoldState = scaffoldState,
-            sheetPeekHeight = 120.dp,
+            sheetShadowElevation = 20.dp,
+            sheetPeekHeight = 60.dp,
             sheetContainerColor = Color.White,
             sheetDragHandle = {
                 // 바텀 시트 핸들
@@ -86,32 +98,37 @@ private fun WalkScreenContent(navController: NavController) {
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Center
                 ) {
-                    IconButton(onClick = {
-                        if (scaffoldState.bottomSheetState.currentValue.ordinal == 1) {
+                    IconButton(
+                        modifier = Modifier.rotate(rotationState)
+                            .animateContentSize(
+                                tween(durationMillis = 100, easing = FastOutLinearInEasing)
+                            ),
+                        onClick = {
+                            bottomSheetStateOrdinal =
+                                scaffoldState.bottomSheetState.currentValue.ordinal
                             bottomSheetScope.launch {
-                                scaffoldState.bottomSheetState.partialExpand()
+                                when (bottomSheetStateOrdinal) {
+                                    1 -> {
+                                        scaffoldState.bottomSheetState.partialExpand()
+                                    }
+
+                                    else -> {
+                                        scaffoldState.bottomSheetState.expand()
+                                    }
+                                }
                             }
-                        } else {
-                            bottomSheetScope.launch {
-                                scaffoldState.bottomSheetState.expand()
-                            }
-                        }
-                    }) {
+                        }) {
+
                         Icon(
-                            imageVector = if (scaffoldState.bottomSheetState.currentValue.ordinal == 1) {
-                                Filled.ExpandMore
-                            } else {
-                                R.drawable.bottomsheetup_icon
-                                Filled.ExpandLess
-                            }, contentDescription = null
+                            painter = painterResource(R.drawable.ic_bottom_sheet_open),
+                            contentDescription = null
                         )
                     }
                 }
             },
             sheetContent = {
-                // 바텀 시트 내부 Contents
                 Column(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier.fillMaxWidth().padding(top = defaultPadding),
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Center
                 ) {
@@ -129,8 +146,10 @@ private fun WalkScreenContent(navController: NavController) {
                         )
                         Spacer(modifier = Modifier.height(30.dp))
                         Box(
+                            // 바텀 시트 이동 거리, 걸음 수가 보이는 회색 박스
                             Modifier.clip(RoundedCornerShape(8.dp)).fillMaxWidth().height(92.dp)
-                                .background(color = BrightGray), contentAlignment = Alignment.Center
+                                .background(color = BrightGray),
+                            contentAlignment = Alignment.Center
                         ) {
                             Row(
                                 modifier = Modifier.matchParentSize(),
@@ -138,6 +157,7 @@ private fun WalkScreenContent(navController: NavController) {
                                 horizontalArrangement = Arrangement.spacedBy(16.dp)
                             ) {
                                 Box(
+                                    // 이동 거리 박스
                                     modifier = Modifier.fillMaxWidth().wrapContentHeight()
                                         .weight(1f).align(
                                             Alignment.CenterVertically,
@@ -150,11 +170,11 @@ private fun WalkScreenContent(navController: NavController) {
                                         Text(
                                             textAlign = TextAlign.Center,
                                             color = SonicSilver,
-                                            text = "이동 거리",
+                                            text = context.getString(R.string.walk_screen_walking_bottom_sheet_box_distanced_traveled),
                                             fontSize = 16.sp,
                                             fontWeight = FontWeight.Medium,
                                         )
-                                        Row() {
+                                        Row {
                                             Text(
                                                 textAlign = TextAlign.Center,
                                                 text = "0.22",
@@ -163,14 +183,24 @@ private fun WalkScreenContent(navController: NavController) {
                                             )
                                             Text(
                                                 textAlign = TextAlign.Center,
-                                                text = "km",
+                                                text = context.getString(R.string.walk_screen_walking_bottom_sheet_box_distanced_traveled_unit),
                                                 fontSize = 10.sp,
                                                 fontWeight = FontWeight.Medium,
                                             )
                                         }
                                     }
                                 }
+                                Spacer(
+                                    // 회색 박스 중간 구분선
+                                    modifier = Modifier.width(1.dp).fillMaxHeight()
+                                        .padding(
+                                            top = defaultPadding + 8.dp,
+                                            bottom = defaultPadding + 8.dp
+                                        )
+                                        .background(SilverSand)
+                                )
                                 Box(
+                                    // 걸음 수 박스
                                     modifier = Modifier.fillMaxWidth().wrapContentHeight()
                                         .weight(1f).align(
                                             Alignment.CenterVertically,
@@ -183,7 +213,7 @@ private fun WalkScreenContent(navController: NavController) {
                                         Text(
                                             color = SonicSilver,
                                             textAlign = TextAlign.Center,
-                                            text = "걸음 수",
+                                            text = context.getString(R.string.walk_screen_walking_bottom_sheet_box_step_count_title),
                                             fontSize = 16.sp,
                                             fontWeight = FontWeight.Medium,
                                         )
@@ -196,7 +226,7 @@ private fun WalkScreenContent(navController: NavController) {
                                             )
                                             Text(
                                                 textAlign = TextAlign.Center,
-                                                text = "걸음",
+                                                text = context.getString(R.string.walk_screen_walking_bottom_sheet_box_step_count_unit),
                                                 fontSize = 10.sp,
                                                 fontWeight = FontWeight.Medium,
                                             )
@@ -214,18 +244,17 @@ private fun WalkScreenContent(navController: NavController) {
                             colors = ButtonDefaults.buttonColors(containerColor = SpiroDiscoBall)
                         ) {
                             Text(
-                                text = "이동 종료",
+                                text = context.getString(R.string.walk_screen_walking_finish_button_content),
                                 color = White,
                                 fontSize = 16.sp,
-                                fontWeight = FontWeight.Bold
+                                fontWeight = FontWeight.Bold,
+                                fontFamily = notoSansKoreanFontFamily
                             )
                         }
                     }
-
-
-                    Spacer(modifier = Modifier.height(120.dp))
                 }
-            }) {
+            } // End of SheetContent
+        ) {
             Column(
                 modifier = Modifier.fillMaxSize().background(White).padding(defaultPadding),
                 horizontalAlignment = Alignment.CenterHorizontally,
@@ -238,10 +267,22 @@ private fun WalkScreenContent(navController: NavController) {
                 }
                 Button(modifier = Modifier.height(40.dp).wrapContentWidth(), onClick = {
                     bottomSheetScope.launch {
-                        scaffoldState.bottomSheetState.expand()
+                        bottomSheetStateOrdinal =
+                            scaffoldState.bottomSheetState.currentValue.ordinal
+                        if (bottomSheetStateOrdinal == 1) {
+                            scaffoldState.bottomSheetState.partialExpand()
+                        } else {
+                            scaffoldState.bottomSheetState.expand()
+                        }
                     }
                 }) {
-                    Text("바텀 시트 열기")
+                    Text(
+                        "바텀 시트 ${
+                            if (bottomSheetStateOrdinal == 1) "닫기" else {
+                                "열기"
+                            }
+                        }  "
+                    )
                 }
             }
         } // End of BottomSheetScaffold {}
