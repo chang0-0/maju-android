@@ -6,15 +6,18 @@ import androidx.compose.material.icons.automirrored.filled.Note
 import androidx.compose.material.icons.automirrored.outlined.MenuBook
 import androidx.compose.material.icons.automirrored.outlined.Note
 import androidx.compose.material.icons.filled.Bookmark
+import androidx.compose.material.icons.filled.DirectionsWalk
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.MenuBook
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.BookmarkBorder
+import androidx.compose.material.icons.outlined.DirectionsWalk
 import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.LocationOn
 import androidx.compose.material.icons.outlined.MenuBook
 import androidx.compose.material.icons.outlined.StarBorder
+import androidx.compose.material3.Icon
 import androidx.compose.ui.graphics.vector.ImageVector
 
 sealed class Screen(
@@ -69,6 +72,22 @@ sealed class Screen(
         title = "CultureMap",
         selectedIcon = Icons.Filled.LocationOn,
         unSelectedIcon = Icons.Outlined.LocationOn,
+        onClick = null,
+    )
+
+    data object Walk : Screen(
+        route = "walk_screen",
+        title = "Walk",
+        selectedIcon = Icons.Filled.DirectionsWalk,
+        unSelectedIcon = Icons.Outlined.DirectionsWalk,
+        onClick = null,
+    )
+
+    data object Test : Screen(
+        route = "test_screen",
+        title = "Test",
+        selectedIcon = Icons.Filled.DirectionsWalk,
+        unSelectedIcon = Icons.Outlined.DirectionsWalk,
         onClick = null,
     )
 }// End of Screen class

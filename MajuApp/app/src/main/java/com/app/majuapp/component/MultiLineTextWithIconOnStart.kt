@@ -20,7 +20,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.app.majuapp.ui.theme.HighlightColor
+import com.app.majuapp.ui.theme.GoldenPoppy
 import com.app.majuapp.util.textCenterAlignment
 
 @Composable
@@ -47,7 +47,7 @@ fun MultiLineTextWithIconOnStart(
             modifier = Modifier
                 .align(alignment)
                 .size((size + 2).dp),
-            tint = HighlightColor
+            tint = GoldenPoppy
         )
         Spacer(modifier = Modifier.width(intervalSize))
         Text(

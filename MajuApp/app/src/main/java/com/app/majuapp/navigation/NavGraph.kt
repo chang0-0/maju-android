@@ -26,6 +26,8 @@ import com.app.majuapp.screen.culture.CultureMapScreen
 import com.app.majuapp.screen.culture.CultureScreen
 import com.app.majuapp.screen.home.HomeScreen
 import com.app.majuapp.screen.preference.PreferenceScreen
+import com.app.majuapp.screen.test.TestScreen
+import com.app.majuapp.screen.walk.WalkScreen
 
 @OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
@@ -38,7 +40,7 @@ fun SetUpNavGraph(
     var selectedItemIndex by rememberSaveable {
         mutableStateOf(0)
     }
-//
+
 //    SharedTransitionLayout {
 //        NavHost(
 //            navController = navController,
@@ -68,6 +70,17 @@ fun SetUpNavGraph(
 //                CultureScreen(navController = navController)
 //            }
 //
+//            composable(
+//                route = Screen.Walk.route
+//            ) {
+//                WalkScreen(navController = navController)
+//            }
+//
+//            composable(
+//                route = Screen.Test.route
+//            ) {
+//                TestScreen(navController = navController)
+//            }
 //        }
 
     Scaffold(
@@ -113,7 +126,7 @@ fun SetUpNavGraph(
 //        SharedTransitionLayout {
             NavHost(
                 navController = navController,
-                startDestination = Screen.CultureMap.route,
+                startDestination = Screen.Home.route,
                 modifier = Modifier.padding(paddingValues)
             ) {
 
@@ -151,6 +164,18 @@ fun SetUpNavGraph(
                     route = Screen.CultureMap.route
                 ) {
                     CultureMapScreen(navController = navController)
+                }
+
+                composable(
+                    route = Screen.Walk.route
+                ) {
+                    WalkScreen(navController = navController)
+                }
+
+                composable(
+                    route = Screen.Test.route
+                ) {
+                    TestScreen(navController = navController)
                 }
             } // NavHost
 //        } // SharedTransitionLayout

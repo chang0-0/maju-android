@@ -30,6 +30,13 @@ private val LightColorScheme = lightColorScheme(
 val defaultPadding = 20.dp
 val roundedCornerPadding = 20.dp
 
+
+/* WalkScreen */
+val dialogDefaultPadding = 26.dp
+val dialogButtonRoundedCorner = 8.dp
+val dialogCornerPadding = 14.dp
+
+
 @Composable
 fun MajuAppTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),

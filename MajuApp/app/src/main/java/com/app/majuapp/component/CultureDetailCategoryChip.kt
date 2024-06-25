@@ -13,15 +13,14 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import com.app.majuapp.ui.theme.CategoryBackgroundColor
+import com.app.majuapp.ui.theme.SpiroDiscoBall
 
 @Composable
 fun CultureDetailCategoryChip(cultureDetailCategory: String) {
     Box(
         modifier = Modifier
             .clip(RoundedCornerShape(4.dp))
-            .background(CategoryBackgroundColor)
+            .background(SpiroDiscoBall)
             .padding(vertical = 4.dp, horizontal = 6.dp),
 
         ) {
