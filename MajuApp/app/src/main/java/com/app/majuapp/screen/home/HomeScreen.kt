@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -30,10 +31,10 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
+import androidx.navigation.ExperimentalSafeArgsApi
 import androidx.navigation.NavController
 import coil.compose.SubcomposeAsyncImage
 import coil.request.ImageRequest
@@ -41,6 +42,7 @@ import com.app.majuapp.R
 import com.app.majuapp.component.HomeScreenRoundedCard
 import com.app.majuapp.component.HomeScreenSpacer
 import com.app.majuapp.component.Loader
+import com.app.majuapp.navigation.Screen
 import com.app.majuapp.ui.theme.SkyBlue
 import com.app.majuapp.ui.theme.SpiroDiscoBall
 import com.app.majuapp.ui.theme.defaultPadding
@@ -52,13 +54,13 @@ private const val TAG = "HomeScreen_창영"
 fun HomeScreen(
     navController: NavController
 ) {
-    HomeScreenContent()
+    HomeScreenContent(navController)
 } // End of HomeScreen()
 
 @Composable
-private fun HomeScreenContent() {
+private fun HomeScreenContent(navController: NavController) {
     val context = LocalContext.current
-    val brightGrayColor = ContextCompat.getColor(context, R.color.bright_gray)
+    val brightGrayColor = ContextCompat.getColor(context, R.color.brightGray)
 
     Surface(modifier = Modifier.fillMaxSize().padding(top = 64.dp)) {
         LazyColumn(
@@ -77,9 +79,8 @@ private fun HomeScreenContent() {
                     stringResource(id = R.string.home_screen_how_wether),
                     fontSize = 20.sp,
                     fontWeight = FontWeight.SemiBold,
-                    // style = MaterialTheme.typography.bodyLarge,
                 )
-                HomeScreenSpacer()
+                Spacer(modifier = Modifier.height(18.dp))
                 HomeScreenRoundedCard(
                     // 홈 화면 알림 카드
                     modifier = Modifier.border(
@@ -94,7 +95,7 @@ private fun HomeScreenContent() {
                 HomeScreenSpacer()
             }
             items(homeCategoryList.chunked(2)) { rowItems ->
-                RowOfCategoryBox(rowItems)
+                RowOfCategoryBox(rowItems, navController)
             }
         }
     }
@@ -119,7 +120,15 @@ private fun HomeScreenWeatherBox(weatherData: String) {
                 fontWeight = FontWeight.SemiBold,
                 color = Color.White
             )
-            Text(text = "27℃", fontSize = 60.sp, fontWeight = FontWeight.Bold, color = Color.White)
+            Text(
+                text = "27℃",
+                fontSize = 60.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color.White,
+                modifier = Modifier.align(
+                    Alignment.Start
+                )
+            )
         }
         SubcomposeAsyncImage(
             modifier = Modifier.padding(10.dp),
@@ -138,7 +147,7 @@ private fun HomeScreenNoticeBox(weatherData: String) {
     Column(modifier = Modifier.fillMaxSize().padding(defaultPadding)) {
         Box(
             modifier = Modifier.clip(RoundedCornerShape(roundedCornerPadding)).fillMaxWidth()
-                .height(120.dp).background(Color.Blue)
+                .height(120.dp)
         ) {
             SubcomposeAsyncImage(
                 modifier = Modifier.fillMaxSize().clip(RoundedCornerShape(12.dp)),
@@ -172,8 +181,11 @@ private fun HomeScreenNoticeBox(weatherData: String) {
 
 } // End of HomeScreenNoticeBox()
 
+@OptIn(ExperimentalSafeArgsApi::class)
 @Composable
-private fun RowOfCategoryBox(categoryList: List<Category>) {
+private fun RowOfCategoryBox(categoryList: List<Category>, navController: NavController) {
+    val context = LocalContext.current
+
     Row(
         modifier = Modifier.fillMaxWidth().padding(bottom = 24.dp),
         horizontalArrangement = Arrangement.spacedBy(24.dp),
@@ -181,13 +193,25 @@ private fun RowOfCategoryBox(categoryList: List<Category>) {
         categoryList.forEach { categoryBox ->
             Box(
                 modifier = Modifier.weight(1f).aspectRatio(1f)
-                    .clip(RoundedCornerShape(roundedCornerPadding)),
-                contentAlignment = Alignment.Center
+                    .clip(RoundedCornerShape(roundedCornerPadding)).clickable {
+                        when (categoryBox.title) {
+                            "산책" -> {
+                                navController.navigate("walk_screen") {
+                                    launchSingleTop = true
+                                    restoreState = true
+                                }
+                            }
+                            "문화" -> {
+                                navController.navigate(Screen.CultureMap.route) {
+                                    launchSingleTop = true
+                                    restoreState = true
+                                }
+                            }
+                        }
+                    },
+                contentAlignment = Alignment.Center,
             ) {
-
-                SubcomposeAsyncImage(modifier = Modifier.blur(radius = 1.2.dp).clickable {
-
-                },
+                SubcomposeAsyncImage(modifier = Modifier.blur(radius = 1.2.dp),
                     model = ImageRequest.Builder(LocalContext.current).data(categoryBox.imageUrl)
                         .crossfade(true).build(),
                     contentDescription = categoryBox.imageUrl,
@@ -213,14 +237,6 @@ private fun RowOfCategoryBox(categoryList: List<Category>) {
         }
     }
 } // End of NestedLazyVerticalGrid()
-
-@Composable
-@Preview
-private fun HomeScreenPreview() {
-    Surface(modifier = Modifier.background(Color.White)) {
-        HomeScreenContent()
-    }
-} // End of HomeScreenPreview()
 
 private val homeCategoryList = listOf(
     Category(
