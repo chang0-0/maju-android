@@ -18,12 +18,16 @@ val googleFontProvider = GoogleFont.Provider(
 
 
 val notoSansKoreanFontFamily = FontFamily(
-    Font(googleFont = GoogleFont("Noto Sans KR"), fontProvider = googleFontProvider)
-//    androidx.compose.ui.text.font.Font(
-//        R.font.noto_sans_korean_medium,
-//        FontWeight.Bold,
-//        FontStyle.Normal
-//    )
+    Font(
+        googleFont = GoogleFont("Noto Sans KR"),
+        fontProvider = googleFontProvider,
+    )
+)
+
+val pretendardFontFamily = FontFamily(
+    androidx.compose.ui.text.font.Font(
+        R.font.pretendard_variable
+    )
 )
 
 val robotoFont = FontFamily(
@@ -51,7 +55,7 @@ val customTypoGraphy = Typography(
 // Set of Material typography styles to start with
 val Typography = Typography(
     bodyLarge = TextStyle(
-        fontFamily = FontFamily.Default,
+        fontFamily = notoSansKoreanFontFamily,
         fontWeight = FontWeight.Bold,
         fontSize = 20.sp,
         lineHeight = 24.sp,

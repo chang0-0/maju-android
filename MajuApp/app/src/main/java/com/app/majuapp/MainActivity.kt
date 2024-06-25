@@ -27,6 +27,12 @@ class MainActivity : ComponentActivity() {
             }
         }
     } // End of onCreate()
+
+
+    override fun onResume() {
+        super.onResume()
+    }
+
 } // End of MainActivity class
 
 @Composable
