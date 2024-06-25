@@ -159,6 +159,9 @@ dependencies {
     // Google Fonts
     implementation("androidx.compose.ui:ui-text-google-fonts:1.6.1")
 
+    //Grid
+    implementation("com.cheonjaeung.compose.grid:grid:2.0.0")
+
     // Google Map
     implementation("com.google.maps.android:maps-compose:5.0.3")
 

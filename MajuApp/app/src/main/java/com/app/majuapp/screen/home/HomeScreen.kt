@@ -42,6 +42,7 @@ import com.app.majuapp.R
 import com.app.majuapp.component.HomeScreenRoundedCard
 import com.app.majuapp.component.HomeScreenSpacer
 import com.app.majuapp.component.Loader
+import com.app.majuapp.navigation.Screen
 import com.app.majuapp.ui.theme.SkyBlue
 import com.app.majuapp.ui.theme.SpiroDiscoBall
 import com.app.majuapp.ui.theme.defaultPadding
@@ -196,6 +197,12 @@ private fun RowOfCategoryBox(categoryList: List<Category>, navController: NavCon
                         when (categoryBox.title) {
                             "산책" -> {
                                 navController.navigate("walk_screen") {
+                                    launchSingleTop = true
+                                    restoreState = true
+                                }
+                            }
+                            "문화" -> {
+                                navController.navigate(Screen.CultureMap.route) {
                                     launchSingleTop = true
                                     restoreState = true
                                 }

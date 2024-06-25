@@ -1,6 +1,10 @@
 <resources>
     <string name="app_name">Maju App</string>
 
+    // Preferece
+    <string name="preference_screen_hellow">저희와 마주해줘서 고마워요!</string>
+    <string name="preference_screen_preference_question">무엇을 좋아하세요?\n당신의 취향이 궁금해요!</string>
+
     // Home
     <string name="home_screen_how_wether">오늘 날씨에 이건 어때요?</string>
 
