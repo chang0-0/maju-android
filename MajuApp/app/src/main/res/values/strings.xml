@@ -24,4 +24,7 @@
     <string name="walk_screen_walking_bottom_sheet_box_distanced_traveled_unit">km</string>
     <string name="walk_screen_walking_bottom_sheet_box_step_count_unit">걸음</string>
 
+    // Record
+    <string name="Record_screen_recording_title">기록</string>
+
 </resources>
