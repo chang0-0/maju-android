@@ -50,3 +50,4 @@ val dummyList = listOf(
     )
 )
 
+val dummyCultureCategories = listOf("음악", "전시", "체험", "연극")

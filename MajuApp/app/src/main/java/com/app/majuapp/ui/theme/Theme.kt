@@ -15,6 +15,7 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.core.view.WindowCompat
 
 private val DarkColorScheme = darkColorScheme(
@@ -35,6 +36,13 @@ val roundedCornerPadding = 20.dp
 val dialogDefaultPadding = 26.dp
 val dialogButtonRoundedCorner = 8.dp
 val dialogCornerPadding = 14.dp
+
+/* CultureScreen */
+val cultureDetailTitleFontSize = 24.sp
+const val cultureDetailTextWithIconSize = 18
+val cultureDetailIntervalSize = 4.dp
+val cultureDetailMediumSpacerSize = 16.dp
+val cultureDetailSmallSpacerSize = 8.dp
 
 
 @Composable
