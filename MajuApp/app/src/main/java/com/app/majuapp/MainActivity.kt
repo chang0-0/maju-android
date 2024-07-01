@@ -4,17 +4,22 @@ import android.graphics.Color
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.viewModels
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.view.WindowCompat
 import androidx.navigation.compose.rememberNavController
 import com.app.majuapp.navigation.SetUpNavGraph
+import com.app.majuapp.screen.login.LoginViewModel
 import com.app.majuapp.ui.theme.MajuAppTheme
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+
+    private val loginViewModel: LoginViewModel by viewModels()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         WindowCompat.setDecorFitsSystemWindows(window, false)
@@ -23,7 +28,7 @@ class MainActivity : ComponentActivity() {
             MajuAppTheme {
                 StatusBarColorChange()
                 val navController = rememberNavController()
-                SetUpNavGraph(navController)
+                SetUpNavGraph(navController, loginViewModel)
             }
         }
     } // End of onCreate()

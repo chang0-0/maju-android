@@ -5,12 +5,14 @@ import androidx.compose.material.icons.automirrored.filled.MenuBook
 import androidx.compose.material.icons.automirrored.filled.Note
 import androidx.compose.material.icons.automirrored.outlined.MenuBook
 import androidx.compose.material.icons.automirrored.outlined.Note
+import androidx.compose.material.icons.filled.AccountBox
 import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.DirectionsWalk
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.MenuBook
 import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.outlined.AccountBox
 import androidx.compose.material.icons.outlined.BookmarkBorder
 import androidx.compose.material.icons.outlined.DirectionsWalk
 import androidx.compose.material.icons.outlined.Home
@@ -88,6 +90,14 @@ sealed class Screen(
         title = "Test",
         selectedIcon = Icons.Filled.DirectionsWalk,
         unSelectedIcon = Icons.Outlined.DirectionsWalk,
+        onClick = null,
+    )
+
+    data object Login : Screen(
+        route = "login_screen",
+        title = "Login",
+        selectedIcon = Icons.Filled.AccountBox,
+        unSelectedIcon = Icons.Outlined.AccountBox,
         onClick = null,
     )
 }// End of Screen class
