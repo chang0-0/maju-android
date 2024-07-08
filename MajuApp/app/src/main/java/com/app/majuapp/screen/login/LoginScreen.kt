@@ -16,14 +16,14 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
-import com.app.majuapp.Application
 import com.app.majuapp.R
 import com.app.majuapp.component.KakaoLoginButton
 
 @Composable
 fun LoginScreen(
     navController: NavHostController,
-    socialLoginViewModel: SocialLoginViewModel
+    socialLoginViewModel: SocialLoginViewModel,
+    loginViewModel: LoginViewModel
 ) {
     Surface(
         modifier = Modifier
@@ -43,7 +43,8 @@ fun LoginScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .align(Alignment.BottomCenter),
-                socialLoginViewModel
+                socialLoginViewModel,
+                loginViewModel
             )
         }
     }
@@ -52,5 +53,5 @@ fun LoginScreen(
 @Preview
 @Composable
 fun PreviewLoginScreen() {
-    LoginScreen(rememberNavController(), socialLoginViewModel = SocialLoginViewModel())
+//    LoginScreen(rememberNavController(), socialLoginViewModel = SocialLoginViewModel())
 } // End of PreviewLoginScreen

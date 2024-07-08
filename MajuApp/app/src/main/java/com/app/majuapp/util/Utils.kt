@@ -5,6 +5,10 @@ import android.content.Context
 import android.content.ContextWrapper
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.text.TextLayoutResult
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
+import retrofit2.HttpException
 import kotlin.math.roundToInt
 
 fun textCenterAlignment(
@@ -33,4 +37,18 @@ fun Context.findActivity(): Activity {
         context = context.baseContext
     }
     throw IllegalStateException("no activity")
+}
+
+fun <T : Any> handleFlowApi(
+    execute: suspend () -> T,
+): Flow<NetworkResult<T>> = flow {
+    emit(NetworkResult.Loading<T>()) //값 갱신전 로딩을 emit
+    delay(1000) // (1초대기)
+    try {
+        emit(NetworkResult.Success(execute())) // execute 성공시 해당값을 Success에 담아서 반환
+    } catch (e: HttpException) {
+        emit(NetworkResult.Error(code = e.code(), msg = e.message(), exception = e)) // 네트워크 오류시 code와 메세지를 반환
+    } catch (e: Exception) {
+        emit(NetworkResult.Error(code = 999, msg = e.message, exception = e)) // 예외 발생시 해당 에러를 반환
+    }
 }

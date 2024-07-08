@@ -7,6 +7,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -16,7 +17,10 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.app.majuapp.R
+import com.app.majuapp.data.dto.LoginDto
+import com.app.majuapp.screen.login.LoginViewModel
 import com.app.majuapp.screen.login.SocialLoginViewModel
+import com.app.majuapp.util.NetworkResult
 import com.app.majuapp.util.SocialLoginUiState
 import com.app.majuapp.util.findActivity
 import com.kakao.sdk.auth.model.OAuthToken
@@ -25,34 +29,51 @@ import com.kakao.sdk.common.model.ClientErrorCause
 import com.kakao.sdk.user.UserApiClient
 import kotlinx.coroutines.launch
 
+val TAG = "Kakao Login"
+
 @SuppressLint("CoroutineCreationDuringComposition")
 @Composable
 fun KakaoLoginButton(
     modifier: Modifier = Modifier,
     socialLoginViewModel: SocialLoginViewModel,
+    loginViewModel: LoginViewModel,
 ) {
     val socialLoginUiState by socialLoginViewModel.socialLoginUiState.collectAsStateWithLifecycle()
+    val loginResult by loginViewModel.loginResult.collectAsStateWithLifecycle()
     val context = LocalContext.current.findActivity()
-    val scope = rememberCoroutineScope()
-    val snackbarHostState = remember { SnackbarHostState() }
+
+    LaunchedEffect(key1 = loginResult) {
+        loginResult.let {
+            when (it) {
+                is NetworkResult.Success -> {
+                    Log.d(
+                        TAG,
+                        "서버 통신 로그인 성공 ${it.value.data?.accessToken}"
+                    )
+                }
+                is NetworkResult.Error -> {Log.e(TAG, "서버 통신 에러 ${it.msg}")}
+                is NetworkResult.Loading -> {Log.e(TAG, "서버 통신 대기 중")}
+            }
+        }
+
+    }
 
     when (socialLoginUiState) {
         SocialLoginUiState.SocialLogin -> {
             kakaoLogin(socialLoginViewModel = socialLoginViewModel, context = context)
         }
+
         SocialLoginUiState.LoginFail -> {
-            scope.launch {
-                snackbarHostState.showSnackbar("카카오 로그인 실패")
-            }
+            Log.d(TAG, "로그인 실패")
             socialLoginViewModel.loginIdle()
         }
+
         SocialLoginUiState.LoginSuccess -> {
-            Log.d("kakao", "로그인 성공")
-            scope.launch {
-                snackbarHostState.showSnackbar("카카오 로그인 성공")
-            }
+            Log.d(TAG, "로그인 성공")
+            loginViewModel.login(socialLoginViewModel.oAuthToken)
             socialLoginViewModel.loginIdle()
         }
+
         else -> {}
     }
 
@@ -71,7 +92,6 @@ private fun kakaoLogin(
     socialLoginViewModel: SocialLoginViewModel,
     context: Context
 ) {
-    val TAG = "Kakao Login"
 
     // 로그인 조합 예제
     // 카카오계정으로 로그인 공통 callback 구성
@@ -82,7 +102,7 @@ private fun kakaoLogin(
             socialLoginViewModel.kakaoSocialAppLoginFail()
         } else if (token != null) {
             Log.i(TAG, "카카오계정으로 로그인 성공 ${token.accessToken}")
-            socialLoginViewModel.kakaoLoginSuccess()
+            socialLoginViewModel.kakaoLoginSuccess(token.accessToken)
         }
     }
 
@@ -102,7 +122,7 @@ private fun kakaoLogin(
                 UserApiClient.instance.loginWithKakaoAccount(context = context, callback = callback)
             } else if (token != null) {
                 Log.i(TAG, "카카오톡으로 로그인 성공 ${token.accessToken}")
-                socialLoginViewModel.kakaoLoginSuccess()
+                socialLoginViewModel.kakaoLoginSuccess(token.accessToken)
             }
         }
     } else {

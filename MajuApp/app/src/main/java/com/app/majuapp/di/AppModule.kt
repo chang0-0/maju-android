@@ -30,7 +30,9 @@ object AppModule {
         override fun intercept(chain: Interceptor.Chain): Response = with(chain) {
             val newRequest = request().newBuilder()
                 // 여기서 토큰이나 API Key넣으면 됨
-                .addHeader("Authorization", "Client-ID ").build()
+                .addHeader("Content-Type", "application/json")
+//                .addHeader("Authorization", "Client-ID ")
+                .build()
             proceed(newRequest)
         }
     } // End of AppInterceptor class
@@ -66,7 +68,7 @@ object AppModule {
     fun providesRetrofit(appInterceptor: AppInterceptor): Retrofit {
         val rxAdapter = RxJava3CallAdapterFactory.create()
 
-        return Retrofit.Builder().baseUrl(Constants.BASE_URL)
+        return Retrofit.Builder().baseUrl(Constants.API_BASE_URL)
             .addConverterFactory(GsonConverterFactory.create()).addCallAdapterFactory(rxAdapter)
             .client(providesOkHttpClient(appInterceptor))
             .build()
