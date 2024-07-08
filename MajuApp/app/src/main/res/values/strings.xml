@@ -33,4 +33,7 @@
     <string name="icon_time_description">시간 아이콘</string>
     <string name="icon_money_info_description">비용 정보 아이콘</string>
 
+    // Record
+    <string name="Record_screen_recording_title">기록</string>
+
 </resources>
