@@ -14,7 +14,5 @@ class Application : Application() {
 
         //Kakao SDK 초기화
         KakaoSdk.init(this, BuildConfig.KAKAO_NATIVE_APP_KEY)
-        Log.d("키 해시값", Utility.getKeyHash(this))
-
     } // End of onCreate()
 } // End of Application class

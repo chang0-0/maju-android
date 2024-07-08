@@ -1,8 +1,6 @@
 package com.app.majuapp.navigation
 
-import android.util.Log
 import androidx.compose.animation.ExperimentalSharedTransitionApi
-import androidx.compose.animation.SharedTransitionLayout
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
@@ -26,7 +24,7 @@ import com.app.majuapp.screen.culture.CultureMapScreen
 import com.app.majuapp.screen.culture.CultureScreen
 import com.app.majuapp.screen.home.HomeScreen
 import com.app.majuapp.screen.login.LoginScreen
-import com.app.majuapp.screen.login.LoginViewModel
+import com.app.majuapp.screen.login.SocialLoginViewModel
 import com.app.majuapp.screen.preference.PreferenceScreen
 import com.app.majuapp.screen.test.TestScreen
 import com.app.majuapp.screen.walk.WalkScreen
@@ -37,7 +35,7 @@ import com.app.majuapp.ui.theme.SpiroDiscoBall
 @Composable
 fun SetUpNavGraph(
     navController: NavHostController,
-    loginViewModel: LoginViewModel,
+    socialLoginViewModel: SocialLoginViewModel,
 ) {
     val screenList = listOf(
         Screen.CultureMap, Screen.Culture
@@ -189,7 +187,7 @@ fun SetUpNavGraph(
             composable(
                 route = Screen.Login.route
             ) {
-                LoginScreen(navController = navController, loginViewModel = loginViewModel)
+                LoginScreen(navController = navController, socialLoginViewModel = socialLoginViewModel)
             }
         } // NavHost
 //        } // SharedTransitionLayout

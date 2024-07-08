@@ -1,6 +1,7 @@
 package com.app.majuapp.di
 
 import com.app.majuapp.BuildConfig
+import com.app.majuapp.domain.api.LoginApi
 import com.app.majuapp.domain.api.TestApi
 import com.app.majuapp.util.Constants
 import dagger.Module
@@ -23,7 +24,7 @@ private const val TAG = "AppModule_창영"
 
 @Module
 @InstallIn(SingletonComponent::class)
-class AppModule {
+object AppModule {
 
     class AppInterceptor @Inject constructor() : Interceptor {
         override fun intercept(chain: Interceptor.Chain): Response = with(chain) {
@@ -70,4 +71,11 @@ class AppModule {
             .client(providesOkHttpClient(appInterceptor))
             .build()
     } // End of providesRetrofit()
+
+    @Provides
+    @Singleton
+    fun providesLoginApi(retrofit: Retrofit): LoginApi {
+        return retrofit.create(LoginApi::class.java)
+    }
+
 } // End of AppModule class
