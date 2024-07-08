@@ -19,6 +19,8 @@ val SpiroDiscoBall = Color(0xFF23C5FF)
 val GoldenPoppy = Color(0xFFFFC300)
 
 val TaupeGray = Color(0xFF888888)
+val OldSilver = Color(0xFF868686)
+val Gray = Color(0xFFB9B9B9)
 
 val White = Color(0xFFFFFFFF)
 val SonicSilver = Color(0xFF767676)

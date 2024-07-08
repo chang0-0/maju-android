@@ -23,15 +23,20 @@ import com.app.majuapp.screen.culture.CultureDetailScreen
 import com.app.majuapp.screen.culture.CultureMapScreen
 import com.app.majuapp.screen.culture.CultureScreen
 import com.app.majuapp.screen.home.HomeScreen
+import com.app.majuapp.screen.login.LoginScreen
+import com.app.majuapp.screen.login.SocialLoginViewModel
 import com.app.majuapp.screen.preference.PreferenceScreen
 import com.app.majuapp.screen.record.RecordScreen
 import com.app.majuapp.screen.test.TestScreen
 import com.app.majuapp.screen.walk.WalkScreen
+import com.app.majuapp.ui.theme.SonicSilver
+import com.app.majuapp.ui.theme.SpiroDiscoBall
 
 @OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 fun SetUpNavGraph(
-    navController: NavHostController
+    navController: NavHostController,
+    socialLoginViewModel: SocialLoginViewModel,
 ) {
     val screenList = listOf(
         Screen.CultureMap, Screen.Culture
@@ -112,7 +117,10 @@ fun SetUpNavGraph(
                                         screen.selectedIcon!!
                                     } else {
                                         screen.unSelectedIcon!!
-                                    }, contentDescription = screen.title
+                                    },
+                                    contentDescription = screen.title,
+                                    tint = if (index == selectedItemIndex) SpiroDiscoBall else SonicSilver
+
                                 )
                             }
                         )
@@ -171,14 +179,20 @@ fun SetUpNavGraph(
                 WalkScreen(navController = navController)
             }
 
-            composable(route = Screen.Record.route) {
-                RecordScreen(navController = navController)
-            }
-
             composable(
                 route = Screen.Test.route
             ) {
                 TestScreen(navController = navController)
+            }
+
+            composable(
+                route = Screen.Login.route
+            ) {
+                LoginScreen(navController = navController, socialLoginViewModel = socialLoginViewModel)
+            }
+
+            composable(route = Screen.Record.route) {
+                RecordScreen(navController = navController)
             }
 
         } // NavHost

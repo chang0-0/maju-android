@@ -24,6 +24,15 @@
     <string name="walk_screen_walking_bottom_sheet_box_distanced_traveled_unit">km</string>
     <string name="walk_screen_walking_bottom_sheet_box_step_count_unit">걸음</string>
 
+    <string name="go_back">뒤로 가기</string>
+    <string name="homepage">홈페이지</string>
+
+    //아이콘 설명
+    <string name="icon_favorite_description">즐겨찾기 아이콘</string>
+    <string name="icon_location_description">장소 아이콘</string>
+    <string name="icon_time_description">시간 아이콘</string>
+    <string name="icon_money_info_description">비용 정보 아이콘</string>
+
     // Record
     <string name="Record_screen_recording_title">기록</string>
 

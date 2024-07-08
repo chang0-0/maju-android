@@ -2,6 +2,7 @@ package com.app.majuapp.screen.culture
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -30,10 +31,12 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.app.majuapp.component.CultureCard
+import com.app.majuapp.component.RowChoiceChips
 import com.app.majuapp.data.model.CultureModel
 import com.app.majuapp.navigation.Screen
 import com.app.majuapp.screen.MainScreen
 import com.app.majuapp.screen.home.HomeScreen
+import com.app.majuapp.util.dummyCultureCategories
 import com.app.majuapp.util.dummyList
 
 @Composable
@@ -46,11 +49,17 @@ fun CultureScreen(navController: NavHostController) {
     ) {
         //TODO Replace real Data
 
-        LazyColumn(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-            items(dummyList) { culture ->
-                CultureCard(culture) { navController.navigate(Screen.CultureDetail.route) }
+        Column {
+            RowChoiceChips(dummyCultureCategories)
+
+            LazyColumn(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                items(dummyList) { culture ->
+                    CultureCard(culture) { navController.navigate(Screen.CultureDetail.route) }
+                }
             }
+
         }
+
     }
 
 
