@@ -1,8 +1,6 @@
 package com.app.majuapp.navigation
 
-import android.util.Log
 import androidx.compose.animation.ExperimentalSharedTransitionApi
-import androidx.compose.animation.SharedTransitionLayout
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
@@ -26,6 +24,7 @@ import com.app.majuapp.screen.culture.CultureMapScreen
 import com.app.majuapp.screen.culture.CultureScreen
 import com.app.majuapp.screen.home.HomeScreen
 import com.app.majuapp.screen.preference.PreferenceScreen
+import com.app.majuapp.screen.record.RecordScreen
 import com.app.majuapp.screen.test.TestScreen
 import com.app.majuapp.screen.walk.WalkScreen
 
@@ -124,60 +123,65 @@ fun SetUpNavGraph(
         }
     ) { paddingValues ->
 //        SharedTransitionLayout {
-            NavHost(
-                navController = navController,
-                startDestination = Screen.Home.route,
-                modifier = Modifier.padding(paddingValues)
+        NavHost(
+            navController = navController,
+            startDestination = Screen.Home.route,
+            modifier = Modifier.padding(paddingValues)
+        ) {
+
+            composable(
+                route = Screen.Home.route
             ) {
+                HomeScreen(navController = navController)
+            }
 
-                composable(
-                    route = Screen.Home.route
-                ) {
-                    HomeScreen(navController = navController)
-                }
+            composable(
+                route = Screen.Main.route
+            ) {
+                MainScreen(navController = navController)
+            }
 
-                composable(
-                    route = Screen.Main.route
-                ) {
-                    MainScreen(navController = navController)
-                }
+            composable(
+                route = Screen.Preference.route
+            ) {
+                PreferenceScreen(navController = navController)
+            }
 
-                composable(
-                    route = Screen.Preference.route
-                ) {
-                    PreferenceScreen(navController = navController)
-                }
+            composable(
+                route = Screen.Culture.route
+            ) {
+                CultureScreen(navController = navController)
+            }
 
-                composable(
-                    route = Screen.Culture.route
-                ) {
-                    CultureScreen(navController = navController)
-                }
+            composable(
+                route = Screen.CultureDetail.route
+            ) {
+                CultureDetailScreen(navController = navController)
+            }
 
-                composable(
-                    route = Screen.CultureDetail.route
-                ) {
-                    CultureDetailScreen(navController = navController)
-                }
+            composable(
+                route = Screen.CultureMap.route
+            ) {
+                CultureMapScreen(navController = navController)
+            }
 
-                composable(
-                    route = Screen.CultureMap.route
-                ) {
-                    CultureMapScreen(navController = navController)
-                }
+            composable(
+                route = Screen.Walk.route
+            ) {
+                WalkScreen(navController = navController)
+            }
 
-                composable(
-                    route = Screen.Walk.route
-                ) {
-                    WalkScreen(navController = navController)
-                }
+            composable(route = Screen.Record.route) {
+                RecordScreen(navController = navController)
+            }
 
-                composable(
-                    route = Screen.Test.route
-                ) {
-                    TestScreen(navController = navController)
-                }
-            } // NavHost
+            composable(
+                route = Screen.Test.route
+            ) {
+                TestScreen(navController = navController)
+            }
+
+        } // NavHost
 //        } // SharedTransitionLayout
     }
 } // End of SetUpNavGraph

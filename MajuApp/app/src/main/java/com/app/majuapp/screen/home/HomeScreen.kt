@@ -59,6 +59,7 @@ fun HomeScreen(
 
 @Composable
 private fun HomeScreenContent(navController: NavController) {
+    // Context
     val context = LocalContext.current
     val brightGrayColor = ContextCompat.getColor(context, R.color.brightGray)
 
@@ -90,7 +91,7 @@ private fun HomeScreenContent(navController: NavController) {
                     ),
                     color = arrayListOf(Color.Transparent, Color.Transparent),
                 ) {
-                    HomeScreenNoticeBox("")
+                    HomeScreenNoticeBox(navController, "")
                 }
                 HomeScreenSpacer()
             }
@@ -142,7 +143,7 @@ private fun HomeScreenWeatherBox(weatherData: String) {
 } // End of HomeScreenWeatherBox()
 
 @Composable
-private fun HomeScreenNoticeBox(weatherData: String) {
+private fun HomeScreenNoticeBox(navController: NavController, weatherData: String) {
     val context = LocalContext.current
     Column(modifier = Modifier.fillMaxSize().padding(defaultPadding)) {
         Box(
@@ -165,10 +166,16 @@ private fun HomeScreenNoticeBox(weatherData: String) {
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Text(
+
                 "임영웅 콘서트",
                 fontWeight = FontWeight.Bold,
                 fontSize = 20.sp,
-                modifier = Modifier.align(Alignment.Bottom)
+                modifier = Modifier.align(Alignment.Bottom).clickable() {
+                    navController.navigate("record_screen") {
+                        launchSingleTop = true
+                        restoreState = true
+                    }
+                },
             )
             Text(
                 text = "2024년 6월 11일",
@@ -201,6 +208,7 @@ private fun RowOfCategoryBox(categoryList: List<Category>, navController: NavCon
                                     restoreState = true
                                 }
                             }
+
                             "문화" -> {
                                 navController.navigate(Screen.CultureMap.route) {
                                     launchSingleTop = true
