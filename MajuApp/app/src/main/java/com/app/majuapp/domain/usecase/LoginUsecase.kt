@@ -15,4 +15,4 @@ class LoginUsecase @Inject constructor(
         loginRepository.login(oauthToken, fcmToken)
     }
 
-}
+} // End of LoginUsecase class

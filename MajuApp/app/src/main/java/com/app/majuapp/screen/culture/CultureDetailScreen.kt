@@ -115,7 +115,9 @@ fun CultureDetailScreen(navController: NavHostController) {
                 CultureDetailButton(
                     buttonText = stringResource(id = R.string.go_back),
                     buttonColor = Gray,
-                    onClick = { /*TODO*/ },
+                    onClick = {
+                        navController.popBackStack()
+                    },
                     modifier = Modifier.weight(1f)
                 )
                 CultureDetailButton(

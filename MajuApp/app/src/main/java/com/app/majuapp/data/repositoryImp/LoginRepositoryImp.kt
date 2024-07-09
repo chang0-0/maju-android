@@ -7,52 +7,65 @@ import com.app.majuapp.domain.repository.LoginRepository
 import com.app.majuapp.util.NetworkResult
 import com.app.majuapp.util.handleFlowApi
 import com.google.gson.JsonObject
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
+import okio.IOException
 import javax.inject.Inject
 
 val TAG = "login_repo_imp"
 
 class LoginRepositoryImp @Inject constructor(private val loginApi: LoginApi) : LoginRepository {
 
-    private val _loginResult = MutableStateFlow<NetworkResult<LoginDto>>(NetworkResult.Loading())
+    private val _loginResult = MutableStateFlow<NetworkResult<LoginDto>>(NetworkResult.Idle())
     override val loginResult: StateFlow<NetworkResult<LoginDto>> = _loginResult
 
     override suspend fun login(oauthToken: String, fcmToken: String) {
-        val response = loginApi.login(
-            JsonObject().apply {
-                addProperty("accessToken", oauthToken)
-                addProperty("fcmToken", fcmToken)
-            }
-        )
         _loginResult.emit(NetworkResult.Loading())
-        try {
-            when {
-                response.isSuccessful -> {
-                    _loginResult.emit(
-                        NetworkResult.Success(
-                            response.body()!!
+        coroutineScope {
+            val response = loginApi.login(
+                JsonObject().apply {
+                    addProperty("accessToken", oauthToken)
+                    addProperty("fcmToken", fcmToken)
+                }
+            )
+            try {
+                when {
+                    response.isSuccessful -> {
+                        _loginResult.emit(
+                            NetworkResult.Success(
+                                response.body()!!
+                            )
+                        )
+                    }
+                    response.errorBody() != null -> _loginResult.emit(
+                        NetworkResult.Error(
+                            response.code(),
+                            response.errorBody().toString(),
+                        )
+                    )
+                    else -> _loginResult.emit(
+                        NetworkResult.Error(
+                            response.code(),
+                            "Something is Wrong....",
                         )
                     )
                 }
-                response.errorBody() != null -> _loginResult.emit(
+            } catch (e: java.lang.Exception) {
+                _loginResult.emit(
                     NetworkResult.Error(
-                        response.code(),
-                        response.errorBody().toString(),
+                        999,
+                        e.message,
+                        e
                     )
                 )
-            }
-        } catch (e: java.lang.Exception) {
-            _loginResult.emit(
-                NetworkResult.Error(
-                    999,
-                    e.message,
-                    e
-                )
-            )
-            Log.e(TAG, "login repo err ${e.message}")
-        } // End of try-catch
+                Log.e(TAG, "login repo err ${e.message}")
+            } // End of try-catch
+        }
+
     }
 
-}
+} // End of LoginRepositoryImp Class

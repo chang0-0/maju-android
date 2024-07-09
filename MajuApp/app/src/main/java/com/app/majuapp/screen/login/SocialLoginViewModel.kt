@@ -37,4 +37,4 @@ class SocialLoginViewModel @Inject constructor() : ViewModel() {
         _socialLoginUiState.value = SocialLoginUiState.Idle
     }
 
-}
+} // End of SocialLoginViewModel class

@@ -24,4 +24,4 @@ class LoginViewModel @Inject constructor(
         }
     }
 
-}
+} // End of LoginViewModel class

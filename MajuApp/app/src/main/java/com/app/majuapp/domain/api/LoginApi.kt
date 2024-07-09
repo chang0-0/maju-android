@@ -15,4 +15,4 @@ interface LoginApi {
         @Body requestBody: JsonObject
     ): Response<LoginDto>
 
-}
+} // End of LoginApi class

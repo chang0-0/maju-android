@@ -5,29 +5,22 @@ import android.content.Context
 import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.app.majuapp.R
-import com.app.majuapp.data.dto.LoginDto
 import com.app.majuapp.screen.login.LoginViewModel
 import com.app.majuapp.screen.login.SocialLoginViewModel
-import com.app.majuapp.util.NetworkResult
 import com.app.majuapp.util.SocialLoginUiState
 import com.app.majuapp.util.findActivity
 import com.kakao.sdk.auth.model.OAuthToken
 import com.kakao.sdk.common.model.ClientError
 import com.kakao.sdk.common.model.ClientErrorCause
 import com.kakao.sdk.user.UserApiClient
-import kotlinx.coroutines.launch
 
 val TAG = "Kakao Login"
 
@@ -36,27 +29,11 @@ val TAG = "Kakao Login"
 fun KakaoLoginButton(
     modifier: Modifier = Modifier,
     socialLoginViewModel: SocialLoginViewModel,
-    loginViewModel: LoginViewModel,
+    loginViewModel: LoginViewModel
 ) {
+
     val socialLoginUiState by socialLoginViewModel.socialLoginUiState.collectAsStateWithLifecycle()
-    val loginResult by loginViewModel.loginResult.collectAsStateWithLifecycle()
     val context = LocalContext.current.findActivity()
-
-    LaunchedEffect(key1 = loginResult) {
-        loginResult.let {
-            when (it) {
-                is NetworkResult.Success -> {
-                    Log.d(
-                        TAG,
-                        "서버 통신 로그인 성공 ${it.value.data?.accessToken}"
-                    )
-                }
-                is NetworkResult.Error -> {Log.e(TAG, "서버 통신 에러 ${it.msg}")}
-                is NetworkResult.Loading -> {Log.e(TAG, "서버 통신 대기 중")}
-            }
-        }
-
-    }
 
     when (socialLoginUiState) {
         SocialLoginUiState.SocialLogin -> {
@@ -81,7 +58,6 @@ fun KakaoLoginButton(
         painter = painterResource(id = R.drawable.kakao_login_large_wide),
         contentDescription = "카카오 로그인",
         modifier = modifier.clickable {
-            /* TODO */
             socialLoginViewModel.kakaoLogin()
         },
         contentScale = ContentScale.FillWidth
@@ -129,4 +105,4 @@ private fun kakaoLogin(
         UserApiClient.instance.loginWithKakaoAccount(context = context, callback = callback)
     }
 
-}
+} // End of kakaoLogin
