@@ -39,9 +39,9 @@ import androidx.navigation.NavController
 import coil.compose.SubcomposeAsyncImage
 import coil.request.ImageRequest
 import com.app.majuapp.R
-import com.app.majuapp.component.HomeScreenRoundedCard
-import com.app.majuapp.component.HomeScreenSpacer
 import com.app.majuapp.component.Loader
+import com.app.majuapp.component.home.GrayBorderRoundedCard
+import com.app.majuapp.component.home.HomeScreenSpacer
 import com.app.majuapp.navigation.Screen
 import com.app.majuapp.ui.theme.SkyBlue
 import com.app.majuapp.ui.theme.SpiroDiscoBall
@@ -68,7 +68,7 @@ private fun HomeScreenContent(navController: NavController) {
             contentPadding = PaddingValues(horizontal = defaultPadding)
         ) {
             item {
-                HomeScreenRoundedCard(
+                GrayBorderRoundedCard(
                     // 홈 화면 날씨 카드
                     modifier = Modifier,
                     color = arrayListOf(SpiroDiscoBall, SkyBlue),
@@ -82,7 +82,7 @@ private fun HomeScreenContent(navController: NavController) {
                     fontWeight = FontWeight.SemiBold,
                 )
                 Spacer(modifier = Modifier.height(18.dp))
-                HomeScreenRoundedCard(
+                GrayBorderRoundedCard(
                     // 홈 화면 알림 카드
                     modifier = Modifier.border(
                         width = 2.dp, color = Color(brightGrayColor), shape = RoundedCornerShape(
@@ -91,7 +91,7 @@ private fun HomeScreenContent(navController: NavController) {
                     ),
                     color = arrayListOf(Color.Transparent, Color.Transparent),
                 ) {
-                    HomeScreenNoticeBox(navController, "")
+                    HomeScreenNoticeBox(navController, "") // 피그마 임영웅 박스
                 }
                 HomeScreenSpacer()
             }
@@ -144,6 +144,12 @@ private fun HomeScreenWeatherBox(weatherData: String) {
 
 @Composable
 private fun HomeScreenNoticeBox(navController: NavController, weatherData: String) {
+    /*
+        홈 화면 알림 박스
+        Home notice box
+        피그마 임영웅 박스
+     */
+
     val context = LocalContext.current
     Column(modifier = Modifier.fillMaxSize().padding(defaultPadding)) {
         Box(
@@ -166,7 +172,6 @@ private fun HomeScreenNoticeBox(navController: NavController, weatherData: Strin
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Text(
-
                 "임영웅 콘서트",
                 fontWeight = FontWeight.Bold,
                 fontSize = 20.sp,

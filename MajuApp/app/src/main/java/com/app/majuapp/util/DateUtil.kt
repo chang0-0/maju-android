@@ -14,7 +14,7 @@ object DateUtil {
 
             for (dayOfWeek in DayOfWeek.entries) {
                 val localizedDayName =
-                    dayOfWeek.getDisplayName(TextStyle.SHORT, Locale.getDefault())
+                    dayOfWeek.getDisplayName(TextStyle.SHORT, Locale.KOREAN)
                 daysOfWeek[dayOfWeek.value - 1] = localizedDayName
             }
 

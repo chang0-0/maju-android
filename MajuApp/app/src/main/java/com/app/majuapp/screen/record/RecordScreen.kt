@@ -1,22 +1,21 @@
 package com.app.majuapp.screen.record
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.KeyboardArrowLeft
-import androidx.compose.material.icons.filled.KeyboardArrowRight
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
@@ -24,21 +23,36 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 import com.app.majuapp.R
+import com.app.majuapp.component.home.GrayBorderRoundedCard
+import com.app.majuapp.component.record.CalendarContent
+import com.app.majuapp.component.record.CalendarDayItem
+import com.app.majuapp.component.record.CalendarHeader
+import com.app.majuapp.component.record.RecordScreenCalendarColorInform
+import com.app.majuapp.component.walk.WalkRecordingBox
+import com.app.majuapp.ui.theme.BrightGray
+import com.app.majuapp.ui.theme.GoldenPoppy
 import com.app.majuapp.ui.theme.MajuAppTheme
+import com.app.majuapp.ui.theme.SonicSilver
+import com.app.majuapp.ui.theme.SpiroDiscoBall
 import com.app.majuapp.ui.theme.White
 import com.app.majuapp.ui.theme.defaultPadding
 import com.app.majuapp.ui.theme.notoSansKoreanFontFamily
+import com.app.majuapp.ui.theme.roundedCornerPadding
 import com.app.majuapp.util.DateUtil
-import com.app.majuapp.util.getDisplayName
 import java.time.YearMonth
+
+private const val TAG = "RecordScreen_창영"
 
 @Composable
 fun RecordScreen(navController: NavController) {
@@ -51,43 +65,161 @@ fun RecordScreenContent(navController: NavController) {
     // Context
     val context = LocalContext.current
 
+    // modifier
+    val modifier = Modifier
+    val brightGrayColor = ContextCompat.getColor(context, R.color.brightGray)
+
+    val list = ArrayList<Int>()
+    list.add(1)
+    list.add(2)
+
     Surface(
-        modifier = Modifier.fillMaxSize().background(White), color = White
+        modifier = modifier.fillMaxSize(), color = White
     ) {
-        Column(modifier = Modifier.fillMaxSize()) {
-            Row(modifier = Modifier.fillMaxWidth()) {
-                Text(
-                    context.getString(R.string.Record_screen_recording_title),
-                    fontSize = 24.sp,
-                    fontWeight = FontWeight.Bold,
-                    fontFamily = notoSansKoreanFontFamily
+        LazyColumn(modifier = Modifier.fillMaxSize()) {
+            item {
+                Column(
+                    modifier = modifier.padding(start = 30.dp, end = 30.dp, top = 30.dp)
+                ) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth().wrapContentHeight(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text(
+                            context.getString(R.string.record_screen_recording_title),
+                            fontSize = 24.sp,
+                            fontWeight = FontWeight.Bold,
+                            fontFamily = notoSansKoreanFontFamily
+                        )
+                        IconButton(modifier = Modifier, onClick = {}) {
+                            Icon(
+                                painter = painterResource(R.drawable.ic_default_user),
+                                tint = SonicSilver,
+                                contentDescription = null
+                            )
+                        }
+                    }
+                }
+                Spacer(
+                    modifier = Modifier.fillMaxWidth().padding(10.dp)
                 )
+                RecordCalendar() // 달력
+                Spacer(
+                    modifier = Modifier.fillMaxWidth().padding(defaultPadding / 2)
+                )
+                Row(
+                    modifier = Modifier.fillMaxWidth().wrapContentHeight()
+                        .padding(start = defaultPadding),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    RecordScreenCalendarColorInform(
+                        text = context.getString(R.string.record_screen_walk_recording_content),
+                        color = SpiroDiscoBall
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    RecordScreenCalendarColorInform(
+                        text = context.getString(R.string.record_screen_culture_life_content),
+                        color = GoldenPoppy
+                    )
+                }
+                Spacer(
+                    modifier = Modifier.fillMaxWidth().padding(defaultPadding / 2)
+                )
+                Spacer(modifier = Modifier.fillMaxWidth().height(4.dp).background(BrightGray))
+                Column(modifier = Modifier.padding(start = 30.dp, end = 30.dp, top = 30.dp)) {
+                    Row(
+                        modifier = Modifier.wrapContentHeight(),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Icon(
+                            painter = painterResource(R.drawable.ic_walk_record_check),
+                            tint = SpiroDiscoBall,
+                            contentDescription = null
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = context.getString(R.string.record_screen_walk_recording_content),
+                            fontFamily = notoSansKoreanFontFamily,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 20.sp,
+                            textAlign = TextAlign.Justify,
+                            modifier = Modifier.alignByBaseline(),
+                        )
+                    }
+
+                    GrayBorderRoundedCard(
+                        // 홈 화면 알림 카드
+                        modifier = Modifier.border(
+                            width = 2.dp,
+                            color = Color(brightGrayColor),
+                            shape = RoundedCornerShape(
+                                roundedCornerPadding
+                            )
+                        ),
+                        color = arrayListOf(Color.Transparent, Color.Transparent),
+                    ) {
+                        Column(
+                            modifier = Modifier.fillMaxWidth()
+                                .padding(
+                                    start = 34.dp,
+                                    end = 34.dp,
+                                    top = 14.dp,
+                                    bottom = 14.dp
+                                ),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.Center
+                        ) {
+                            Text(
+                                text = "보라매공원 산책로",
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 16.sp,
+                                fontFamily = notoSansKoreanFontFamily
+                            )
+                            Spacer(modifier = Modifier.height(10.dp))
+                            WalkRecordingBox(context)
+                        }
+                    }
+
+                    Row(
+                        modifier = Modifier.wrapContentHeight(),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Icon(
+                            painter = painterResource(R.drawable.ic_culture_life_check),
+                            tint = GoldenPoppy,
+                            contentDescription = null
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = context.getString(R.string.record_screen_culture_life_content),
+                            fontFamily = notoSansKoreanFontFamily,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 20.sp,
+                            textAlign = TextAlign.Justify,
+                            modifier = Modifier.alignByBaseline(),
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(10.dp))
+                    WalkRecordingBox(context)
+                }
             }
-            Spacer(
-                modifier = Modifier.fillMaxWidth().padding(defaultPadding)
-            )
-            RecordCalendar()
-        }
+        } // End of LazyColumn()
     }
-
-
 } // End of RecordScreenContent()
 
 
 @Composable
 private fun RecordCalendar(viewModel: RecordCalendarViewModel = viewModel()) {
-    val uiState by viewModel.uiState.collectAsState()
+    val calendarUiState by viewModel.calendarUiState.collectAsState() // 달력 날짜 전체 데이터
 
     Surface(
-        modifier = Modifier
-            .fillMaxSize()
-            .verticalScroll(rememberScrollState())
-            .padding(defaultPadding)
+        // modifier = Modifier.wrapContentHeight().verticalScroll(rememberScrollState()), color = White
+        modifier = Modifier.wrapContentHeight(), color = White
     ) {
-        CalendarWidget(
-            days = DateUtil.daysOfWeek,
-            yearMonth = uiState.yearMonth,
-            dates = uiState.dates,
+        CalendarWidget(days = DateUtil.daysOfWeek,
+            yearMonth = calendarUiState.yearMonth,
+            dates = calendarUiState.dates,
             onPreviousMonthButtonClicked = { prevMonth ->
                 viewModel.toPreviousMonth(prevMonth)
             },
@@ -96,11 +228,8 @@ private fun RecordCalendar(viewModel: RecordCalendarViewModel = viewModel()) {
             },
             onDateClickListener = {
                 // TODO("set on date click listener")
-            }
-        )
+            })
     }
-
-
 } // End of RecordCalendar()
 
 @Composable
@@ -113,133 +242,32 @@ private fun CalendarWidget(
     onDateClickListener: (CalendarUiState.Date) -> Unit,
 ) {
     Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp)
+        modifier = Modifier.fillMaxSize()
     ) {
-        Row {
-            repeat(days.size) {
-                val item = days[it]
-                DayItem(item, modifier = Modifier.weight(1f))
-            }
-        }
-        Header(
+        CalendarHeader(
             yearMonth = yearMonth,
             onPreviousMonthButtonClicked = onPreviousMonthButtonClicked,
             onNextMonthButtonClicked = onNextMonthButtonClicked
         )
-        Content(
-            dates = dates,
-            onDateClickListener = onDateClickListener
-        )
-    }
-}
-
-@Composable
-fun Header(
-    yearMonth: YearMonth,
-    onPreviousMonthButtonClicked: (YearMonth) -> Unit,
-    onNextMonthButtonClicked: (YearMonth) -> Unit,
-) {
-    Row {
-        IconButton(onClick = {
-            onPreviousMonthButtonClicked.invoke(yearMonth.minusMonths(1))
-        }) {
-            Icon(
-                imageVector = Icons.Filled.KeyboardArrowLeft,
-                contentDescription = null
-            )
-        }
-        Text(
-            text = yearMonth.getDisplayName(),
-            textAlign = TextAlign.Center,
-            style = MaterialTheme.typography.bodyLarge,
-            modifier = Modifier
-                .weight(1f)
-                .align(Alignment.CenterVertically)
-        )
-        IconButton(onClick = {
-            onNextMonthButtonClicked.invoke(yearMonth.plusMonths(1))
-        }) {
-            Icon(
-                imageVector = Icons.Filled.KeyboardArrowRight,
-                contentDescription = null
-            )
-        }
-    }
-}
-
-@Composable
-fun DayItem(day: String, modifier: Modifier = Modifier) {
-    Box(modifier = modifier) {
-        Text(
-            text = day,
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.primary,
-            modifier = Modifier
-                .align(Alignment.Center)
-                .padding(10.dp)
-        )
-    }
-}
-
-@Composable
-fun Content(
-    dates: List<CalendarUiState.Date>,
-    onDateClickListener: (CalendarUiState.Date) -> Unit,
-) {
-    Column {
-        var index = 0
-        repeat(6) {
-            if (index >= dates.size) return@repeat
-            Row {
-                repeat(7) {
-                    val item = if (index < dates.size) dates[index] else CalendarUiState.Date.Empty
-                    ContentItem(
-                        date = item,
-                        onClickListener = onDateClickListener,
-                        modifier = Modifier.weight(1f)
-                    )
-                    index++
+        Column(modifier = Modifier.padding(start = 10.dp, end = 10.dp)) {
+            Row() {
+                repeat(days.size) {
+                    val item = days[it]
+                    CalendarDayItem(item, modifier = Modifier.weight(1f))
                 }
             }
+            CalendarContent(
+                dates = dates, onDateClickListener = onDateClickListener
+            )
         }
     }
-}
+} // End of CalendarWidget()
 
-@Composable
-fun ContentItem(
-    date: CalendarUiState.Date,
-    onClickListener: (CalendarUiState.Date) -> Unit,
-    modifier: Modifier = Modifier
-) {
-    Box(
-        modifier = modifier
-            .background(
-                color = if (date.isSelected) {
-                    MaterialTheme.colorScheme.secondaryContainer
-                } else {
-                    Color.Transparent
-                }
-            )
-            .clickable {
-                onClickListener(date)
-            }
-    ) {
-        Text(
-            text = date.dayOfMonth,
-            style = MaterialTheme.typography.bodyMedium,
-            modifier = Modifier
-                .align(Alignment.Center)
-                .padding(10.dp)
-        )
-    }
-}
 
 @Preview(showSystemUi = true)
 @Composable
 fun CalendarAppPreview() {
     MajuAppTheme() {
-        RecordCalendar()
+        RecordScreenContent(rememberNavController())
     }
 } // End of CalendarAppPreview()
