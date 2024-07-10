@@ -1,6 +1,7 @@
 package com.app.majuapp.navigation
 
 import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.SharedTransitionLayout
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
@@ -18,78 +19,24 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
-import com.app.majuapp.screen.MainScreen
-import com.app.majuapp.screen.culture.CultureDetailScreen
-import com.app.majuapp.screen.culture.CultureMapScreen
-import com.app.majuapp.screen.culture.CultureScreen
 import com.app.majuapp.screen.home.HomeScreen
-import com.app.majuapp.screen.login.LoginScreen
-import com.app.majuapp.screen.login.SocialLoginViewModel
-import com.app.majuapp.screen.preference.PreferenceScreen
-import com.app.majuapp.screen.record.RecordScreen
-import com.app.majuapp.screen.test.TestScreen
-import com.app.majuapp.screen.walk.WalkScreen
-import com.app.majuapp.ui.theme.SonicSilver
-import com.app.majuapp.ui.theme.SpiroDiscoBall
+import com.app.majuapp.screen.MainScreen
 
 @OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 fun SetUpNavGraph(
-    navController: NavHostController,
-    socialLoginViewModel: SocialLoginViewModel,
+    navController: NavHostController
 ) {
     val screenList = listOf(
-        Screen.CultureMap, Screen.Culture
+        Screen.Home, Screen.Main
     )
     var selectedItemIndex by rememberSaveable {
         mutableStateOf(0)
     }
 
-//    SharedTransitionLayout {
-//        NavHost(
-//            navController = navController,
-//            startDestination = Screen.Preference.route,
-//        ) {
-//            composable(
-//                route = Screen.Home.route
-//            ) {
-//                HomeScreen(navController = navController)
-//            }
-//
-//            composable(
-//                route = Screen.Main.route
-//            ) {
-//                MainScreen(navController = navController)
-//            }
-//
-//            composable(
-//                route = Screen.Preference.route
-//            ) {
-//                PreferenceScreen(navController = navController)
-//            }
-//
-//            composable(
-//                route = Screen.Culture.route
-//            ) {
-//                CultureScreen(navController = navController)
-//            }
-//
-//            composable(
-//                route = Screen.Walk.route
-//            ) {
-//                WalkScreen(navController = navController)
-//            }
-//
-//            composable(
-//                route = Screen.Test.route
-//            ) {
-//                TestScreen(navController = navController)
-//            }
-//        }
-
-    Scaffold(
-        bottomBar = {
-            if (shouldShowBottomBar(navController = navController))
+    SharedTransitionLayout {
+        Scaffold(
+            bottomBar = {
                 NavigationBar() {
                     val navBackStackEntry by navController.currentBackStackEntryAsState()
                     val currentDestination = navBackStackEntry?.destination
@@ -117,10 +64,7 @@ fun SetUpNavGraph(
                                         screen.selectedIcon!!
                                     } else {
                                         screen.unSelectedIcon!!
-                                    },
-                                    contentDescription = screen.title,
-                                    tint = if (index == selectedItemIndex) SpiroDiscoBall else SonicSilver
-
+                                    }, contentDescription = screen.title
                                 )
                             }
                         )
@@ -128,83 +72,26 @@ fun SetUpNavGraph(
                 }
 
 
+            }
+        ) { paddingValues ->
+            NavHost(
+                navController = navController,
+                startDestination = Screen.Home.route,
+                modifier = Modifier.padding(paddingValues)
+            ) {
+
+                composable(
+                    route = Screen.Home.route
+                ) {
+                    HomeScreen(navController = navController)
+                }
+
+                composable(
+                    route = Screen.Main.route
+                ) {
+                    MainScreen(navController = navController)
+                }
+            }
         }
-    ) { paddingValues ->
-//        SharedTransitionLayout {
-        NavHost(
-            navController = navController,
-            startDestination = Screen.Home.route,
-            modifier = Modifier.padding(paddingValues)
-        ) {
-
-            composable(
-                route = Screen.Home.route
-            ) {
-                HomeScreen(navController = navController)
-            }
-
-            composable(
-                route = Screen.Main.route
-            ) {
-                MainScreen(navController = navController)
-            }
-
-            composable(
-                route = Screen.Preference.route
-            ) {
-                PreferenceScreen(navController = navController)
-            }
-
-            composable(
-                route = Screen.Culture.route
-            ) {
-                CultureScreen(navController = navController)
-            }
-
-            composable(
-                route = Screen.CultureDetail.route
-            ) {
-                CultureDetailScreen(navController = navController)
-            }
-
-            composable(
-                route = Screen.CultureMap.route
-            ) {
-                CultureMapScreen(navController = navController)
-            }
-
-            composable(
-                route = Screen.Walk.route
-            ) {
-                WalkScreen(navController = navController)
-            }
-
-            composable(
-                route = Screen.Test.route
-            ) {
-                TestScreen(navController = navController)
-            }
-
-            composable(
-                route = Screen.Login.route
-            ) {
-                LoginScreen(navController = navController, socialLoginViewModel = socialLoginViewModel)
-            }
-
-            composable(route = Screen.Record.route) {
-                RecordScreen(navController = navController)
-            }
-
-        } // NavHost
-//        } // SharedTransitionLayout
-    }
+    } // SharedTransitionLayout
 } // End of SetUpNavGraph
-
-@Composable
-fun shouldShowBottomBar(navController: NavHostController): Boolean {
-    val navBackStackEntry by navController.currentBackStackEntryAsState()
-    return when (navBackStackEntry?.destination?.route) {
-        Screen.CultureMap.route, Screen.Culture.route -> true
-        else -> false
-    }
-}
