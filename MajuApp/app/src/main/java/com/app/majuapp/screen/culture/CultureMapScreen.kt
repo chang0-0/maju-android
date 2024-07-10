@@ -63,6 +63,7 @@ fun CultureMapScreen(
         /** 권한 요청시 동의 했을 경우 **/
         if (areGranted) {
             Log.d("permission", "권한이 동의되었습니다.")
+            cultureViewModel.getCurrentLocation()
         }
         /** 권한 요청시 거부 했을 경우 **/
         else {
@@ -86,7 +87,7 @@ fun CultureMapScreen(
         )
     }
 
-    LaunchedEffect(key1 = currentLocation) {
+    LaunchedEffect(key1 = currentLocation.value) {
         Log.d("currentPosition", "${currentLocation.value?.latitude}, ${currentLocation.value?.longitude}")
         currentLocation.value?.let { location ->
             cameraPositionState.position =

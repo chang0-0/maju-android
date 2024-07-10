@@ -26,7 +26,7 @@ class CultureViewModel @Inject constructor(
         viewModelScope.launch {
             val result = locationTracker.getCurrentLocation()
             result?.let {
-                _currentLocation.value = result
+                _currentLocation.emit(result)
             }
         }
     }
