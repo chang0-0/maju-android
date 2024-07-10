@@ -1,5 +1,6 @@
 package com.app.majuapp.component
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -45,23 +46,24 @@ fun CultureCard(
         "2024-12-07"
     ),
     favoriteButtonFlag: Boolean = true,
-    onClick: () -> Unit = {}
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit = {},
 ) {
     Card(
-        modifier = Modifier
+        modifier = modifier
             .wrapContentHeight(align = Alignment.Top)
             .clickable { onClick() }
             .fillMaxWidth()
             .border(
                 width = 3.dp,
                 color = Color.LightGray,
-                shape = RoundedCornerShape(16.dp)
-            )
-            .padding(16.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.Transparent)
+                shape = CardDefaults.shape
+            ),
+        colors = CardDefaults.cardColors(containerColor = Color.White, )
     ) {
         Row(
-            modifier = Modifier.height(IntrinsicSize.Min),
+            modifier = Modifier.height(IntrinsicSize.Min)
+                .padding(16.dp),
             horizontalArrangement = Arrangement.SpaceEvenly
         ) {
             NetworkImageCard(
@@ -125,12 +127,5 @@ fun CultureCard(
 @Preview
 @Composable
 fun PreviewCultureCard() {
-    CultureCard(CultureModel(
-        0,
-        "뮤지컬/오페라",
-        "https://cdn.woman.chosun.com/news/photo/202309/112221_118277_4824.jpg",
-        "오페라 갈라",
-        "세종 대극장",
-        "2024-12-07"
-    ))
+    CultureCard()
 } // End of PreviewCultureCard

@@ -10,6 +10,7 @@ sealed class NetworkResult<T>(var data: Any? = null, val message: String? = "") 
     ) : NetworkResult<T>(code, msg)
 
     class Loading<T> : NetworkResult<T>()
+    class Idle<T> : NetworkResult<T>()
 } // End of NetworkResult class
 
 sealed class ResourceState<T> {

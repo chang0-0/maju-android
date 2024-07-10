@@ -43,6 +43,7 @@ const val cultureDetailTextWithIconSize = 18
 val cultureDetailIntervalSize = 4.dp
 val cultureDetailMediumSpacerSize = 16.dp
 val cultureDetailSmallSpacerSize = 8.dp
+val cultureDefaultPadding = 24.dp
 
 
 @Composable

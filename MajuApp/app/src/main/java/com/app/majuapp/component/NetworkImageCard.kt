@@ -29,7 +29,7 @@ fun NetworkImageCard(networkUrl: String, modifier: Modifier = Modifier,) {
         SubcomposeAsyncImage(
             modifier = Modifier
                 .fillMaxSize()
-                .clip(RoundedCornerShape(16.dp)),
+                .clip(CardDefaults.shape),
             model = ImageRequest.Builder(context)
                 .data(networkUrl)
                 .crossfade(true).build(),
