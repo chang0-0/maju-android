@@ -37,7 +37,10 @@ val WinterWizard = Color(0xFF00BCFF)
 val CoolGrey = Color(0xFF898AA4)
 val MediumElectricBlue = Color(0xFF004C91)
 
-
 val MaximumGreenYellow = Color(0xFFE0F74E)
 val ChineseBlack = Color(0xFF111111)
 val SilverSand = Color(0xFFC4C4C4)
+
+// 달력
+val RaisinBlack = Color(0xFF262626)
+val QuickSilver = Color(0xFFA3A3A3)

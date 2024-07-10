@@ -34,6 +34,9 @@
     <string name="icon_money_info_description">비용 정보 아이콘</string>
 
     // Record
-    <string name="Record_screen_recording_title">기록</string>
+    <string name="record_screen_recording_title">기록</string>
+
+    <string name="record_screen_walk_recording_content">산책 기록</string>
+    <string name="record_screen_culture_life_content">문화 생활</string>
 
 </resources>
