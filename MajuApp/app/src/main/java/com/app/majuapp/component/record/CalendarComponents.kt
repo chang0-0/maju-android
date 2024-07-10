@@ -4,6 +4,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowLeft
@@ -21,6 +22,37 @@ import androidx.compose.ui.unit.dp
 import com.app.majuapp.screen.record.CalendarUiState
 import com.app.majuapp.ui.theme.QuickSilver
 import java.time.YearMonth
+
+@Composable
+fun CalendarWidget(
+    days: Array<String>,
+    yearMonth: YearMonth,
+    dates: List<CalendarUiState.Date>,
+    onPreviousMonthButtonClicked: (YearMonth) -> Unit,
+    onNextMonthButtonClicked: (YearMonth) -> Unit,
+    onDateClickListener: (CalendarUiState.Date) -> Unit,
+) {
+    Column(
+        modifier = Modifier.fillMaxSize()
+    ) {
+        CalendarHeader(
+            yearMonth = yearMonth,
+            onPreviousMonthButtonClicked = onPreviousMonthButtonClicked,
+            onNextMonthButtonClicked = onNextMonthButtonClicked
+        )
+        Column(modifier = Modifier.padding(start = 10.dp, end = 10.dp)) {
+            Row() {
+                repeat(days.size) {
+                    val item = days[it]
+                    CalendarDayItem(item, modifier = Modifier.weight(1f))
+                }
+            }
+            CalendarContent(
+                dates = dates, onDateClickListener = onDateClickListener
+            )
+        }
+    }
+} // End of CalendarWidget()
 
 @Composable
 fun CalendarContentItem(
@@ -48,7 +80,8 @@ fun CalendarContentItem(
 fun CalendarContent(
     dates: List<CalendarUiState.Date>,
     onDateClickListener: (CalendarUiState.Date) -> Unit,
-) {/*
+) {
+    /*
         달력의 일수 표시
     */
     Column {
@@ -75,7 +108,8 @@ fun CalendarHeader(
     yearMonth: YearMonth,
     onPreviousMonthButtonClicked: (YearMonth) -> Unit,
     onNextMonthButtonClicked: (YearMonth) -> Unit,
-) {/*
+) {
+    /*
         달력의 헤더 부분
         좌우 아이콘, 년, 월
      */

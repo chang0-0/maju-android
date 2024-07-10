@@ -13,9 +13,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
@@ -25,21 +28,21 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.content.ContextCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.app.majuapp.R
 import com.app.majuapp.component.home.GrayBorderRoundedCard
-import com.app.majuapp.component.record.CalendarContent
-import com.app.majuapp.component.record.CalendarDayItem
-import com.app.majuapp.component.record.CalendarHeader
+import com.app.majuapp.component.record.CalendarWidget
 import com.app.majuapp.component.record.RecordScreenCalendarColorInform
+import com.app.majuapp.component.record.RecordScreenIconTextTitle
 import com.app.majuapp.component.walk.WalkRecordingBox
+import com.app.majuapp.domain.model.CultureLifeRecord
+import com.app.majuapp.domain.model.RecordingDataModel
+import com.app.majuapp.domain.model.RecordingWalkRecord
 import com.app.majuapp.ui.theme.BrightGray
 import com.app.majuapp.ui.theme.GoldenPoppy
 import com.app.majuapp.ui.theme.MajuAppTheme
@@ -50,36 +53,39 @@ import com.app.majuapp.ui.theme.defaultPadding
 import com.app.majuapp.ui.theme.notoSansKoreanFontFamily
 import com.app.majuapp.ui.theme.roundedCornerPadding
 import com.app.majuapp.util.DateUtil
-import java.time.YearMonth
+import kotlinx.coroutines.launch
 
 private const val TAG = "RecordScreen_창영"
 
 @Composable
 fun RecordScreen(navController: NavController) {
-    RecordScreenContent(navController)
+    RecordScreenContent(navController, recordingScreenDummyData)
 } // End of RecordScreen()
 
 
 @Composable
-fun RecordScreenContent(navController: NavController) {
+fun RecordScreenContent(navController: NavController, recordingData: RecordingDataModel) {
     // Context
     val context = LocalContext.current
 
     // modifier
     val modifier = Modifier
-    val brightGrayColor = ContextCompat.getColor(context, R.color.brightGray)
 
-    val list = ArrayList<Int>()
-    list.add(1)
-    list.add(2)
+    // Snackbar State
+    val rememberSnackbarState = remember { SnackbarHostState() }
+    val coroutineScope = rememberCoroutineScope()
 
     Surface(
-        modifier = modifier.fillMaxSize(), color = White
+        modifier = modifier.fillMaxSize(), color = White,
     ) {
         LazyColumn(modifier = Modifier.fillMaxSize()) {
             item {
                 Column(
-                    modifier = modifier.padding(start = 30.dp, end = 30.dp, top = 30.dp)
+                    modifier = modifier.padding(
+                        start = 30.dp,
+                        end = 30.dp,
+                        top = 30.dp,
+                    )
                 ) {
                     Row(
                         modifier = Modifier.fillMaxWidth().wrapContentHeight(),
@@ -101,16 +107,10 @@ fun RecordScreenContent(navController: NavController) {
                         }
                     }
                 }
-                Spacer(
-                    modifier = Modifier.fillMaxWidth().padding(10.dp)
-                )
-                RecordCalendar() // 달력
-                Spacer(
-                    modifier = Modifier.fillMaxWidth().padding(defaultPadding / 2)
-                )
+                RecordCalendar(rememberSnackbarState = rememberSnackbarState) // 달력
                 Row(
                     modifier = Modifier.fillMaxWidth().wrapContentHeight()
-                        .padding(start = defaultPadding),
+                        .padding(start = defaultPadding + 4.dp, top = defaultPadding / 2),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     RecordScreenCalendarColorInform(
@@ -124,94 +124,97 @@ fun RecordScreenContent(navController: NavController) {
                     )
                 }
                 Spacer(
-                    modifier = Modifier.fillMaxWidth().padding(defaultPadding / 2)
+                    modifier = Modifier.fillMaxWidth()
+                        .padding(top = defaultPadding, bottom = defaultPadding)
+                        .height(4.dp)
+                        .background(BrightGray)
                 )
-                Spacer(modifier = Modifier.fillMaxWidth().height(4.dp).background(BrightGray))
-                Column(modifier = Modifier.padding(start = 30.dp, end = 30.dp, top = 30.dp)) {
-                    Row(
-                        modifier = Modifier.wrapContentHeight(),
-                        verticalAlignment = Alignment.CenterVertically,
+                Column(
+                    modifier = Modifier.fillMaxWidth()
+                        .padding(start = 30.dp, end = 30.dp, top = defaultPadding)
+                ) {
+                    /*
+                        산책 기록 LazyRow
+                     */
+                    RecordScreenIconTextTitle(
+                        painterResource(R.drawable.ic_walk_record_check),
+                        SpiroDiscoBall,
+                        context.getString(R.string.record_screen_walk_recording_content)
+                    )
+                    LazyRow(
+                        modifier = Modifier.fillMaxSize(),
+                        horizontalArrangement = Arrangement.spacedBy(28.dp)
                     ) {
-                        Icon(
-                            painter = painterResource(R.drawable.ic_walk_record_check),
-                            tint = SpiroDiscoBall,
-                            contentDescription = null
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(
-                            text = context.getString(R.string.record_screen_walk_recording_content),
-                            fontFamily = notoSansKoreanFontFamily,
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 20.sp,
-                            textAlign = TextAlign.Justify,
-                            modifier = Modifier.alignByBaseline(),
-                        )
-                    }
+                        items(recordingData.walkRecord.size) {
+                            RecordScreenLazyItems(
+                                modifier = Modifier.fillParentMaxWidth()
+                            ) {
 
-                    GrayBorderRoundedCard(
-                        // 홈 화면 알림 카드
-                        modifier = Modifier.border(
-                            width = 2.dp,
-                            color = Color(brightGrayColor),
-                            shape = RoundedCornerShape(
-                                roundedCornerPadding
-                            )
-                        ),
-                        color = arrayListOf(Color.Transparent, Color.Transparent),
-                    ) {
-                        Column(
-                            modifier = Modifier.fillMaxWidth()
-                                .padding(
-                                    start = 34.dp,
-                                    end = 34.dp,
-                                    top = 14.dp,
-                                    bottom = 14.dp
-                                ),
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            verticalArrangement = Arrangement.Center
-                        ) {
-                            Text(
-                                text = "보라매공원 산책로",
-                                fontWeight = FontWeight.Bold,
-                                fontSize = 16.sp,
-                                fontFamily = notoSansKoreanFontFamily
-                            )
-                            Spacer(modifier = Modifier.height(10.dp))
-                            WalkRecordingBox(context)
+                            }
                         }
                     }
 
-                    Row(
-                        modifier = Modifier.wrapContentHeight(),
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        Icon(
-                            painter = painterResource(R.drawable.ic_culture_life_check),
-                            tint = GoldenPoppy,
-                            contentDescription = null
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(
-                            text = context.getString(R.string.record_screen_culture_life_content),
-                            fontFamily = notoSansKoreanFontFamily,
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 20.sp,
-                            textAlign = TextAlign.Justify,
-                            modifier = Modifier.alignByBaseline(),
-                        )
-                    }
-                    Spacer(modifier = Modifier.height(10.dp))
-                    WalkRecordingBox(context)
+                    /*
+                        문화 생활 LazyRow Item
+                     */
+                    RecordScreenIconTextTitle(
+                        painterResource(R.drawable.ic_culture_life_check),
+                        GoldenPoppy,
+                        context.getString(R.string.record_screen_culture_life_content)
+                    )
                 }
             }
         } // End of LazyColumn()
-    }
+        SnackbarHost(hostState = rememberSnackbarState)
+    } // End of Surface()
 } // End of RecordScreenContent()
+
+@Composable
+private fun RecordScreenLazyItems(
+    modifier: Modifier, composableContent: @Composable () -> Unit
+) {
+    val context = LocalContext.current
+
+    Column(
+        modifier = modifier.fillMaxSize().wrapContentHeight()
+    ) {
+        GrayBorderRoundedCard(
+            // 홈 화면 알림 카드
+            modifier = Modifier.border(
+                width = 2.dp, color = BrightGray, shape = RoundedCornerShape(
+                    roundedCornerPadding
+                )
+            ),
+            color = arrayListOf(Color.Transparent, Color.Transparent),
+        ) {
+            Column(
+                modifier = Modifier.fillMaxWidth().padding(
+                    start = 34.dp, end = 34.dp, top = 14.dp, bottom = 14.dp
+                ),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                Text(
+                    text = "보라매공원 산책로",
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 16.sp,
+                    fontFamily = notoSansKoreanFontFamily
+                )
+                Spacer(modifier = Modifier.height(10.dp))
+                WalkRecordingBox(context)
+            }
+        }
+        composableContent() // 내부 컴포저블 함수
+    }
+} // End of RecordScreenLazyItems()
 
 
 @Composable
-private fun RecordCalendar(viewModel: RecordCalendarViewModel = viewModel()) {
+private fun RecordCalendar(
+    viewModel: RecordCalendarViewModel = viewModel(), rememberSnackbarState: SnackbarHostState
+) {
     val calendarUiState by viewModel.calendarUiState.collectAsState() // 달력 날짜 전체 데이터
+    val coroutineScope = rememberCoroutineScope()
 
     Surface(
         // modifier = Modifier.wrapContentHeight().verticalScroll(rememberScrollState()), color = White
@@ -227,47 +230,58 @@ private fun RecordCalendar(viewModel: RecordCalendarViewModel = viewModel()) {
                 viewModel.toNextMonth(nextMonth)
             },
             onDateClickListener = {
-                // TODO("set on date click listener")
+                coroutineScope.launch {
+                    rememberSnackbarState.showSnackbar("날짜 선택")
+                }
             })
     }
 } // End of RecordCalendar()
-
-@Composable
-private fun CalendarWidget(
-    days: Array<String>,
-    yearMonth: YearMonth,
-    dates: List<CalendarUiState.Date>,
-    onPreviousMonthButtonClicked: (YearMonth) -> Unit,
-    onNextMonthButtonClicked: (YearMonth) -> Unit,
-    onDateClickListener: (CalendarUiState.Date) -> Unit,
-) {
-    Column(
-        modifier = Modifier.fillMaxSize()
-    ) {
-        CalendarHeader(
-            yearMonth = yearMonth,
-            onPreviousMonthButtonClicked = onPreviousMonthButtonClicked,
-            onNextMonthButtonClicked = onNextMonthButtonClicked
-        )
-        Column(modifier = Modifier.padding(start = 10.dp, end = 10.dp)) {
-            Row() {
-                repeat(days.size) {
-                    val item = days[it]
-                    CalendarDayItem(item, modifier = Modifier.weight(1f))
-                }
-            }
-            CalendarContent(
-                dates = dates, onDateClickListener = onDateClickListener
-            )
-        }
-    }
-} // End of CalendarWidget()
 
 
 @Preview(showSystemUi = true)
 @Composable
 fun CalendarAppPreview() {
     MajuAppTheme() {
-        RecordScreenContent(rememberNavController())
+        RecordScreenContent(
+            rememberNavController(), RecordingDataModel(
+                arrayListOf(), arrayListOf()
+            )
+        )
     }
 } // End of CalendarAppPreview()
+
+@Preview(showBackground = true)
+@Composable
+fun LazyRowPreview() {
+    MajuAppTheme() {
+        RecordScreenLazyItems(
+            modifier = Modifier
+        ) {
+
+        }
+    }
+}
+
+private val recordingScreenDummyData = RecordingDataModel(
+    arrayListOf(
+        RecordingWalkRecord(
+            "보라매공원 산책로",
+            0.22,
+            275,
+        ), RecordingWalkRecord(
+            "보라매공원 산책로",
+            0.22,
+            275,
+        ), RecordingWalkRecord(
+            "보라매공원 산책로",
+            0.22,
+            275,
+        ), RecordingWalkRecord(
+            "보라매공원 산책로",
+            0.22,
+            275,
+        )
+    ), arrayListOf(
+        CultureLifeRecord("", "", "", "", "")
+    )
+)
