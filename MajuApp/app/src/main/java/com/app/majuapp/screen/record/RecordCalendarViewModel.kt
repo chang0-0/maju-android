@@ -12,13 +12,13 @@ import java.time.YearMonth
 class RecordCalendarViewModel : ViewModel() {
     private val dataSource by lazy { CalendarDataSource() }
 
-    private val _uiState = MutableStateFlow(CalendarUiState.Init)
-    val uiState: StateFlow<CalendarUiState> = _uiState.asStateFlow()
+    private val _calendarUiState = MutableStateFlow(CalendarUiState.Init)
+    val calendarUiState: StateFlow<CalendarUiState> = _calendarUiState.asStateFlow()
 
 
     init {
         viewModelScope.launch {
-            _uiState.update { currentState ->
+            _calendarUiState.update { currentState ->
                 currentState.copy(
                     dates = dataSource.getDates(currentState.yearMonth)
                 )
@@ -28,7 +28,7 @@ class RecordCalendarViewModel : ViewModel() {
 
     fun toNextMonth(nextMonth: YearMonth) {
         viewModelScope.launch {
-            _uiState.update { currentState ->
+            _calendarUiState.update { currentState ->
                 currentState.copy(
                     yearMonth = nextMonth,
                     dates = dataSource.getDates(nextMonth)
@@ -39,7 +39,7 @@ class RecordCalendarViewModel : ViewModel() {
 
     fun toPreviousMonth(prevMonth: YearMonth) {
         viewModelScope.launch {
-            _uiState.update { currentState ->
+            _calendarUiState.update { currentState ->
                 currentState.copy(
                     yearMonth = prevMonth,
                     dates = dataSource.getDates(prevMonth)

@@ -8,13 +8,11 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.AccessTime
 import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material.icons.outlined.LocationOn
 import androidx.compose.material.icons.outlined.MonetizationOn
-import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -26,7 +24,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.app.majuapp.R
@@ -35,7 +32,6 @@ import com.app.majuapp.component.CultureDetailCategoryChip
 import com.app.majuapp.component.MultiLineTextWithIconOnStart
 import com.app.majuapp.component.NetworkImageCard
 import com.app.majuapp.component.SingleLineTextWithIconOnStart
-import com.app.majuapp.component.WalkComponentButton
 import com.app.majuapp.ui.theme.GoldenPoppy
 import com.app.majuapp.ui.theme.Gray
 import com.app.majuapp.ui.theme.cultureDetailIntervalSize

@@ -5,7 +5,6 @@ import java.time.LocalDate
 import java.time.YearMonth
 
 class CalendarDataSource {
-
     fun getDates(yearMonth: YearMonth): List<CalendarUiState.Date> {
         return yearMonth.getDayOfMonthStartingFromMonday()
             .map { date ->
@@ -14,9 +13,10 @@ class CalendarDataSource {
                         "${date.dayOfMonth}"
                     } else {
                         "" // Fill with empty string for days outside the current month
+                        "${date.dayOfMonth}"
                     },
                     isSelected = date.isEqual(LocalDate.now()) && date.monthValue == yearMonth.monthValue
                 )
             }
     }
-}
+} // End of CalendarDataSource class

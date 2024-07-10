@@ -1,4 +1,4 @@
-package com.app.majuapp.component
+package com.app.majuapp.component.home
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -24,14 +25,16 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.SubcomposeAsyncImage
 import coil.request.ImageRequest
+import com.app.majuapp.component.Loader
 import com.app.majuapp.screen.home.Category
 import com.app.majuapp.ui.theme.roundedCornerPadding
 
 @Composable
-fun HomeScreenRoundedCard(modifier: Modifier, color: List<Color>, content: @Composable () -> Unit) {
+fun GrayBorderRoundedCard(modifier: Modifier, color: List<Color>, content: @Composable () -> Unit) {
     Box(
         modifier = modifier.clip(RoundedCornerShape(roundedCornerPadding)).fillMaxWidth()
-            .height(200.dp).background(
+            .wrapContentHeight()
+            .background(
                 Brush.linearGradient(
                     colors = listOf(color[0], color[1]),
                     start = Offset(0f, 0f),
@@ -41,7 +44,7 @@ fun HomeScreenRoundedCard(modifier: Modifier, color: List<Color>, content: @Comp
     ) {
         content()
     }
-} // End of HomeBox()
+} // End of GrayBorderRoundedCard()
 
 @Composable
 fun HomeScreenCategoryItem(categoryItem: Category, onClick: (String) -> Unit) {
