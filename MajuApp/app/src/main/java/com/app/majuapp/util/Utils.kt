@@ -3,16 +3,15 @@ package com.app.majuapp.util
 import android.app.Activity
 import android.content.Context
 import android.content.ContextWrapper
+import android.content.pm.PackageManager
 import android.graphics.Bitmap
+import android.util.Log
+import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.text.TextLayoutResult
 import androidx.core.content.ContextCompat
 import com.google.android.gms.maps.model.BitmapDescriptor
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flow
-import retrofit2.HttpException
 import kotlin.math.roundToInt
 
 fun textCenterAlignment(
@@ -61,4 +60,23 @@ fun bitmapDescriptorUsingVector(
     val canvas = android.graphics.Canvas(bm)
     drawable.draw(canvas)
     return BitmapDescriptorFactory.fromBitmap(bm)
+}
+
+fun checkAndRequestPermissions(
+    context: Context,
+    permissions: Array<String>,
+    launcher: ManagedActivityResultLauncher<Array<String>, Map<String, Boolean>>,
+) {
+    val TAG = "permission"
+    if (permissions.all {
+            ContextCompat.checkSelfPermission(
+                context,
+                it
+            ) == PackageManager.PERMISSION_GRANTED
+        }) {
+        Log.d(TAG, "권한이 이미 존재합니다.")
+    } else {
+        launcher.launch(permissions)
+        Log.d(TAG, "권한을 요청했습니다.")
+    }
 }
