@@ -3,8 +3,12 @@ package com.app.majuapp.util
 import android.app.Activity
 import android.content.Context
 import android.content.ContextWrapper
+import android.graphics.Bitmap
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.text.TextLayoutResult
+import androidx.core.content.ContextCompat
+import com.google.android.gms.maps.model.BitmapDescriptor
+import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -39,16 +43,22 @@ fun Context.findActivity(): Activity {
     throw IllegalStateException("no activity")
 }
 
-fun <T : Any> handleFlowApi(
-    execute: suspend () -> T,
-): Flow<NetworkResult<T>> = flow {
-    emit(NetworkResult.Loading<T>()) //값 갱신전 로딩을 emit
-    delay(1000) // (1초대기)
-    try {
-        emit(NetworkResult.Success(execute())) // execute 성공시 해당값을 Success에 담아서 반환
-    } catch (e: HttpException) {
-        emit(NetworkResult.Error(code = e.code(), msg = e.message(), exception = e)) // 네트워크 오류시 code와 메세지를 반환
-    } catch (e: Exception) {
-        emit(NetworkResult.Error(code = 999, msg = e.message, exception = e)) // 예외 발생시 해당 에러를 반환
-    }
+fun bitmapDescriptorUsingVector(
+    context: Context,
+    vectorResId: Int
+): BitmapDescriptor? {
+
+    // retrieve the actual drawable
+    val drawable = ContextCompat.getDrawable(context, vectorResId) ?: return null
+    drawable.setBounds(0, 0, drawable.intrinsicWidth, drawable.intrinsicHeight)
+    val bm = Bitmap.createBitmap(
+        drawable.intrinsicWidth,
+        drawable.intrinsicHeight,
+        Bitmap.Config.ARGB_8888
+    )
+
+    // draw it onto the bitmap
+    val canvas = android.graphics.Canvas(bm)
+    drawable.draw(canvas)
+    return BitmapDescriptorFactory.fromBitmap(bm)
 }

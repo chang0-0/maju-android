@@ -176,10 +176,7 @@ dependencies {
     // Optionally, you can include the widgets library for ScaleBar, etc.
     implementation("com.google.maps.android:maps-compose-widgets:5.0.3")
 
-    // GoogleMap
-    implementation("com.google.maps.android:maps-compose:4.3.3")
-    implementation("com.google.maps.android:maps-compose-utils:4.3.3")
-    implementation("com.google.maps.android:maps-compose-widgets:4.3.3")
+    implementation("com.google.android.gms:play-services-location:17.1.0")
 
 }
 
