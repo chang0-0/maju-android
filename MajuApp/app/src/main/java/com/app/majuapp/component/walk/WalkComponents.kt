@@ -39,12 +39,14 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.app.majuapp.R
+import com.app.majuapp.component.fillMaxWidthSpacer
 import com.app.majuapp.ui.theme.BrightGray
 import com.app.majuapp.ui.theme.GoldenPoppy
 import com.app.majuapp.ui.theme.MajuAppTheme
 import com.app.majuapp.ui.theme.OuterSpace
 import com.app.majuapp.ui.theme.SilverSand
 import com.app.majuapp.ui.theme.SonicSilver
+import com.app.majuapp.ui.theme.TaupeGray
 import com.app.majuapp.ui.theme.White
 import com.app.majuapp.ui.theme.defaultPadding
 import com.app.majuapp.ui.theme.dialogButtonRoundedCorner
@@ -67,11 +69,9 @@ fun WalkScreenChooseStartDialog(
     content: String,
     onClickDismiss: () -> Unit,
     onClickConfirm: () -> Unit,
-) {
-    /*
+) {/*
         산책 기능 다이얼로그 화면
      */
-
     // Context
     val context = LocalContext.current
 
@@ -160,8 +160,7 @@ fun WalkScreenChooseStartDialog(
                             Spacer(modifier = Modifier.fillMaxWidth().height(18.dp))
                             Box(
                                 modifier = Modifier.clip(RoundedCornerShape(roundedCornerPadding))
-                                    .fillMaxWidth()
-                                    .height(200.dp).background(
+                                    .fillMaxWidth().height(200.dp).background(
                                         OuterSpace, shape = RoundedCornerShape(roundedCornerPadding)
                                     ),
                                 contentAlignment = Alignment.BottomCenter,
@@ -180,16 +179,6 @@ fun WalkScreenChooseStartDialog(
                         modifier = Modifier.padding(start = defaultPadding, end = defaultPadding),
                         Arrangement.spacedBy(8.dp)
                     ) {
-                        /*
-                            산책로 결과에 따라 보여지는 버튼 Text 다름
-                         */
-//                        WalkComponentButton(
-//                            buttonText = "돌아가기",
-//                            GoldenPoppy,
-//                            onClickConfirm,
-//                            Modifier.weight(1f)
-//                        )
-
                         WalkComponentButton(
                             buttonText = context.getString(R.string.walk_screen_dialog_start_dialog_start_button_content),
                             GoldenPoppy,
@@ -210,16 +199,108 @@ fun WalkScreenChooseStartDialog(
 } // End of WalkScreenChooseStartDialogue()
 
 @Composable
-fun WalkRecordingBox(context: Context) {
-    /*
+fun WalkScreenInformDialogue(
+    title: String,
+    content: String,
+    leftButtonText: String,
+    rightButtonText: String,
+    onClickDismiss: () -> Unit,
+    onClickConfirm: () -> Unit,
+) {
+    var showAnimatedDialog by remember { mutableStateOf(false) }
+    var graphicVisible = remember { mutableStateOf(false) }
+    LaunchedEffect(Unit) { graphicVisible.value = true }
+
+    var animateIn = remember { mutableStateOf(false) }
+    LaunchedEffect(Unit) { animateIn.value = true }
+
+    AnimatedVisibility(
+        visible = graphicVisible.value, enter = expandVertically(
+            animationSpec = spring(stiffness = Spring.StiffnessMediumLow),
+            expandFrom = Alignment.CenterVertically,
+        )
+    ) {
+        Dialog(
+            onDismissRequest = { onClickDismiss() },
+            properties = DialogProperties(
+                dismissOnBackPress = true,
+                dismissOnClickOutside = false,
+            ),
+        ) {
+            Box(
+                contentAlignment = Alignment.Center,
+                modifier = Modifier.shadow(8.dp, shape = RoundedCornerShape(16.dp))
+                    .background(Color.Black.copy(alpha = .9f))
+                    .clip(RoundedCornerShape(dialogCornerPadding)).background(White).padding(
+                        start = dialogDefaultPadding,
+                        end = dialogDefaultPadding,
+                        top = dialogDefaultPadding,
+                        bottom = 16.dp
+                    ),
+            ) {
+                Column(
+                    modifier = Modifier.fillMaxWidth().wrapContentHeight(),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center,
+                ) {
+                    Text(
+                        modifier = Modifier,
+                        text = title,
+                        fontSize = 22.sp,
+                        fontWeight = FontWeight.ExtraBold
+                    )
+                    fillMaxWidthSpacer(Modifier, defaultPadding)
+                    Text(
+                        text = content,
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.ExtraLight,
+                        color = SonicSilver,
+                        modifier = Modifier.align(
+                            Alignment.CenterHorizontally
+                        ),
+                        textAlign = TextAlign.Center
+                    )
+                    fillMaxWidthSpacer(Modifier, defaultPadding)
+                    Row(
+                        modifier = Modifier.padding(start = defaultPadding, end = defaultPadding),
+                        Arrangement.spacedBy(8.dp)
+                    ) {
+                        WalkComponentButton(
+                            buttonText = leftButtonText,
+                            TaupeGray,
+                            onClickConfirm,
+                            Modifier.weight(1f)
+                        )
+                        WalkComponentButton(
+                            buttonText = rightButtonText,
+                            GoldenPoppy,
+                            onClickDismiss,
+                            Modifier.weight(1f)
+                        )
+                    }
+                }
+            }
+        }
+
+        DisposableEffect(Unit) {
+            onDispose {
+                showAnimatedDialog = false
+            }
+        }
+    }
+
+} // End of WalkScreenInformDialogue()
+
+
+@Composable
+fun WalkRecordingBox(context: Context) {/*
         바텀 시트 내부
         이동 거리, 걸음 수가 보이는 회색 박스
      */
 
     Box(
         Modifier.clip(RoundedCornerShape(8.dp)).fillMaxWidth().height(92.dp)
-            .background(color = BrightGray),
-        contentAlignment = Alignment.Center
+            .background(color = BrightGray), contentAlignment = Alignment.Center
     ) {
         Row(
             modifier = Modifier.matchParentSize(),
@@ -228,10 +309,9 @@ fun WalkRecordingBox(context: Context) {
         ) {
             Box(
                 // 이동 거리 박스
-                modifier = Modifier.fillMaxWidth().wrapContentHeight()
-                    .weight(1f).align(
-                        Alignment.CenterVertically,
-                    ),
+                modifier = Modifier.fillMaxWidth().wrapContentHeight().weight(1f).align(
+                    Alignment.CenterVertically,
+                ),
             ) {
                 Column(
                     modifier = Modifier.fillMaxWidth().wrapContentHeight(),
@@ -262,19 +342,15 @@ fun WalkRecordingBox(context: Context) {
             }
             Spacer(
                 // 회색 박스 중간 구분선
-                modifier = Modifier.width(1.dp).fillMaxHeight()
-                    .padding(
-                        top = defaultPadding + 8.dp,
-                        bottom = defaultPadding + 8.dp
-                    )
-                    .background(SilverSand)
+                modifier = Modifier.width(1.dp).fillMaxHeight().padding(
+                    top = defaultPadding + 8.dp, bottom = defaultPadding + 8.dp
+                ).background(SilverSand)
             )
             Box(
                 // 걸음 수 박스
-                modifier = Modifier.fillMaxWidth().wrapContentHeight()
-                    .weight(1f).align(
-                        Alignment.CenterVertically,
-                    ),
+                modifier = Modifier.fillMaxWidth().wrapContentHeight().weight(1f).align(
+                    Alignment.CenterVertically,
+                ),
             ) {
                 Column(
                     modifier = Modifier.fillMaxWidth().wrapContentHeight(),

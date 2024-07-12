@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.BottomSheetScaffold
 import androidx.compose.material3.Button
@@ -20,6 +19,8 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberBottomSheetScaffoldState
@@ -37,17 +38,26 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.content.ContextCompat
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.app.majuapp.R
 import com.app.majuapp.component.walk.WalkRecordingBox
 import com.app.majuapp.component.walk.WalkScreenChooseStartDialog
+import com.app.majuapp.component.walk.WalkScreenInformDialogue
 import com.app.majuapp.ui.theme.MajuAppTheme
 import com.app.majuapp.ui.theme.SpiroDiscoBall
 import com.app.majuapp.ui.theme.White
 import com.app.majuapp.ui.theme.defaultPadding
 import com.app.majuapp.ui.theme.notoSansKoreanFontFamily
+import com.google.android.gms.maps.model.CameraPosition
+import com.google.android.gms.maps.model.LatLng
+import com.google.maps.android.compose.CameraPositionState
+import com.google.maps.android.compose.GoogleMap
+import com.google.maps.android.compose.MapProperties
+import com.google.maps.android.compose.MapType
+import com.google.maps.android.compose.MapUiSettings
+import com.google.maps.android.compose.rememberCameraPositionState
 import kotlinx.coroutines.launch
 
 private const val TAG = "WalkScreen_창영"
@@ -59,11 +69,16 @@ fun WalkScreen(navController: NavController) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun WalkScreenContent(navController: NavController) {
+private fun WalkScreenContent(
+    navController: NavController, walkViewModel: WalkViewModel = hiltViewModel()
+) {
     val context = LocalContext.current
 
-    /* Dialog */
-    var showDialog by rememberSaveable { mutableStateOf(true) }
+    /* chooseStartDialog */
+    var showChooseStartDialog by rememberSaveable { mutableStateOf(true) }
+
+    /* informDialog */
+    var showInformDialog by remember { mutableStateOf(false) }
 
     /* BottomSheet*/
     val scaffoldState = rememberBottomSheetScaffoldState()
@@ -74,6 +89,17 @@ private fun WalkScreenContent(navController: NavController) {
     val rotationState by animateFloatAsState(
         targetValue = if (scaffoldState.bottomSheetState.currentValue.ordinal == 1) 180f else 0f
     )
+
+    /* GoogleMap */
+    val seoul = LatLng(37.5744, 126.9771)
+    val cameraPositionState: CameraPositionState = rememberCameraPositionState {
+        position = CameraPosition.fromLatLngZoom(seoul, 16f)
+    }
+    var uiSettings by remember { mutableStateOf(MapUiSettings()) }
+    val properties by remember {
+        mutableStateOf(MapProperties(mapType = MapType.NORMAL))
+    }
+
 
     Surface(modifier = Modifier.fillMaxSize().background(White)) {
         BottomSheetScaffold(scaffoldState = scaffoldState,
@@ -87,26 +113,23 @@ private fun WalkScreenContent(navController: NavController) {
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Center
                 ) {
-                    IconButton(
-                        modifier = Modifier.rotate(rotationState)
-                            .animateContentSize(
-                                tween(durationMillis = 100, easing = FastOutLinearInEasing)
-                            ),
-                        onClick = {
-                            bottomSheetStateOrdinal =
-                                scaffoldState.bottomSheetState.currentValue.ordinal
-                            bottomSheetScope.launch {
-                                when (bottomSheetStateOrdinal) {
-                                    1 -> {
-                                        scaffoldState.bottomSheetState.partialExpand()
-                                    }
+                    IconButton(modifier = Modifier.rotate(rotationState).animateContentSize(
+                        tween(durationMillis = 100, easing = FastOutLinearInEasing)
+                    ), onClick = {
+                        bottomSheetStateOrdinal =
+                            scaffoldState.bottomSheetState.currentValue.ordinal
+                        bottomSheetScope.launch {
+                            when (bottomSheetStateOrdinal) {
+                                1 -> {
+                                    scaffoldState.bottomSheetState.partialExpand()
+                                }
 
-                                    else -> {
-                                        scaffoldState.bottomSheetState.expand()
-                                    }
+                                else -> {
+                                    scaffoldState.bottomSheetState.expand()
                                 }
                             }
-                        }) {
+                        }
+                    }) {
 
                         Icon(
                             painter = painterResource(R.drawable.ic_bottom_sheet_open),
@@ -120,6 +143,10 @@ private fun WalkScreenContent(navController: NavController) {
                     BottomSheet Content
                     바텀 시트 내부 콘텐트
                 */
+
+                val coroutineScope = rememberCoroutineScope()
+                val snackbarHostState = remember { SnackbarHostState() }
+                SnackbarHost(hostState = snackbarHostState)
 
                 Column(
                     modifier = Modifier.fillMaxWidth().padding(top = defaultPadding),
@@ -144,7 +171,10 @@ private fun WalkScreenContent(navController: NavController) {
                         Button(
                             shape = RoundedCornerShape(8.dp),
                             modifier = Modifier.fillMaxWidth().height(44.dp),
-                            onClick = {},
+                            onClick = {
+                                // 산책 종료 버튼 클릭 이벤트
+                                walkViewModel.setShowInfromDialog()
+                            },
                             colors = ButtonDefaults.buttonColors(containerColor = SpiroDiscoBall)
                         ) {
                             Text(
@@ -160,40 +190,21 @@ private fun WalkScreenContent(navController: NavController) {
             } // End of SheetContent
         ) {
             Column(
-                modifier = Modifier.fillMaxSize().background(White).padding(defaultPadding),
+                modifier = Modifier.fillMaxSize(),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
             ) {
-                Button(modifier = Modifier.height(40.dp).wrapContentWidth(), onClick = {
-                    showDialog = true
-                }) {
-                    Text("다이얼로그 활성화")
-                }
-                Button(modifier = Modifier.height(40.dp).wrapContentWidth(), onClick = {
-                    bottomSheetScope.launch {
-                        bottomSheetStateOrdinal =
-                            scaffoldState.bottomSheetState.currentValue.ordinal
-                        if (bottomSheetStateOrdinal == 1) {
-                            scaffoldState.bottomSheetState.partialExpand()
-                        } else {
-                            scaffoldState.bottomSheetState.expand()
-                        }
-                    }
-                }) {
-                    Text(
-                        "바텀 시트 ${
-                            if (bottomSheetStateOrdinal == 1) "닫기" else {
-                                "열기"
-                            }
-                        }  "
-                    )
-                }
+                GoogleMap(
+                    modifier = Modifier.fillMaxSize(),
+                    cameraPositionState = cameraPositionState,
+                    properties = properties,
+                    uiSettings = uiSettings.copy(zoomControlsEnabled = false)
+                )
             }
         } // End of BottomSheetScaffold {}
     } // End of Surface {}
 
-    if (showDialog) {
-        /*
+    if (showChooseStartDialog) {/*
             산책로 리스트를 받아오는데, 이 리스트가 비어있으면
             다이얼로그에서 보여지는 텍스트들이 변경된다.
 
@@ -204,13 +215,34 @@ private fun WalkScreenContent(navController: NavController) {
         WalkScreenChooseStartDialog(context.getString(R.string.walk_screen_dialog_choose_promenade_title),
             context.getString(R.string.walk_screen_dialog_choose_promenade_content),
             onClickDismiss = {
-                showDialog = false
+                showChooseStartDialog = false
                 navController.popBackStack()
             },
             onClickConfirm = {
-                showDialog = false
+                showChooseStartDialog = false
             })
     }
+
+    val showState = walkViewModel.showInfromDialog.collectAsState()
+    when (showState.value) {
+        true -> {
+            WalkScreenInformDialogue(
+                context.getString(R.string.walk_screen_inform_dialog_title),
+                context.getString(R.string.walk_screen_inform_dialog_content),
+                leftButtonText = context.getString(R.string.walk_screen_inform_dialog_close_button_content),
+                rightButtonText = context.getString(R.string.walk_screen_inform_dialog_continue_button_content),
+                onClickDismiss = {
+                    walkViewModel.setShowInfromDialog()
+                },
+                onClickConfirm = {
+                    walkViewModel.setShowInfromDialog()
+                    navController.popBackStack()
+                })
+        }
+
+        else -> null
+    }
+
 } // End of WalkScreenContent()
 
 

@@ -23,6 +23,6 @@ fun Loader(modifier: Modifier = Modifier) {
 } // End of Loader()
 
 @Composable
-fun fillMaxWidthSpacer(height: Dp) {
-    Spacer(modifier = Modifier.fillMaxWidth().height(height))
+fun fillMaxWidthSpacer(modifier: Modifier, height: Dp) {
+    Spacer(modifier = modifier.fillMaxWidth().height(height))
 } // End of fillMaxWidthSpacer()

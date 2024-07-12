@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -14,6 +15,8 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowLeft
@@ -87,6 +90,10 @@ fun RecordScreenContent(
     var currentIndex by remember { mutableIntStateOf(0) }
     val totalItem = recordingData.cultureLifeRecord.size
 
+    val culturePagerState = rememberPagerState(pageCount = {
+        recordingData.cultureLifeRecord.size
+    })
+
     Surface(
         modifier = modifier.fillMaxSize(), color = White,
     ) {
@@ -141,8 +148,7 @@ fun RecordScreenContent(
                         .background(BrightGray)
                 )
                 Column(
-                    modifier = Modifier.fillMaxWidth()
-                        .padding(start = 30.dp, end = 30.dp)
+                    modifier = Modifier.fillMaxWidth().padding(start = 30.dp, end = 30.dp)
                 ) {
                     RecordScreenIconTextTitle(
                         painterResource(R.drawable.ic_walk_record_check),
@@ -160,7 +166,7 @@ fun RecordScreenContent(
                             ) {}
                         }
                     }
-                    fillMaxWidthSpacer(20.dp)
+                    fillMaxWidthSpacer(Modifier, 20.dp)
                     RecordScreenIconTextTitle(
                         painterResource(R.drawable.ic_culture_life_check),
                         GoldenPoppy,
@@ -170,26 +176,35 @@ fun RecordScreenContent(
                 Row(
                     modifier = Modifier.fillMaxSize(),
                     verticalAlignment = Alignment.CenterVertically,
-                    //horizontalArrangement = Arrangement.Center
                 ) {
-                    IconButton(
-                        modifier = Modifier.background(Color.Green),
-                        onClick = {
-                            if (currentIndex > 0) {
-                                currentIndex--
+                    // CultureLife Pager
+                    IconButton(modifier = Modifier.weight(1f), onClick = {
+                        coroutineScope.launch {
+                            if (culturePagerState.currentPage > 0) {
+                                culturePagerState.animateScrollToPage(culturePagerState.currentPage - 1)
                             }
-                        }) {
+                        }
+                    }) {
                         Icon(
                             imageVector = Icons.Filled.KeyboardArrowLeft, contentDescription = null
                         )
                     }
-                    Row() {
-                        val item = recordingData.cultureLifeRecord[currentIndex]
-                        RecordScreenLazyItems(modifier = Modifier.width(200.dp)) {}
+                    HorizontalPager(
+                        modifier = Modifier.weight(8f),
+                        state = culturePagerState,
+                        contentPadding = PaddingValues()
+                    ) { page ->
+                        RecordScreenLazyItems(
+                            modifier = Modifier.fillMaxSize()
+                        ) {
+
+                        }
                     }
-                    IconButton(modifier = Modifier, onClick = {
-                        if (currentIndex < totalItem - 1) {
-                            currentIndex++
+                    IconButton(modifier = Modifier.weight(1f), onClick = {
+                        coroutineScope.launch {
+                            if (culturePagerState.currentPage < culturePagerState.pageCount - 1) {
+                                culturePagerState.animateScrollToPage(culturePagerState.currentPage + 1)
+                            }
                         }
                     }) {
                         Icon(
