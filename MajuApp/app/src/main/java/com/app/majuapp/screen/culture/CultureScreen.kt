@@ -41,7 +41,9 @@ fun CultureScreen(
             LazyColumn(verticalArrangement = Arrangement.spacedBy(16.dp)) {
                 (cultureEventListNetworkResult.value.data as NetworkDto<List<CultureDomainModel>>?)?.let {
                     items(it.data ?: listOf()) { culture ->
-                        CultureCard(culture) { navController.navigate(Screen.CultureDetail.route) }
+                        CultureCard(culture) { id ->
+                            navController.navigate("${Screen.CultureDetail.route}/$id")
+                        }
                     }
                 }
             }

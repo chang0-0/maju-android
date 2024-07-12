@@ -14,6 +14,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.core.view.WindowCompat
 import androidx.navigation.compose.rememberNavController
 import com.app.majuapp.navigation.SetUpNavGraph
+import com.app.majuapp.screen.culture.CultureDetailViewModel
 import com.app.majuapp.screen.culture.CultureViewModel
 import com.app.majuapp.screen.login.LoginViewModel
 import com.app.majuapp.screen.login.SocialLoginViewModel
@@ -27,6 +28,7 @@ class MainActivity : ComponentActivity() {
     private val socialLoginViewModel: SocialLoginViewModel by viewModels()
     private val loginViewModel: LoginViewModel by viewModels()
     private val cultureViewModel: CultureViewModel by viewModels()
+    private val cultureDetailViewModel: CultureDetailViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -37,7 +39,7 @@ class MainActivity : ComponentActivity() {
                 StatusBarColorChange()
 
                 val navController = rememberNavController()
-                SetUpNavGraph(navController, socialLoginViewModel, loginViewModel, cultureViewModel)
+                SetUpNavGraph(navController, socialLoginViewModel, loginViewModel, cultureViewModel, cultureDetailViewModel)
             }
         }
     } // End of onCreate()

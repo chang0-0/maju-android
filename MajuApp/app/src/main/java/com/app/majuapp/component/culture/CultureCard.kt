@@ -41,12 +41,12 @@ fun CultureCard(
     culture: CultureDomainModel,
     favoriteButtonFlag: Boolean = true,
     modifier: Modifier = Modifier,
-    onClick: () -> Unit = {},
+    onClick: (Int) -> Unit = {},
 ) {
     Card(
         modifier = modifier
             .wrapContentHeight(align = Alignment.Top)
-            .clickable { onClick() }
+            .clickable { onClick(culture.id) }
             .fillMaxWidth()
             .border(
                 width = 3.dp,

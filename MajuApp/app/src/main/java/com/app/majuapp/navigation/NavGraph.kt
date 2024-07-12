@@ -15,11 +15,14 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.navArgument
 import com.app.majuapp.screen.MainScreen
 import com.app.majuapp.screen.culture.CultureDetailScreen
+import com.app.majuapp.screen.culture.CultureDetailViewModel
 import com.app.majuapp.screen.culture.CultureMapScreen
 import com.app.majuapp.screen.culture.CultureScreen
 import com.app.majuapp.screen.culture.CultureViewModel
@@ -40,7 +43,8 @@ fun SetUpNavGraph(
     navController: NavHostController,
     socialLoginViewModel: SocialLoginViewModel,
     loginViewModel: LoginViewModel,
-    cultureViewModel: CultureViewModel
+    cultureViewModel: CultureViewModel,
+    cultureDetailViewModel: CultureDetailViewModel
 ) {
     val screenList = listOf(
         Screen.CultureMap, Screen.Culture
@@ -166,9 +170,13 @@ fun SetUpNavGraph(
             }
 
             composable(
-                route = Screen.CultureDetail.route
+                route = "${Screen.CultureDetail.route}/{id}",
+                arguments = listOf(navArgument("id") {
+                    type = NavType.IntType
+                })
             ) {
-                CultureDetailScreen(navController = navController)
+                val cultureEventId = it.arguments?.getInt("id") ?: 0
+                CultureDetailScreen(navController = navController, cultureEventId, cultureDetailViewModel)
             }
 
             composable(
