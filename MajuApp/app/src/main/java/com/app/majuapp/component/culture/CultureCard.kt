@@ -33,18 +33,12 @@ import androidx.compose.ui.unit.sp
 import com.app.majuapp.component.NetworkImageCard
 import com.app.majuapp.component.SingleLineTextWithIconOnStart
 import com.app.majuapp.data.model.CultureModel
+import com.app.majuapp.domain.model.CultureDomainModel
 import com.app.majuapp.ui.theme.GoldenPoppy
 
 @Composable
 fun CultureCard(
-    culture: CultureModel = CultureModel(
-        0,
-        "뮤지컬/오페라",
-        "https://cdn.woman.chosun.com/news/photo/202309/112221_118277_4824.jpg",
-        "오페라 갈라",
-        "세종 대극장",
-        "2024-12-07"
-    ),
+    culture: CultureDomainModel,
     favoriteButtonFlag: Boolean = true,
     modifier: Modifier = Modifier,
     onClick: () -> Unit = {},
@@ -67,7 +61,7 @@ fun CultureCard(
             horizontalArrangement = Arrangement.SpaceEvenly
         ) {
             NetworkImageCard(
-                networkUrl = culture.sumnailUrl,
+                networkUrl = culture.thumbnail,
                 modifier = Modifier
                     .width(120.dp),
             )
@@ -96,14 +90,14 @@ fun CultureCard(
                 Text(
                     fontWeight = FontWeight.Bold,
                     fontSize = 20.sp,
-                    text = culture.title,
+                    text = culture.eventName,
                     textAlign = TextAlign.Center,
                     maxLines = 1
                 )
                 Spacer(modifier = Modifier.weight(1f))
 
                 SingleLineTextWithIconOnStart(
-                    textContent = culture.location,
+                    textContent = culture.place,
                     iconDescription = "location",
                     imageVector = Icons.Outlined.LocationOn,
                     iconTint = GoldenPoppy,
@@ -111,7 +105,7 @@ fun CultureCard(
                     intervalSize = 4.dp
                 )
                 SingleLineTextWithIconOnStart(
-                    textContent = culture.time,
+                    textContent = culture.startDate,
                     iconDescription = "time",
                     imageVector = Icons.Outlined.AccessTime,
                     iconTint = GoldenPoppy,
@@ -127,5 +121,5 @@ fun CultureCard(
 @Preview
 @Composable
 fun PreviewCultureCard() {
-    CultureCard()
+//    CultureCard()
 } // End of PreviewCultureCard

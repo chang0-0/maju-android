@@ -167,16 +167,16 @@ fun CultureMapScreen(
                     .padding(start = cultureDefaultPadding, end = cultureDefaultPadding)
                     .offset(y = cultureDefaultPadding),
             )
-
-            CultureCard(
-                dummyList[0],
-                false,
-                modifier = Modifier
-                    .wrapContentSize()
-                    .align(Alignment.BottomCenter)
-                    .padding(start = cultureDefaultPadding, end = cultureDefaultPadding)
-                    .offset(y = -cultureDefaultPadding),
-            )
+//
+//            CultureCard(
+//                dummyList[0],
+//                false,
+//                modifier = Modifier
+//                    .wrapContentSize()
+//                    .align(Alignment.BottomCenter)
+//                    .padding(start = cultureDefaultPadding, end = cultureDefaultPadding)
+//                    .offset(y = -cultureDefaultPadding),
+//            )
         }
     }
 

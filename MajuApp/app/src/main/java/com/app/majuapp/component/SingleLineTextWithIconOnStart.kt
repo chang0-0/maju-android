@@ -38,6 +38,7 @@ fun SingleLineTextWithIconOnStart(
             fontWeight = FontWeight.Medium,
             fontSize = size.sp,
             text = textContent,
+            maxLines = 1
         )
     }
 } // End of SingleLineTextWithIconOnStart
