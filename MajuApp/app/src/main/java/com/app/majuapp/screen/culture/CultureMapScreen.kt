@@ -20,12 +20,11 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.app.majuapp.R
 import com.app.majuapp.component.MapMarker
-import com.app.majuapp.component.RowChoiceChips
 import com.app.majuapp.component.culture.CultureCard
+import com.app.majuapp.component.culture.CultureRowChoiceChips
 import com.app.majuapp.data.dto.NetworkDto
 import com.app.majuapp.domain.model.CultureDomainModel
 import com.app.majuapp.ui.theme.cultureDefaultPadding
-import com.app.majuapp.util.Constants.CATEGORIES
 import com.app.majuapp.util.NetworkResult
 import com.app.majuapp.util.checkAndRequestPermissions
 import com.app.majuapp.util.dummyList
@@ -43,7 +42,7 @@ fun CultureMapScreen(
 
     val context = LocalContext.current
     val currentLocation = cultureViewModel.currentLocation.collectAsStateWithLifecycle()
-    val cultureEventsNetworkResult = cultureViewModel.cultureEventList.collectAsStateWithLifecycle()
+    val cultureEventListNetworkResult = cultureViewModel.cultureEventList.collectAsStateWithLifecycle()
 
     /** 요청할 권한 **/
     val permissions = arrayOf(
@@ -96,8 +95,8 @@ fun CultureMapScreen(
         cultureViewModel.getAllCultureEvents()
     }
 
-    LaunchedEffect(key1 = cultureEventsNetworkResult.value) {
-        cultureEventsNetworkResult.value.let {
+    LaunchedEffect(key1 = cultureEventListNetworkResult.value) {
+        cultureEventListNetworkResult.value.let {
             when (it) {
                 is NetworkResult.Error -> {
                     Log.e("culture Api", it.msg ?: "에러")
@@ -140,7 +139,7 @@ fun CultureMapScreen(
                     zoomControlsEnabled = false
                 )
             ) {
-                (cultureEventsNetworkResult.value.data as NetworkDto<List<CultureDomainModel>>?)?.let {
+                (cultureEventListNetworkResult.value.data as NetworkDto<List<CultureDomainModel>>?)?.let {
                     for (cultureEvent in it.data ?: listOf()) {
                         MapMarker(
                             position = LatLng(
@@ -161,8 +160,8 @@ fun CultureMapScreen(
                 }
             }
 
-            RowChoiceChips(
-                CATEGORIES,
+            CultureRowChoiceChips(
+                cultureViewModel,
                 Modifier
                     .align(Alignment.TopStart)
                     .padding(start = cultureDefaultPadding, end = cultureDefaultPadding)
@@ -179,8 +178,6 @@ fun CultureMapScreen(
                     .offset(y = -cultureDefaultPadding),
             )
         }
-
-
     }
 
 } // End of CultureMapScreen

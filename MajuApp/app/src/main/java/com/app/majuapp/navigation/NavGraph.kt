@@ -162,7 +162,7 @@ fun SetUpNavGraph(
             composable(
                 route = Screen.Culture.route
             ) {
-                CultureScreen(navController = navController)
+                CultureScreen(navController = navController, cultureViewModel = cultureViewModel)
             }
 
             composable(

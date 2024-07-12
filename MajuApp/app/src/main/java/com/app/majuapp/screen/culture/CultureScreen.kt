@@ -15,12 +15,16 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.app.majuapp.component.RowChoiceChips
 import com.app.majuapp.component.culture.CultureCard
+import com.app.majuapp.component.culture.CultureRowChoiceChips
 import com.app.majuapp.navigation.Screen
-import com.app.majuapp.util.Constants.CATEGORIES
+import com.app.majuapp.util.Constants.GENRES
 import com.app.majuapp.util.dummyList
 
 @Composable
-fun CultureScreen(navController: NavHostController) {
+fun CultureScreen(
+    navController: NavHostController,
+    cultureViewModel: CultureViewModel
+) {
 
     Surface(
         modifier = Modifier
@@ -30,8 +34,7 @@ fun CultureScreen(navController: NavHostController) {
         //TODO Replace real Data
 
         Column {
-            RowChoiceChips(CATEGORIES)
-
+            CultureRowChoiceChips(cultureViewModel = cultureViewModel, modifier = Modifier)
             LazyColumn(verticalArrangement = Arrangement.spacedBy(16.dp)) {
                 items(dummyList) { culture ->
                     CultureCard(culture) { navController.navigate(Screen.CultureDetail.route) }
@@ -48,5 +51,5 @@ fun CultureScreen(navController: NavHostController) {
 @Preview
 @Composable
 fun PreviewCultureScreen() {
-    CultureScreen(navController = rememberNavController())
+//    CultureScreen(navController = rememberNavController(), CultureViewModel())
 }
