@@ -1,6 +1,7 @@
 package com.app.majuapp.component.walk
 
 import android.content.Context
+import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
@@ -19,6 +20,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -40,6 +43,7 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.app.majuapp.R
 import com.app.majuapp.component.fillMaxWidthSpacer
+import com.app.majuapp.domain.model.walk.WalkingTrailResultData
 import com.app.majuapp.ui.theme.BrightGray
 import com.app.majuapp.ui.theme.GoldenPoppy
 import com.app.majuapp.ui.theme.MajuAppTheme
@@ -62,11 +66,15 @@ import com.google.maps.android.compose.MapType
 import com.google.maps.android.compose.MapUiSettings
 import com.google.maps.android.compose.rememberCameraPositionState
 
+
+private const val TAG = "WalkComponents_창영"
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun WalkScreenChooseStartDialog(
     title: String,
     content: String,
+    walkingTrailData: WalkingTrailResultData,
     onClickDismiss: () -> Unit,
     onClickConfirm: () -> Unit,
 ) {/*
@@ -91,6 +99,13 @@ fun WalkScreenChooseStartDialog(
     val properties by remember {
         mutableStateOf(MapProperties(mapType = MapType.NORMAL))
     }
+
+    val walkingPagerState = rememberPagerState(pageCount = {
+        walkingTrailData.data.size
+    })
+
+    Log.d(TAG, "WalkScreenChooseStartDialog -> walkingTrailData : ${walkingTrailData} ")
+
 
     AnimatedVisibility(
         visible = graphicVisible.value, enter = expandVertically(
@@ -165,12 +180,17 @@ fun WalkScreenChooseStartDialog(
                                     ),
                                 contentAlignment = Alignment.BottomCenter,
                             ) {
-                                GoogleMap(
+                                HorizontalPager(
                                     modifier = Modifier.fillMaxSize(),
-                                    cameraPositionState = cameraPositionState,
-                                    properties = properties,
-                                    uiSettings = uiSettings.copy(zoomControlsEnabled = false)
-                                )
+                                    state = walkingPagerState
+                                ) { page ->
+                                    GoogleMap(
+                                        modifier = Modifier.fillMaxSize(),
+                                        cameraPositionState = cameraPositionState,
+                                        properties = properties,
+                                        uiSettings = uiSettings.copy(zoomControlsEnabled = false)
+                                    )
+                                }
                             }
                         }
                     }
@@ -397,11 +417,3 @@ fun WalkComponentButton(
         Text(buttonText, fontSize = 14.sp, fontWeight = FontWeight.Bold)
     }
 } // End of WalkComponentButton()
-
-@Preview
-@Composable
-private fun WalkScreenChooseStartDialogPreveiw() {
-    MajuAppTheme {
-        WalkScreenChooseStartDialog("출발지 선택", "지도 위에 현재 위치\n 선택해주세요!", {}, {})
-    }
-} // End of WalkScreenChooseStartDialogPreview()

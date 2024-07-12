@@ -1,8 +1,10 @@
 package com.app.majuapp.di
 
+import com.app.majuapp.Application
 import com.app.majuapp.BuildConfig
 import com.app.majuapp.domain.api.LoginApi
 import com.app.majuapp.domain.api.TestApi
+import com.app.majuapp.domain.api.WalkApi
 import com.app.majuapp.util.Constants
 import dagger.Module
 import dagger.Provides
@@ -25,13 +27,13 @@ private const val TAG = "AppModule_창영"
 @Module
 @InstallIn(SingletonComponent::class)
 object AppModule {
+    val sharedPreferencesUtil = Application.sharedPreferencesUtil
 
     class AppInterceptor @Inject constructor() : Interceptor {
         override fun intercept(chain: Interceptor.Chain): Response = with(chain) {
             val newRequest = request().newBuilder()
-                // 여기서 토큰이나 API Key넣으면 됨
-                .addHeader("Content-Type", "application/json")
-//                .addHeader("Authorization", "Client-ID ")
+                //.addHeader("Content-Type", "application/json")
+                .addHeader("Authorization", sharedPreferencesUtil.getUserAccessToken())
                 .build()
             proceed(newRequest)
         }
@@ -79,5 +81,11 @@ object AppModule {
     fun providesLoginApi(retrofit: Retrofit): LoginApi {
         return retrofit.create(LoginApi::class.java)
     }
+
+    @Provides
+    @Singleton
+    fun providesWalkApi(retrofit: Retrofit): WalkApi {
+        return retrofit.create(WalkApi::class.java)
+    } // End of providesWalkApi()
 
 } // End of AppModule class

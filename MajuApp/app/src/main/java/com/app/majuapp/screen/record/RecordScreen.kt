@@ -84,11 +84,7 @@ fun RecordScreenContent(
     val modifier = Modifier
 
     // Snackbar State
-    val rememberSnackbarState = remember { SnackbarHostState() }
     val coroutineScope = rememberCoroutineScope()
-
-    var currentIndex by remember { mutableIntStateOf(0) }
-    val totalItem = recordingData.cultureLifeRecord.size
 
     val culturePagerState = rememberPagerState(pageCount = {
         recordingData.cultureLifeRecord.size

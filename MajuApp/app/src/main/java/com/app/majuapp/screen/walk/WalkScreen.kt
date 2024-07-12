@@ -42,6 +42,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.app.majuapp.R
+import com.app.majuapp.component.Loader
 import com.app.majuapp.component.walk.WalkRecordingBox
 import com.app.majuapp.component.walk.WalkScreenChooseStartDialog
 import com.app.majuapp.component.walk.WalkScreenInformDialogue
@@ -101,6 +102,19 @@ private fun WalkScreenContent(
     }
 
 
+    /* 최초 산책경로 가져오기 */
+//    val isLoading by walkViewModel.isLoading
+//    val error by walkViewModel.error
+//    val data = walkViewModel.data
+
+    LaunchedEffect(Unit) {
+        // walkViewModel.result.collectAsState(initial = RequestState.Idle)
+    }
+
+    val data =
+        walkViewModel.result.collectAsState(initial = RequestState.Idle) // StateFlow의 상태변경 감지
+
+
     Surface(modifier = Modifier.fillMaxSize().background(White)) {
         BottomSheetScaffold(scaffoldState = scaffoldState,
             sheetShadowElevation = 20.dp,
@@ -113,9 +127,21 @@ private fun WalkScreenContent(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Center
                 ) {
+
+                    if (data.value.isLoading()) {
+                        Loader()
+                    } else if (data.value.isSuccess()) {
+                        Text(text = data.value.getSuccessData()!!.data.toString())
+                    } else if (data.value.isError()) {
+                        Text(text = data.value.getErrorMessage())
+                    }
+
                     IconButton(modifier = Modifier.rotate(rotationState).animateContentSize(
                         tween(durationMillis = 100, easing = FastOutLinearInEasing)
                     ), onClick = {
+
+                        // walkViewModel.test()
+
                         bottomSheetStateOrdinal =
                             scaffoldState.bottomSheetState.currentValue.ordinal
                         bottomSheetScope.launch {
@@ -130,7 +156,6 @@ private fun WalkScreenContent(
                             }
                         }
                     }) {
-
                         Icon(
                             painter = painterResource(R.drawable.ic_bottom_sheet_open),
                             contentDescription = null
@@ -212,22 +237,28 @@ private fun WalkScreenContent(
             주변 산책로 없음, 홈으로 돌아가기로 보인다.
          */
 
-        WalkScreenChooseStartDialog(context.getString(R.string.walk_screen_dialog_choose_promenade_title),
-            context.getString(R.string.walk_screen_dialog_choose_promenade_content),
-            onClickDismiss = {
-                showChooseStartDialog = false
-                navController.popBackStack()
-            },
-            onClickConfirm = {
-                showChooseStartDialog = false
-            })
+        if (data.value.isLoading()) {
+            Loader()
+        } else if (data.value.isSuccess()) {
+            WalkScreenChooseStartDialog(context.getString(R.string.walk_screen_dialog_choose_promenade_title),
+                context.getString(R.string.walk_screen_dialog_choose_promenade_content),
+                data.value.getSuccessData()!!,
+                onClickDismiss = {
+                    showChooseStartDialog = false
+                    navController.popBackStack()
+                },
+                onClickConfirm = {
+                    showChooseStartDialog = false
+                })
+        } else if (data.value.isError()) {
+            Text(text = data.value.getErrorMessage())
+        }
     }
 
     val showState = walkViewModel.showInfromDialog.collectAsState()
     when (showState.value) {
         true -> {
-            WalkScreenInformDialogue(
-                context.getString(R.string.walk_screen_inform_dialog_title),
+            WalkScreenInformDialogue(context.getString(R.string.walk_screen_inform_dialog_title),
                 context.getString(R.string.walk_screen_inform_dialog_content),
                 leftButtonText = context.getString(R.string.walk_screen_inform_dialog_close_button_content),
                 rightButtonText = context.getString(R.string.walk_screen_inform_dialog_continue_button_content),
