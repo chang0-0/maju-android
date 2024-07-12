@@ -12,10 +12,10 @@ interface CultureApi {
     @GET("culture-events/list")
     suspend fun getAllCultureEvents(): Response<NetworkDto<List<CultureDomainModel>>>
 
-    @GET("/culture-events/list/{genre}")
+    @GET("culture-events/list/{genre}")
     suspend fun getGenreCultureEvents(@Path("genre") genre: String): Response<NetworkDto<List<CultureDomainModel>>>
 
-    @GET("/culture-events/detail/{eventId}")
+    @GET("culture-events/detail/{eventId}")
     suspend fun getCultureEventsDetail(@Path("eventId") eventId: Int): Response<NetworkDto<CultureDetailDomainModel>>
 
 } // End of CultureApi
