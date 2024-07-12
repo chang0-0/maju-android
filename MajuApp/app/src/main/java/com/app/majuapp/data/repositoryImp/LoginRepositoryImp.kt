@@ -13,7 +13,7 @@ import javax.inject.Inject
 
 val TAG = "login_repo_imp"
 
-class LoginRepositoryImp @Inject constructor(private val loginApi: LoginApi) : LoginRepository {
+class LoginRepositoryImp @Inject constructor(private val loginApi: LoginApi) : LoginRepository { // End of LoginRepositoryImp Class
 
     private val _loginResult = MutableStateFlow<NetworkResult<LoginDto>>(NetworkResult.Idle())
     override val loginResult: StateFlow<NetworkResult<LoginDto>> = _loginResult
@@ -63,4 +63,12 @@ class LoginRepositoryImp @Inject constructor(private val loginApi: LoginApi) : L
 
     }
 
-} // End of LoginRepositoryImp Class
+    override suspend fun logout() {
+//        TODO("Not yet implemented")
+    }
+
+    override suspend fun idle() {
+        _loginResult.emit(NetworkResult.Idle())
+    }
+
+}

@@ -1,6 +1,5 @@
-package com.app.majuapp.component
+package com.app.majuapp.component.culture
 
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.RoundedCornerShape

@@ -10,5 +10,6 @@ interface LoginRepository {
 
     val loginResult: StateFlow<NetworkResult<LoginDto>>
     suspend fun login(oauthToken: String, fcmToken: String)
-
+    suspend fun logout()
+    suspend fun idle()
 }

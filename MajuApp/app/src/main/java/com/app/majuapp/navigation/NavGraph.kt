@@ -137,7 +137,7 @@ fun SetUpNavGraph(
 //        SharedTransitionLayout {
         NavHost(
             navController = navController,
-            startDestination = Screen.Login.route,
+            startDestination = Screen.Home.route,
             modifier = Modifier.padding(paddingValues)
         ) {
 

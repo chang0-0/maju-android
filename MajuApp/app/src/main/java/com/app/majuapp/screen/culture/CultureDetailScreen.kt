@@ -27,8 +27,8 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.app.majuapp.R
-import com.app.majuapp.component.CultureDetailButton
-import com.app.majuapp.component.CultureDetailCategoryChip
+import com.app.majuapp.component.culture.CultureDetailButton
+import com.app.majuapp.component.culture.CultureDetailCategoryChip
 import com.app.majuapp.component.MultiLineTextWithIconOnStart
 import com.app.majuapp.component.NetworkImageCard
 import com.app.majuapp.component.SingleLineTextWithIconOnStart
