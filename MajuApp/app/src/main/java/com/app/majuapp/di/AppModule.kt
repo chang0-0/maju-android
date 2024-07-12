@@ -1,6 +1,7 @@
 package com.app.majuapp.di
 
 import com.app.majuapp.BuildConfig
+import com.app.majuapp.domain.api.CultureApi
 import com.app.majuapp.domain.api.LoginApi
 import com.app.majuapp.domain.api.TestApi
 import com.app.majuapp.util.Constants
@@ -78,6 +79,12 @@ object AppModule {
     @Singleton
     fun providesLoginApi(retrofit: Retrofit): LoginApi {
         return retrofit.create(LoginApi::class.java)
-    }
+    } // End of providesLoginApi
+
+    @Provides
+    @Singleton
+    fun providesCultureApi(retrofit: Retrofit): CultureApi {
+        return retrofit.create(CultureApi::class.java)
+    } // End of providesCultureApi
 
 } // End of AppModule class

@@ -4,7 +4,7 @@ import android.os.Parcelable
 import kotlinx.android.parcel.Parcelize
 
 @Parcelize
-data class LoginDataModel(
+data class LoginDomainModel(
     val accessToken: String,
     val isExist: Boolean,
     val isLeft: Boolean,

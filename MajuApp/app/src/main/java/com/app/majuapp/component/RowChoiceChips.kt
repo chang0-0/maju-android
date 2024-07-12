@@ -20,7 +20,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.app.majuapp.ui.theme.GoldenPoppy
 import com.app.majuapp.ui.theme.OldSilver
-import com.app.majuapp.util.dummyCultureCategories
+import com.app.majuapp.util.Constants.CATEGORIES
 
 @Composable
 fun RowChoiceChips(
@@ -69,5 +69,5 @@ fun RowChoiceChips(
 @Preview
 @Composable
 fun PreviewChoiceChips() {
-    RowChoiceChips(dummyCultureCategories)
+    RowChoiceChips(CATEGORIES)
 }

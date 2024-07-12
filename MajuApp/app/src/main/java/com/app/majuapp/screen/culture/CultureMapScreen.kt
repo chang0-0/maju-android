@@ -19,15 +19,19 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.app.majuapp.R
-import com.app.majuapp.component.culture.CultureCard
 import com.app.majuapp.component.MapMarker
 import com.app.majuapp.component.RowChoiceChips
+import com.app.majuapp.component.culture.CultureCard
+import com.app.majuapp.data.dto.NetworkDto
+import com.app.majuapp.domain.model.CultureDomainModel
 import com.app.majuapp.ui.theme.cultureDefaultPadding
+import com.app.majuapp.util.Constants.CATEGORIES
+import com.app.majuapp.util.NetworkResult
 import com.app.majuapp.util.checkAndRequestPermissions
-import com.app.majuapp.util.dummyCultureCategories
 import com.app.majuapp.util.dummyList
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
+import com.google.maps.android.compose.DefaultMapUiSettings
 import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.rememberCameraPositionState
 
@@ -39,6 +43,7 @@ fun CultureMapScreen(
 
     val context = LocalContext.current
     val currentLocation = cultureViewModel.currentLocation.collectAsStateWithLifecycle()
+    val cultureEventsNetworkResult = cultureViewModel.cultureEventList.collectAsStateWithLifecycle()
 
     /** 요청할 권한 **/
     val permissions = arrayOf(
@@ -78,20 +83,50 @@ fun CultureMapScreen(
     }
 
     LaunchedEffect(key1 = currentLocation.value) {
-        Log.d("currentPosition", "${currentLocation.value?.latitude}, ${currentLocation.value?.longitude}")
+        Log.d(
+            "currentPosition",
+            "${currentLocation.value?.latitude}, ${currentLocation.value?.longitude}"
+        )
         currentLocation.value?.let { location ->
             cameraPositionState.position =
                 CameraPosition.fromLatLngZoom(
                     LatLng(location.latitude, location.longitude), 15f
                 )
         }
+        cultureViewModel.getAllCultureEvents()
     }
+
+    LaunchedEffect(key1 = cultureEventsNetworkResult.value) {
+        cultureEventsNetworkResult.value.let {
+            when (it) {
+                is NetworkResult.Error -> {
+                    Log.e("culture Api", it.msg ?: "에러")
+                }
+
+                is NetworkResult.Idle -> {
+                    Log.d("culture Api", "IDLE")
+                }
+
+                is NetworkResult.Loading -> {
+                    Log.d("culture Api", "LOADING")
+                }
+
+                is NetworkResult.Success -> {
+                    if (it.value.status == 200) {
+//                        cultureEvents = it.value.data ?: listOf()
+                    } else {
+                        Log.e("culture Api", "culture events api call failed.")
+                    }
+                }
+            }
+        }
+    }
+
     Surface(
         modifier = Modifier
             .fillMaxSize()
 //            .padding(top = 40.dp, start = 24.dp, end = 24.dp)
     ) {
-
         Box(
             modifier = Modifier
                 .fillMaxSize(),
@@ -100,17 +135,34 @@ fun CultureMapScreen(
                 modifier = Modifier
                     .fillMaxSize(),
                 cameraPositionState = cameraPositionState,
-            ) {
-                MapMarker(
-                    position = latLng,
-                    title = "",
-                    snippet = "Marker",
-                    iconResourceId = R.drawable.ic_pin_music
+                uiSettings = DefaultMapUiSettings.copy(
+                    compassEnabled = false,
+                    zoomControlsEnabled = false
                 )
+            ) {
+                (cultureEventsNetworkResult.value.data as NetworkDto<List<CultureDomainModel>>?)?.let {
+                    for (cultureEvent in it.data ?: listOf()) {
+                        MapMarker(
+                            position = LatLng(
+                                cultureEvent.lat,
+                                cultureEvent.lon
+                            ),
+                            title = cultureEvent.eventName,
+                            snippet = "Marker",
+                            iconResourceId = when (cultureEvent.genre) {
+                                "음악" -> R.drawable.ic_pin_music
+                                "전시" -> R.drawable.ic_pin_exhibition
+                                "연극" -> R.drawable.ic_pin_theater
+                                "체험" -> R.drawable.ic_pin_experience
+                                else -> R.drawable.ic_pin_experience
+                            }
+                        )
+                    }
+                }
             }
 
             RowChoiceChips(
-                dummyCultureCategories,
+                CATEGORIES,
                 Modifier
                     .align(Alignment.TopStart)
                     .padding(start = cultureDefaultPadding, end = cultureDefaultPadding)

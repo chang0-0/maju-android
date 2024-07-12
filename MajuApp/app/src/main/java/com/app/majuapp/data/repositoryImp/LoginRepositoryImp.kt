@@ -6,9 +6,11 @@ import com.app.majuapp.domain.api.LoginApi
 import com.app.majuapp.domain.repository.LoginRepository
 import com.app.majuapp.util.NetworkResult
 import com.google.gson.JsonObject
-import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 val TAG = "login_repo_imp"
@@ -20,14 +22,14 @@ class LoginRepositoryImp @Inject constructor(private val loginApi: LoginApi) : L
 
     override suspend fun login(oauthToken: String, fcmToken: String) {
         _loginResult.emit(NetworkResult.Loading())
-        coroutineScope {
+        val response = loginApi.login(
+            JsonObject().apply {
+                addProperty("accessToken", oauthToken)
+                addProperty("fcmToken", fcmToken)
+            }
+        )
+        CoroutineScope(Dispatchers.IO).launch {
             try {
-                val response = loginApi.login(
-                    JsonObject().apply {
-                        addProperty("accessToken", oauthToken)
-                        addProperty("fcmToken", fcmToken)
-                    }
-                )
                 when {
                     response.isSuccessful -> {
                         _loginResult.emit(
@@ -71,4 +73,4 @@ class LoginRepositoryImp @Inject constructor(private val loginApi: LoginApi) : L
         _loginResult.emit(NetworkResult.Idle())
     }
 
-}
+} // End of LoginRepositoryImp
