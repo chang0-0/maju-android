@@ -45,9 +45,9 @@ fun LoginScreen(
             when (it) {
                 is NetworkResult.Success<LoginDto> -> {
                     Log.d(
-                        TAG,
-                        "서버 통신 로그인 성공"
+                        TAG, "서버 통신 로그인 성공"
                     )
+
                     it.value.data?.let { loginDto ->
                         Application.sharedPreferencesUtil.apply {
                             addUserAccessToken(loginDto.accessToken)
@@ -70,12 +70,10 @@ fun LoginScreen(
                 }
             }
         }
-
     }
 
     Surface(
-        modifier = Modifier
-            .fillMaxSize()
+        modifier = Modifier.fillMaxSize()
             .padding(top = 40.dp, start = 24.dp, end = 24.dp, bottom = 40.dp)
     ) {
         Box {
@@ -89,8 +87,7 @@ fun LoginScreen(
                 Image(
                     painter = painterResource(id = R.drawable.ic_splash_logo),
                     contentDescription = "로고 이미지",
-                    modifier = Modifier
-                        .size(288.dp),
+                    modifier = Modifier.size(288.dp),
                     contentScale = ContentScale.FillWidth
                 )
                 Column(
@@ -104,10 +101,7 @@ fun LoginScreen(
                     }
                     Spacer(modifier = Modifier.weight(1f))
                     KakaoLoginButton(
-                        modifier = Modifier
-                            .fillMaxWidth(),
-                        socialLoginViewModel,
-                        loginViewModel
+                        modifier = Modifier.fillMaxWidth(), socialLoginViewModel, loginViewModel
                     )
                 }
             }

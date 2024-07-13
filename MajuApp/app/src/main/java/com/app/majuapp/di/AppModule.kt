@@ -33,7 +33,7 @@ object AppModule {
         override fun intercept(chain: Interceptor.Chain): Response = with(chain) {
             val newRequest = request().newBuilder()
                 //.addHeader("Content-Type", "application/json")
-                .addHeader("Authorization", sharedPreferencesUtil.getUserAccessToken())
+                // .addHeader("Authorization", sharedPreferencesUtil.getUserAccessToken())
                 .build()
             proceed(newRequest)
         }

@@ -9,7 +9,7 @@ data class WalkTrailData(
     val name: String,
     val level: String,
     val startLat: Double,
-    val StartLon: Double,
+    val startLon: Double,
     val endLat: Double,
-    val EndLon: Double,
+    val endLon: Double,
 ) : Parcelable

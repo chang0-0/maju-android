@@ -1,7 +1,6 @@
 package com.app.majuapp.component.walk
 
 import android.content.Context
-import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
@@ -36,17 +35,18 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.app.majuapp.R
 import com.app.majuapp.component.fillMaxWidthSpacer
+import com.app.majuapp.domain.model.walk.CoordinateData
 import com.app.majuapp.domain.model.walk.WalkingTrailResultData
+import com.app.majuapp.screen.walk.WalkViewModel
 import com.app.majuapp.ui.theme.BrightGray
 import com.app.majuapp.ui.theme.GoldenPoppy
-import com.app.majuapp.ui.theme.MajuAppTheme
 import com.app.majuapp.ui.theme.OuterSpace
 import com.app.majuapp.ui.theme.SilverSand
 import com.app.majuapp.ui.theme.SonicSilver
@@ -56,14 +56,14 @@ import com.app.majuapp.ui.theme.defaultPadding
 import com.app.majuapp.ui.theme.dialogButtonRoundedCorner
 import com.app.majuapp.ui.theme.dialogCornerPadding
 import com.app.majuapp.ui.theme.dialogDefaultPadding
+import com.app.majuapp.ui.theme.notoSansKoreanFontFamily
 import com.app.majuapp.ui.theme.roundedCornerPadding
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.compose.CameraPositionState
 import com.google.maps.android.compose.GoogleMap
-import com.google.maps.android.compose.MapProperties
-import com.google.maps.android.compose.MapType
-import com.google.maps.android.compose.MapUiSettings
+import com.google.maps.android.compose.Marker
+import com.google.maps.android.compose.MarkerState
 import com.google.maps.android.compose.rememberCameraPositionState
 
 
@@ -75,8 +75,9 @@ fun WalkScreenChooseStartDialog(
     title: String,
     content: String,
     walkingTrailData: WalkingTrailResultData,
-    onClickDismiss: () -> Unit,
     onClickConfirm: () -> Unit,
+    onClickDismiss: () -> Unit,
+    walkViewModel: WalkViewModel = hiltViewModel()
 ) {/*
         산책 기능 다이얼로그 화면
      */
@@ -91,21 +92,9 @@ fun WalkScreenChooseStartDialog(
     LaunchedEffect(Unit) { animateIn.value = true }
 
     /* GoogleMap */
-    val seoul = LatLng(37.5744, 126.9771)
-    val cameraPositionState: CameraPositionState = rememberCameraPositionState {
-        position = CameraPosition.fromLatLngZoom(seoul, 16f)
-    }
-    var uiSettings by remember { mutableStateOf(MapUiSettings()) }
-    val properties by remember {
-        mutableStateOf(MapProperties(mapType = MapType.NORMAL))
-    }
-
     val walkingPagerState = rememberPagerState(pageCount = {
         walkingTrailData.data.size
     })
-
-    Log.d(TAG, "WalkScreenChooseStartDialog -> walkingTrailData : ${walkingTrailData} ")
-
 
     AnimatedVisibility(
         visible = graphicVisible.value, enter = expandVertically(
@@ -157,43 +146,69 @@ fun WalkScreenChooseStartDialog(
                     Box(
                         modifier = Modifier.clip(RoundedCornerShape(roundedCornerPadding))
                             .fillMaxWidth().height(260.dp).border(
-                                2.dp, BrightGray, shape = RoundedCornerShape(roundedCornerPadding)
+                                2.dp,
+                                BrightGray,
+                                shape = RoundedCornerShape(roundedCornerPadding)
                             ).padding(defaultPadding), contentAlignment = Alignment.BottomCenter
                     ) {
-                        Column(
-                            modifier = Modifier.fillMaxWidth().fillMaxHeight(),
-                            verticalArrangement = Arrangement.Center,
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
+                        if (walkingTrailData.data.isNullOrEmpty()) {
                             Text(
-                                text = "보라매공원 산책로",
-                                fontSize = 16.sp,
+                                "주변 산책로가\n존재하지 않습니다.",
+                                fontSize = 14.sp,
                                 fontWeight = FontWeight.Bold,
-                                color = Color.Black,
-                                textAlign = TextAlign.Center
+                                fontFamily = notoSansKoreanFontFamily
                             )
-                            Spacer(modifier = Modifier.fillMaxWidth().height(18.dp))
-                            Box(
-                                modifier = Modifier.clip(RoundedCornerShape(roundedCornerPadding))
-                                    .fillMaxWidth().height(200.dp).background(
-                                        OuterSpace, shape = RoundedCornerShape(roundedCornerPadding)
-                                    ),
-                                contentAlignment = Alignment.BottomCenter,
-                            ) {
-                                HorizontalPager(
-                                    modifier = Modifier.fillMaxSize(),
-                                    state = walkingPagerState
-                                ) { page ->
-                                    GoogleMap(
-                                        modifier = Modifier.fillMaxSize(),
-                                        cameraPositionState = cameraPositionState,
-                                        properties = properties,
-                                        uiSettings = uiSettings.copy(zoomControlsEnabled = false)
+                        } else {
+                            HorizontalPager(
+                                state = walkingPagerState
+                            ) { page ->
+                                val coordinates = walkingTrailData.data[page]
+                                // val coordinates = mapViewModel.getCoordinatesForPage(page)
+                                val cameraPositionState = rememberCameraPositionState {
+                                    position = CameraPosition.fromLatLngZoom(
+                                        LatLng(coordinates.startLat, coordinates.startLon), 16f
                                     )
+                                }
+
+                                Column(
+                                    modifier = Modifier.fillMaxWidth().fillMaxHeight(),
+                                    verticalArrangement = Arrangement.Center,
+                                    horizontalAlignment = Alignment.CenterHorizontally
+                                ) {
+                                    Text(
+                                        text = walkingTrailData.data[page].name,
+                                        fontSize = 16.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        color = Color.Black,
+                                        textAlign = TextAlign.Center
+                                    )
+                                    Spacer(modifier = Modifier.fillMaxWidth().height(18.dp))
+                                    Box(
+                                        modifier = Modifier.clip(
+                                            RoundedCornerShape(
+                                                roundedCornerPadding
+                                            )
+                                        )
+                                            .fillMaxWidth().height(200.dp).background(
+                                                OuterSpace,
+                                                shape = RoundedCornerShape(roundedCornerPadding)
+                                            ),
+                                        contentAlignment = Alignment.BottomCenter,
+                                    ) {
+
+
+                                        MapScreen(
+                                            cameraPositionState,
+                                            LatLng(coordinates.startLat, coordinates.startLon),
+                                            LatLng(coordinates.endLat, coordinates.endLon)
+                                        )
+                                    }
+
                                 }
                             }
                         }
                     }
+
                     Spacer(modifier = Modifier.height(18.dp))
                     Row(
                         modifier = Modifier.padding(start = defaultPadding, end = defaultPadding),
@@ -202,7 +217,17 @@ fun WalkScreenChooseStartDialog(
                         WalkComponentButton(
                             buttonText = context.getString(R.string.walk_screen_dialog_start_dialog_start_button_content),
                             GoldenPoppy,
-                            onClickConfirm,
+                            onClickConfirm = {
+                                onClickConfirm()
+
+                                val coordinates =
+                                    walkingTrailData.data[walkingPagerState.currentPage]
+                                walkViewModel.setCurrentCoordinate(
+                                    CoordinateData(
+                                        coordinates.startLon, coordinates.startLon
+                                    )
+                                )
+                            },
                             Modifier.weight(1f)
                         )
                     }
@@ -217,6 +242,30 @@ fun WalkScreenChooseStartDialog(
         }
     }
 } // End of WalkScreenChooseStartDialogue()
+
+@Composable
+fun MapScreen(
+    cameraPositionState: CameraPositionState,
+    startLocation: LatLng,
+    endLocation: LatLng,
+) {
+    GoogleMap(
+        modifier = Modifier.fillMaxSize(),
+        cameraPositionState = cameraPositionState,
+    ) {
+        Marker(
+            state = MarkerState(
+                position = startLocation
+            )
+        )
+        Marker(
+            state = MarkerState(
+                position = endLocation
+            )
+        )
+    }
+} // End of MapScreen()
+
 
 @Composable
 fun WalkScreenInformDialogue(
@@ -414,6 +463,11 @@ fun WalkComponentButton(
             containerColor = buttonColor,
         ),
         onClick = { onClickConfirm() }) {
-        Text(buttonText, fontSize = 14.sp, fontWeight = FontWeight.Bold)
+        Text(
+            buttonText,
+            fontSize = 14.sp,
+            fontWeight = FontWeight.Bold,
+            fontFamily = notoSansKoreanFontFamily
+        )
     }
 } // End of WalkComponentButton()

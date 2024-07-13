@@ -1,6 +1,7 @@
 package com.app.majuapp.screen.walk
 
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -21,6 +22,23 @@ class WalkViewModel @Inject constructor(
     private val walkRepository: WalkRepository
 ) : ViewModel() {
 
+    // ====================================== Permission ======================================
+    val visiblePermissionDialogQueue = mutableStateListOf<String>()
+
+    fun dismissDialog() {
+        visiblePermissionDialogQueue.removeFirst()
+    }
+
+    fun onPermissionResult(
+        permission: String,
+        isGranted: Boolean
+    ) {
+        if (!isGranted && !visiblePermissionDialogQueue.contains(permission)) {
+            visiblePermissionDialogQueue.add(permission)
+        }
+    }
+
+
     // InformDialog
     private val _showInformDialog = MutableStateFlow<Boolean>(false)
     val showInfromDialog = _showInformDialog.asStateFlow()
@@ -29,11 +47,20 @@ class WalkViewModel @Inject constructor(
         _showInformDialog.value = !_showInformDialog.value
     } // End of setShowInfromDialog()
 
+    // NowLocation
+    private val _nowLocation = MutableStateFlow<CoordinateData?>(null)
+    val nowLocation = _nowLocation.asStateFlow()
+
+    fun setNowLocation() {
+
+    }
+
+
 
     // ========================================= getWalkingTrails ======================================
     // 현재 위치 좌표를 기반으로 해당 값이 변경될 경우, 이 값을 기반으로 가까운 산책로를 찾는다.
     val currentCoordinateData: MutableStateFlow<CoordinateData> = MutableStateFlow(
-        CoordinateData(0.0, 0.0)
+        CoordinateData(37.568133, 126.968707)
     )
 
     val data = mutableStateOf<WalkingTrailResultData?>(null)
