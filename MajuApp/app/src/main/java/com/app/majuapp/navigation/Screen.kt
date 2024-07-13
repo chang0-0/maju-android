@@ -7,6 +7,7 @@ import androidx.compose.material.icons.automirrored.outlined.MenuBook
 import androidx.compose.material.icons.automirrored.outlined.Note
 import androidx.compose.material.icons.filled.AccountBox
 import androidx.compose.material.icons.filled.Bookmark
+import androidx.compose.material.icons.filled.Cable
 import androidx.compose.material.icons.filled.DirectionsWalk
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.LocationOn
@@ -14,6 +15,7 @@ import androidx.compose.material.icons.filled.MenuBook
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.AccountBox
 import androidx.compose.material.icons.outlined.BookmarkBorder
+import androidx.compose.material.icons.outlined.Cable
 import androidx.compose.material.icons.outlined.DirectionsWalk
 import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.LocationOn
@@ -106,6 +108,14 @@ sealed class Screen(
         title = "Login",
         selectedIcon = Icons.Filled.AccountBox,
         unSelectedIcon = Icons.Outlined.AccountBox,
+        onClick = null,
+    )
+
+    data object WebView : Screen(
+        route = "web_view_screen",
+        title = "WebView",
+        selectedIcon = Icons.Filled.Cable,
+        unSelectedIcon = Icons.Outlined.Cable,
         onClick = null,
     )
 }// End of Screen class

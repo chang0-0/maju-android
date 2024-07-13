@@ -176,7 +176,12 @@ dependencies {
     // Optionally, you can include the widgets library for ScaleBar, etc.
     implementation("com.google.maps.android:maps-compose-widgets:5.0.3")
 
+    //위치 얻어오기
     implementation("com.google.android.gms:play-services-location:17.1.0")
+
+    //WebView in Compose
+    implementation("com.google.accompanist:accompanist-webview:0.35.0-alpha")
+
 
 }
 

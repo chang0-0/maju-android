@@ -34,6 +34,7 @@ import com.app.majuapp.screen.preference.PreferenceScreen
 import com.app.majuapp.screen.record.RecordScreen
 import com.app.majuapp.screen.test.TestScreen
 import com.app.majuapp.screen.walk.WalkScreen
+import com.app.majuapp.screen.webview.WebViewScreen
 import com.app.majuapp.ui.theme.SonicSilver
 import com.app.majuapp.ui.theme.SpiroDiscoBall
 
@@ -141,7 +142,7 @@ fun SetUpNavGraph(
 //        SharedTransitionLayout {
         NavHost(
             navController = navController,
-            startDestination = Screen.Home.route,
+            startDestination = Screen.Login.route,
             modifier = Modifier.padding(paddingValues)
         ) {
 
@@ -214,6 +215,11 @@ fun SetUpNavGraph(
                 RecordScreen(navController = navController)
             }
 
+            composable(
+                route = "${Screen.WebView.route}"
+            ) {
+                WebViewScreen(navController = navController, cultureDetailViewModel)
+            }
         } // NavHost
 //        } // SharedTransitionLayout
     }

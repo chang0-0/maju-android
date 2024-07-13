@@ -42,6 +42,7 @@ import com.app.majuapp.data.repositoryImp.CultureRepositoryImp
 import com.app.majuapp.domain.api.CultureApi
 import com.app.majuapp.domain.model.CultureDetailDomainModel
 import com.app.majuapp.domain.usecase.CultureUsecase
+import com.app.majuapp.navigation.Screen
 import com.app.majuapp.ui.theme.GoldenPoppy
 import com.app.majuapp.ui.theme.Gray
 import com.app.majuapp.ui.theme.cultureDetailIntervalSize
@@ -50,6 +51,8 @@ import com.app.majuapp.ui.theme.cultureDetailSmallSpacerSize
 import com.app.majuapp.ui.theme.cultureDetailTextWithIconSize
 import com.app.majuapp.ui.theme.cultureDetailTitleFontSize
 import com.app.majuapp.util.dummyList
+import com.google.accompanist.web.WebView
+import com.google.accompanist.web.rememberWebViewState
 
 @Composable
 fun CultureDetailScreen(
@@ -62,7 +65,6 @@ fun CultureDetailScreen(
     LaunchedEffect(key1 = true) {
         cultureDetailViewModel.getCultureEventDetail(cultureEventId)
     }
-
     Surface(
         modifier = Modifier
             .fillMaxSize()
@@ -143,7 +145,9 @@ fun CultureDetailScreen(
                     CultureDetailButton(
                         buttonText = stringResource(id = R.string.homepage),
                         buttonColor = GoldenPoppy,
-                        onClick = { /*TODO*/ },
+                        onClick = {
+                            navController.navigate(Screen.WebView.route)
+                        },
                         modifier = Modifier.weight(1f)
                     )
                 }
