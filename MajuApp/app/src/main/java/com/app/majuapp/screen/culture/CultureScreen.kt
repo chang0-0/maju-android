@@ -13,15 +13,11 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
-import androidx.navigation.compose.rememberNavController
-import com.app.majuapp.component.RowChoiceChips
 import com.app.majuapp.component.culture.CultureCard
 import com.app.majuapp.component.culture.CultureRowChoiceChips
 import com.app.majuapp.data.dto.NetworkDto
-import com.app.majuapp.domain.model.CultureDomainModel
+import com.app.majuapp.domain.model.CultureEventDomainModel
 import com.app.majuapp.navigation.Screen
-import com.app.majuapp.util.Constants.GENRES
-import com.app.majuapp.util.dummyList
 
 @Composable
 fun CultureScreen(
@@ -39,7 +35,7 @@ fun CultureScreen(
         Column {
             CultureRowChoiceChips(cultureViewModel = cultureViewModel, modifier = Modifier)
             LazyColumn(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                (cultureEventListNetworkResult.value.data as NetworkDto<List<CultureDomainModel>>?)?.let {
+                (cultureEventListNetworkResult.value.data as NetworkDto<List<CultureEventDomainModel>>?)?.let {
                     items(it.data ?: listOf()) { culture ->
                         CultureCard(culture) { id ->
                             navController.navigate("${Screen.CultureDetail.route}/$id")

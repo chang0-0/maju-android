@@ -1,12 +1,9 @@
 package com.app.majuapp.data.repositoryImp
 
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import com.app.majuapp.data.dto.LoginDto
 import com.app.majuapp.data.dto.NetworkDto
 import com.app.majuapp.domain.api.CultureApi
 import com.app.majuapp.domain.model.CultureDetailDomainModel
-import com.app.majuapp.domain.model.CultureDomainModel
+import com.app.majuapp.domain.model.CultureEventDomainModel
 import com.app.majuapp.domain.repository.CultureRepository
 import com.app.majuapp.util.NetworkResult
 import com.app.majuapp.util.setNetworkResult
@@ -18,8 +15,8 @@ class CultureRepositoryImp @Inject constructor(
     private val cultureApi: CultureApi
 ) : CultureRepository {
 
-    private val _cultureEventList = MutableStateFlow<NetworkResult<NetworkDto<List<CultureDomainModel>>>>(NetworkResult.Idle())
-    override val cultureEventList: StateFlow<NetworkResult<NetworkDto<List<CultureDomainModel>>>> = _cultureEventList
+    private val _cultureEventList = MutableStateFlow<NetworkResult<NetworkDto<List<CultureEventDomainModel>>>>(NetworkResult.Idle())
+    override val cultureEventList: StateFlow<NetworkResult<NetworkDto<List<CultureEventDomainModel>>>> = _cultureEventList
 
     private val _cultureEventDetail = MutableStateFlow<NetworkResult<NetworkDto<CultureDetailDomainModel>>>(NetworkResult.Idle())
     override val cultureEventDetail: StateFlow<NetworkResult<NetworkDto<CultureDetailDomainModel>>> = _cultureEventDetail

@@ -15,7 +15,7 @@ fun MapMarker(
     title: String,
     snippet: String,
     @DrawableRes iconResourceId: Int,
-    onClick: () -> Boolean = { true }
+    onClick: () -> Boolean = { false }
 ) {
     val context = LocalContext.current.findActivity()
     val icon = bitmapDescriptorUsingVector(

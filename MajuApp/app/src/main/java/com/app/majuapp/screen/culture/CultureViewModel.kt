@@ -3,6 +3,7 @@ package com.app.majuapp.screen.culture
 import android.location.Location
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.app.majuapp.domain.model.CultureEventDomainModel
 import com.app.majuapp.domain.repository.LocationTracker
 import com.app.majuapp.domain.usecase.CultureUsecase
 import com.app.majuapp.util.Constants.GENRES
@@ -17,15 +18,18 @@ import javax.inject.Inject
 class CultureViewModel @Inject constructor(
     private val locationTracker: LocationTracker,
     private val cultureUsecase: CultureUsecase,
-): ViewModel() {
+) : ViewModel() {
 
-    private val _currentLocation = MutableStateFlow<Location?>( null )
+    private val _currentLocation = MutableStateFlow<Location?>(null)
     val currentLocation: StateFlow<Location?> = _currentLocation
 
     val cultureEventList = cultureUsecase.cultureEventList
 
     private val _genreChoicedIdx = MutableStateFlow<Int>(-1)
-    val genreChoicedIdx = _genreChoicedIdx
+    val genreChoicedIdx: StateFlow<Int> = _genreChoicedIdx
+
+    private val _focusedEvent = MutableStateFlow<CultureEventDomainModel?>(null)
+    val focusedEvent: StateFlow<CultureEventDomainModel?> = _focusedEvent
 
     init {
 //        getCurrentLocation()
@@ -50,11 +54,21 @@ class CultureViewModel @Inject constructor(
     fun genreChoice(choicedIdx: Int) {
         _genreChoicedIdx.value = if (choicedIdx == _genreChoicedIdx.value) -1 else choicedIdx
         viewModelScope.launch(Dispatchers.IO) {
-            if ( _genreChoicedIdx.value == -1)
+            if (_genreChoicedIdx.value == -1)
                 cultureUsecase.getAllCultureEvents()
             else
                 cultureUsecase.getGenreCultureEvents(GENRES[choicedIdx])
         }
+    }
+
+    fun focusEvent(event: CultureEventDomainModel) {
+        viewModelScope.launch(Dispatchers.IO) {
+            _focusedEvent.emit(event)
+        }
+    }
+
+    fun unfocusEvent() = viewModelScope.launch(Dispatchers.IO) {
+        _focusedEvent.emit(null)
     }
 
 }

@@ -4,7 +4,7 @@ import android.os.Parcelable
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
-data class CultureDomainModel(
+data class CultureEventDomainModel(
     val category: String,
     val endDate: String,
     val eventName: String,

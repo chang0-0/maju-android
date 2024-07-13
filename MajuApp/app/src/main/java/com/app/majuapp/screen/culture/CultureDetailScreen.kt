@@ -38,7 +38,10 @@ import com.app.majuapp.component.MultiLineTextWithIconOnStart
 import com.app.majuapp.component.NetworkImageCard
 import com.app.majuapp.component.SingleLineTextWithIconOnStart
 import com.app.majuapp.data.dto.NetworkDto
+import com.app.majuapp.data.repositoryImp.CultureRepositoryImp
+import com.app.majuapp.domain.api.CultureApi
 import com.app.majuapp.domain.model.CultureDetailDomainModel
+import com.app.majuapp.domain.usecase.CultureUsecase
 import com.app.majuapp.ui.theme.GoldenPoppy
 import com.app.majuapp.ui.theme.Gray
 import com.app.majuapp.ui.theme.cultureDetailIntervalSize
@@ -67,7 +70,8 @@ fun CultureDetailScreen(
     ) {
 
         Column(
-            modifier = Modifier,
+            modifier = Modifier
+                .verticalScroll(rememberScrollState()),
         ) {
             (cultureEventDetailNetworkResult.value.data as NetworkDto<CultureDetailDomainModel>?)?.data?.let { culture ->
                 NetworkImageCard(
@@ -75,7 +79,9 @@ fun CultureDetailScreen(
                     modifier = Modifier.fillMaxWidth()
                 )
                 Spacer(modifier = Modifier.height(16.dp))
-                Column(modifier = Modifier.weight(1f)) {
+                Column(
+                    modifier = Modifier
+                ) {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween,
@@ -105,7 +111,7 @@ fun CultureDetailScreen(
                     )
                     Spacer(modifier = Modifier.height(cultureDetailSmallSpacerSize))
                     SingleLineTextWithIconOnStart(
-                        textContent = "${culture.startDate} - ${culture.endDate}",
+                        textContent = "${culture.startDate} ~ ${culture.endDate}",
                         iconDescription = stringResource(id = R.string.icon_time_description),
                         imageVector = Icons.Outlined.AccessTime,
                         iconTint = GoldenPoppy,
@@ -151,5 +157,8 @@ fun CultureDetailScreen(
 @Preview
 @Composable
 fun PreviewCultureDetailScreen() {
-//    CultureDetailScreen(rememberNavController())
+//    CultureDetailScreen(
+//        rememberNavController(),
+//        1
+//    )
 } // End of PreviewPreferenceScreen

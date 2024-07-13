@@ -23,11 +23,10 @@ import com.app.majuapp.component.MapMarker
 import com.app.majuapp.component.culture.CultureCard
 import com.app.majuapp.component.culture.CultureRowChoiceChips
 import com.app.majuapp.data.dto.NetworkDto
-import com.app.majuapp.domain.model.CultureDomainModel
+import com.app.majuapp.domain.model.CultureEventDomainModel
 import com.app.majuapp.ui.theme.cultureDefaultPadding
 import com.app.majuapp.util.NetworkResult
 import com.app.majuapp.util.checkAndRequestPermissions
-import com.app.majuapp.util.dummyList
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.compose.DefaultMapUiSettings
@@ -42,7 +41,9 @@ fun CultureMapScreen(
 
     val context = LocalContext.current
     val currentLocation = cultureViewModel.currentLocation.collectAsStateWithLifecycle()
-    val cultureEventListNetworkResult = cultureViewModel.cultureEventList.collectAsStateWithLifecycle()
+    val cultureEventListNetworkResult =
+        cultureViewModel.cultureEventList.collectAsStateWithLifecycle()
+    val focusedEvent = cultureViewModel.focusedEvent.collectAsStateWithLifecycle()
 
     /** 요청할 권한 **/
     val permissions = arrayOf(
@@ -137,9 +138,12 @@ fun CultureMapScreen(
                 uiSettings = DefaultMapUiSettings.copy(
                     compassEnabled = false,
                     zoomControlsEnabled = false
-                )
+                ),
+                onMapClick = { latLng ->
+                    cultureViewModel.unfocusEvent()
+                }
             ) {
-                (cultureEventListNetworkResult.value.data as NetworkDto<List<CultureDomainModel>>?)?.let {
+                (cultureEventListNetworkResult.value.data as NetworkDto<List<CultureEventDomainModel>>?)?.let {
                     for (cultureEvent in it.data ?: listOf()) {
                         MapMarker(
                             position = LatLng(
@@ -155,7 +159,10 @@ fun CultureMapScreen(
                                 "체험" -> R.drawable.ic_pin_experience
                                 else -> R.drawable.ic_pin_experience
                             }
-                        )
+                        ) {
+                            cultureViewModel.focusEvent(cultureEvent)
+                            false
+                        }
                     }
                 }
             }
@@ -167,16 +174,17 @@ fun CultureMapScreen(
                     .padding(start = cultureDefaultPadding, end = cultureDefaultPadding)
                     .offset(y = cultureDefaultPadding),
             )
-//
-//            CultureCard(
-//                dummyList[0],
-//                false,
-//                modifier = Modifier
-//                    .wrapContentSize()
-//                    .align(Alignment.BottomCenter)
-//                    .padding(start = cultureDefaultPadding, end = cultureDefaultPadding)
-//                    .offset(y = -cultureDefaultPadding),
-//            )
+
+            if (focusedEvent.value != null)
+                CultureCard(
+                    focusedEvent.value!!,
+                    true,
+                    modifier = Modifier
+                        .wrapContentSize()
+                        .align(Alignment.BottomCenter)
+                        .padding(start = cultureDefaultPadding, end = cultureDefaultPadding)
+                        .offset(y = -cultureDefaultPadding),
+                )
         }
     }
 

@@ -32,13 +32,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.app.majuapp.component.NetworkImageCard
 import com.app.majuapp.component.SingleLineTextWithIconOnStart
-import com.app.majuapp.data.model.CultureModel
-import com.app.majuapp.domain.model.CultureDomainModel
+import com.app.majuapp.domain.model.CultureEventDomainModel
 import com.app.majuapp.ui.theme.GoldenPoppy
 
 @Composable
 fun CultureCard(
-    culture: CultureDomainModel,
+    culture: CultureEventDomainModel,
     favoriteButtonFlag: Boolean = true,
     modifier: Modifier = Modifier,
     onClick: (Int) -> Unit = {},
