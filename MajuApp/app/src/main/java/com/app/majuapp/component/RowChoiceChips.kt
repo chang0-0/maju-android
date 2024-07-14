@@ -7,10 +7,6 @@ import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
@@ -20,14 +16,15 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.app.majuapp.ui.theme.GoldenPoppy
 import com.app.majuapp.ui.theme.OldSilver
-import com.app.majuapp.util.dummyCultureCategories
+import com.app.majuapp.util.Constants.GENRES
 
 @Composable
 fun RowChoiceChips(
     itemList: List<String>,
-    modifier: Modifier = Modifier
+    choicedItemIdx: Int = -1,
+    modifier: Modifier = Modifier,
+    onChoice: (Int) -> Unit = {}
 ) {
-    var choicedItemIdx by remember { mutableStateOf(-1) }
 
     LazyRow(
         horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -37,7 +34,7 @@ fun RowChoiceChips(
             FilterChip(
                 selected = choicedItemIdx == idx,
                 onClick = {
-                    choicedItemIdx = if (choicedItemIdx == idx) -1 else idx
+                    onChoice(idx)
                 },
                 label = {
                     Text(
@@ -69,5 +66,5 @@ fun RowChoiceChips(
 @Preview
 @Composable
 fun PreviewChoiceChips() {
-    RowChoiceChips(dummyCultureCategories)
+    RowChoiceChips(GENRES)
 }

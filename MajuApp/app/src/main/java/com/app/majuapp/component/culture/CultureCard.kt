@@ -1,6 +1,5 @@
-package com.app.majuapp.component
+package com.app.majuapp.component.culture
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -14,8 +13,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.outlined.AccessTime
 import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material.icons.outlined.LocationOn
@@ -32,42 +32,39 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.app.majuapp.data.model.CultureModel
+import com.app.majuapp.component.NetworkImageCard
+import com.app.majuapp.component.SingleLineTextWithIconOnStart
+import com.app.majuapp.domain.model.CultureEventDomainModel
 import com.app.majuapp.ui.theme.GoldenPoppy
 
 @Composable
 fun CultureCard(
-    culture: CultureModel = CultureModel(
-        0,
-        "뮤지컬/오페라",
-        "https://cdn.woman.chosun.com/news/photo/202309/112221_118277_4824.jpg",
-        "오페라 갈라",
-        "세종 대극장",
-        "2024-12-07"
-    ),
+    culture: CultureEventDomainModel,
     favoriteButtonFlag: Boolean = true,
     modifier: Modifier = Modifier,
-    onClick: () -> Unit = {},
+    onLikeClicked: (Int) -> Unit = { _ -> },
+    onClick: (Int) -> Unit = {},
 ) {
     Card(
         modifier = modifier
             .wrapContentHeight(align = Alignment.Top)
-            .clickable { onClick() }
+            .clickable { onClick(culture.id) }
             .fillMaxWidth()
             .border(
                 width = 3.dp,
                 color = Color.LightGray,
                 shape = CardDefaults.shape
             ),
-        colors = CardDefaults.cardColors(containerColor = Color.White, )
+        colors = CardDefaults.cardColors(containerColor = Color.White)
     ) {
         Row(
-            modifier = Modifier.height(IntrinsicSize.Min)
+            modifier = Modifier
+                .height(IntrinsicSize.Min)
                 .padding(16.dp),
             horizontalArrangement = Arrangement.SpaceEvenly
         ) {
             NetworkImageCard(
-                networkUrl = culture.sumnailUrl,
+                networkUrl = culture.thumbnail,
                 modifier = Modifier
                     .width(120.dp),
             )
@@ -86,24 +83,27 @@ fun CultureCard(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     CultureDetailCategoryChip(cultureDetailCategory = culture.category)
-                    if (favoriteButtonFlag)
-                        Icon(
-                            imageVector = Icons.Outlined.FavoriteBorder,
-                            contentDescription = "favorite"
-                        )
+                    Icon(
+                        imageVector = if (!culture.likeStatus) Icons.Outlined.FavoriteBorder else Icons.Filled.Favorite,
+                        contentDescription = "favorite",
+                        modifier = Modifier.clickable {
+                            onLikeClicked(culture.id)
+                        },
+                        tint = if (!culture.likeStatus) Color.LightGray else Color.Red
+                    )
                 }
                 Spacer(modifier = Modifier.weight(1f))
                 Text(
                     fontWeight = FontWeight.Bold,
                     fontSize = 20.sp,
-                    text = culture.title,
+                    text = culture.eventName,
                     textAlign = TextAlign.Center,
                     maxLines = 1
                 )
                 Spacer(modifier = Modifier.weight(1f))
 
                 SingleLineTextWithIconOnStart(
-                    textContent = culture.location,
+                    textContent = culture.place,
                     iconDescription = "location",
                     imageVector = Icons.Outlined.LocationOn,
                     iconTint = GoldenPoppy,
@@ -111,7 +111,7 @@ fun CultureCard(
                     intervalSize = 4.dp
                 )
                 SingleLineTextWithIconOnStart(
-                    textContent = culture.time,
+                    textContent = culture.startDate,
                     iconDescription = "time",
                     imageVector = Icons.Outlined.AccessTime,
                     iconTint = GoldenPoppy,
@@ -127,5 +127,5 @@ fun CultureCard(
 @Preview
 @Composable
 fun PreviewCultureCard() {
-    CultureCard()
+//    CultureCard()
 } // End of PreviewCultureCard

@@ -10,16 +10,19 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.navArgument
 import com.app.majuapp.screen.MainScreen
 import com.app.majuapp.screen.culture.CultureDetailScreen
+import com.app.majuapp.screen.culture.CultureDetailViewModel
 import com.app.majuapp.screen.culture.CultureMapScreen
 import com.app.majuapp.screen.culture.CultureScreen
 import com.app.majuapp.screen.culture.CultureViewModel
@@ -31,6 +34,7 @@ import com.app.majuapp.screen.preference.PreferenceScreen
 import com.app.majuapp.screen.record.RecordScreen
 import com.app.majuapp.screen.test.TestScreen
 import com.app.majuapp.screen.walk.WalkScreen
+import com.app.majuapp.screen.webview.WebViewScreen
 import com.app.majuapp.ui.theme.SonicSilver
 import com.app.majuapp.ui.theme.SpiroDiscoBall
 
@@ -40,56 +44,15 @@ fun SetUpNavGraph(
     navController: NavHostController,
     socialLoginViewModel: SocialLoginViewModel,
     loginViewModel: LoginViewModel,
-    cultureViewModel: CultureViewModel
+    cultureViewModel: CultureViewModel,
+    cultureDetailViewModel: CultureDetailViewModel
 ) {
     val screenList = listOf(
         Screen.CultureMap, Screen.Culture
     )
-    var selectedItemIndex by rememberSaveable {
+    var selectedItemIndex by remember {
         mutableStateOf(0)
     }
-
-//    SharedTransitionLayout {
-//        NavHost(
-//            navController = navController,
-//            startDestination = Screen.Preference.route,
-//        ) {
-//            composable(
-//                route = Screen.Home.route
-//            ) {
-//                HomeScreen(navController = navController)
-//            }
-//
-//            composable(
-//                route = Screen.Main.route
-//            ) {
-//                MainScreen(navController = navController)
-//            }
-//
-//            composable(
-//                route = Screen.Preference.route
-//            ) {
-//                PreferenceScreen(navController = navController)
-//            }
-//
-//            composable(
-//                route = Screen.Culture.route
-//            ) {
-//                CultureScreen(navController = navController)
-//            }
-//
-//            composable(
-//                route = Screen.Walk.route
-//            ) {
-//                WalkScreen(navController = navController)
-//            }
-//
-//            composable(
-//                route = Screen.Test.route
-//            ) {
-//                TestScreen(navController = navController)
-//            }
-//        }
 
     Scaffold(
         bottomBar = {
@@ -105,6 +68,7 @@ fun SetUpNavGraph(
                                 selectedItemIndex = index
                                 navController.navigate(screen.route) {
                                     popUpTo(navController.graph.findStartDestination().id) {
+                                        inclusive = true
                                         saveState = true
                                     }
                                     launchSingleTop = true
@@ -130,8 +94,6 @@ fun SetUpNavGraph(
                         )
                     }
                 }
-
-
         }
     ) { paddingValues ->
 //        SharedTransitionLayout {
@@ -162,13 +124,17 @@ fun SetUpNavGraph(
             composable(
                 route = Screen.Culture.route
             ) {
-                CultureScreen(navController = navController)
+                CultureScreen(navController = navController, cultureViewModel = cultureViewModel)
             }
 
             composable(
-                route = Screen.CultureDetail.route
+                route = "${Screen.CultureDetail.route}/{id}",
+                arguments = listOf(navArgument("id") {
+                    type = NavType.IntType
+                })
             ) {
-                CultureDetailScreen(navController = navController)
+                val cultureEventId = it.arguments?.getInt("id") ?: 0
+                CultureDetailScreen(navController = navController, cultureEventId, cultureDetailViewModel)
             }
 
             composable(
@@ -176,7 +142,14 @@ fun SetUpNavGraph(
             ) {
                 CultureMapScreen(
                     navController = navController,
-                    cultureViewModel = cultureViewModel
+                    cultureViewModel = cultureViewModel,
+                    navigateToCultureScreen = {
+
+                    },
+                    onBack = {
+//                        selectedItemIndex = 0
+                        navController.popBackStack()
+                    }
                 )
             }
 
@@ -206,6 +179,11 @@ fun SetUpNavGraph(
                 RecordScreen(navController = navController)
             }
 
+            composable(
+                route = "${Screen.WebView.route}"
+            ) {
+                WebViewScreen(navController = navController, cultureDetailViewModel)
+            }
         } // NavHost
 //        } // SharedTransitionLayout
     }

@@ -177,9 +177,11 @@ dependencies {
     // Optionally, you can include the widgets library for ScaleBar, etc.
     implementation("com.google.maps.android:maps-compose-widgets:5.0.3")
 
+    //WebView in Compose
+    implementation("com.google.accompanist:accompanist-webview:0.35.0-alpha")
+
     // location service
     implementation("com.google.android.gms:play-services-location:21.1.0")
-
 
     // Permission
     implementation("com.google.accompanist:accompanist-permissions:0.35.0-alpha")
