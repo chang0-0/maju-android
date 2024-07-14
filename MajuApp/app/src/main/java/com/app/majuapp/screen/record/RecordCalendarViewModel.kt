@@ -1,5 +1,6 @@
 package com.app.majuapp.screen.record
 
+import android.icu.text.SimpleDateFormat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.app.majuapp.data.dto.NetworkDto
@@ -13,7 +14,9 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.time.LocalDate
 import java.time.YearMonth
+import java.util.Date
 import javax.inject.Inject
 
 @HiltViewModel
@@ -51,6 +54,7 @@ class RecordCalendarViewModel @Inject constructor(
         }
         getCultureLikeMonthEvents(_calendarUiState.value.yearMonth.toString())
         getWalkingHistoryMonthEvents(_calendarUiState.value.yearMonth.toString())
+        getCultureLikeDateEvents(SimpleDateFormat("yyyy-MM-dd").format(Date(System.currentTimeMillis())))
     }
 
     fun toNextMonth(nextMonth: YearMonth) {
@@ -68,6 +72,20 @@ class RecordCalendarViewModel @Inject constructor(
             _calendarUiState.update { currentState ->
                 currentState.copy(
                     yearMonth = prevMonth, dates = dataSource.getDates(prevMonth)
+                )
+            }
+        }
+    }
+
+    fun toClickedDay(day: String) {
+        viewModelScope.launch {
+            _calendarUiState.update { currentState ->
+                currentState.copy(
+                    dates = dataSource.getDates(currentState.yearMonth).map { it ->
+                        it.copy(
+                            isSelected = it.dayOfMonth == day
+                        )
+                    }
                 )
             }
         }

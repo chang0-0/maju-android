@@ -37,7 +37,7 @@ fun CalendarWidget(
     monthEvents: Map<String, BooleanArray>,
     onPreviousMonthButtonClicked: (YearMonth) -> Unit,
     onNextMonthButtonClicked: (YearMonth) -> Unit,
-    onDateClickListener: (CalendarUiState.Date) -> Unit,
+    onDateClickListener: (String, String) -> Unit,
 ) {
     val yearMonthString = String.format("%02d-%02d", yearMonth.year, yearMonth.monthValue)
     Column(
@@ -70,14 +70,15 @@ fun CalendarContentItem(
     date: CalendarUiState.Date,
     yearMonthString: String,
     monthEvents: Map<String, BooleanArray>,
-    onClickListener: (CalendarUiState.Date) -> Unit,
+    onClickListener: (String, String) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val yearMonthDayString = "$yearMonthString-" + if (date.dayOfMonth.length < 2) "0${date.dayOfMonth}" else "${date.dayOfMonth}"
     Box(modifier = modifier.clickable {
-        onClickListener(date)
+        onClickListener(yearMonthDayString, date.dayOfMonth)
     }) {
         val array = monthEvents.getOrDefault(
-            "$yearMonthString-" + if (date.dayOfMonth.length < 2) "0${date.dayOfMonth}" else "${date.dayOfMonth}",
+            yearMonthDayString,
             booleanArrayOf(false, false)
         )
 
@@ -120,7 +121,7 @@ fun CalendarContent(
     dates: List<CalendarUiState.Date>,
     yearMonthString: String,
     monthEvents: Map<String, BooleanArray>,
-    onDateClickListener: (CalendarUiState.Date) -> Unit,
+    onDateClickListener: (String, String) -> Unit,
 ) {
     /*
         달력의 일수 표시

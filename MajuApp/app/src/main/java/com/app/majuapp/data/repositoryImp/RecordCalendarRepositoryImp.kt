@@ -70,7 +70,7 @@ class RecordCalendarRepositoryImp @Inject constructor(
     }
 
     override suspend fun getWalkingHistoryDateEvents(date: String) {
-        TODO("Not yet implemented")
+//        TODO("Not yet implemented")
     }
 
     override suspend fun getCultureLikeMonthEvents(date: String){
@@ -96,7 +96,7 @@ class RecordCalendarRepositoryImp @Inject constructor(
             response.body()?.let {
                 when(it.status) {
                     200 -> {
-
+                        _cultureLikeDateEvents.value = it.data!!
                     }
                     else -> {
 

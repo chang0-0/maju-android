@@ -83,14 +83,15 @@ fun CultureCard(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     CultureDetailCategoryChip(cultureDetailCategory = culture.category)
-                    Icon(
-                        imageVector = if (!culture.likeStatus) Icons.Outlined.FavoriteBorder else Icons.Filled.Favorite,
-                        contentDescription = "favorite",
-                        modifier = Modifier.clickable {
-                            onLikeClicked(culture.id)
-                        },
-                        tint = if (!culture.likeStatus) Color.LightGray else Color.Red
-                    )
+                    if (favoriteButtonFlag)
+                        Icon(
+                            imageVector = if (!culture.likeStatus) Icons.Outlined.FavoriteBorder else Icons.Filled.Favorite,
+                            contentDescription = "favorite",
+                            modifier = Modifier.clickable {
+                                onLikeClicked(culture.id)
+                            },
+                            tint = if (!culture.likeStatus) Color.LightGray else Color.Red
+                        )
                 }
                 Spacer(modifier = Modifier.weight(1f))
                 Text(

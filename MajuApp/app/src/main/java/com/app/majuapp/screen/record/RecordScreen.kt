@@ -47,6 +47,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.app.majuapp.R
+import com.app.majuapp.component.culture.CultureCard
 import com.app.majuapp.component.fillMaxWidthSpacer
 import com.app.majuapp.component.home.GrayBorderRoundedCard
 import com.app.majuapp.component.record.CalendarWidget
@@ -82,7 +83,8 @@ fun RecordScreen(navController: NavController) {
 fun RecordScreenContent(
     navController: NavController,
     recordingData: RecordingDataModel,
-    recordViewModel: RecordViewModel = hiltViewModel()
+    recordViewModel: RecordViewModel = hiltViewModel(),
+    calendarViewModel: RecordCalendarViewModel = hiltViewModel()
 ) {
     // Context
     val context = LocalContext.current
@@ -93,10 +95,14 @@ fun RecordScreenContent(
     // Snackbar State
     val coroutineScope = rememberCoroutineScope()
 
+    val cultureLikeDateEvents =
+        calendarViewModel.cultureLikeDateEvents.collectAsStateWithLifecycle()
+
     val culturePagerState = rememberPagerState(pageCount = {
-        recordingData.cultureLifeRecord.size
+        cultureLikeDateEvents.value.size
     })
 
+    
     Surface(
         modifier = modifier.fillMaxSize(), color = White,
     ) {
@@ -205,11 +211,7 @@ fun RecordScreenContent(
                         state = culturePagerState,
                         contentPadding = PaddingValues()
                     ) { page ->
-                        RecordScreenLazyItems(
-                            modifier = Modifier.fillMaxSize()
-                        ) {
-
-                        }
+                        CultureCard(culture = cultureLikeDateEvents.value.get(page), favoriteButtonFlag = false)
                     }
                     IconButton(modifier = Modifier.weight(1f), onClick = {
                         coroutineScope.launch {
@@ -283,8 +285,10 @@ private fun RecordCalendar(
     val snackbarHostState = remember { SnackbarHostState() }
 
     val monthEvents = calendarViewModel.monthEvents.collectAsStateWithLifecycle()
-    val walkingHistoryMonthEvents = calendarViewModel.walkingHistoryMonthEventsNetworkResult.collectAsStateWithLifecycle()
-    val cultureLikeMonthEvents = calendarViewModel.cultureLikeMonthEventsNetworkResult.collectAsStateWithLifecycle()
+    val walkingHistoryMonthEvents =
+        calendarViewModel.walkingHistoryMonthEventsNetworkResult.collectAsStateWithLifecycle()
+    val cultureLikeMonthEvents =
+        calendarViewModel.cultureLikeMonthEventsNetworkResult.collectAsStateWithLifecycle()
 
     LaunchedEffect(key1 = cultureLikeMonthEvents.value, key2 = walkingHistoryMonthEvents.value) {
         if (walkingHistoryMonthEvents.value is NetworkResult.Success && cultureLikeMonthEvents.value is NetworkResult.Success) {
@@ -320,10 +324,9 @@ private fun RecordCalendar(
                 calendarViewModel.getCultureLikeMonthEvents(nextMonth.toString())
                 calendarViewModel.getWalkingHistoryMonthEvents(nextMonth.toString())
             },
-            onDateClickListener = {
-                coroutineScope.launch {
-                    recordViewModel.showSnackbar("날짜 선택")
-                }
+            onDateClickListener = { yearMonthDay, day ->
+                calendarViewModel.getCultureLikeDateEvents(yearMonthDay)
+                calendarViewModel.toClickedDay(day)
             })
     }
 } // End of RecordCalendar()
