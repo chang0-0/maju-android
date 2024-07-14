@@ -1,5 +1,6 @@
 package com.app.majuapp.component.walk
 
+import android.R.attr.fontWeight
 import android.content.Context
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.Spring
@@ -43,6 +44,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.app.majuapp.R
 import com.app.majuapp.component.fillMaxWidthSpacer
 import com.app.majuapp.domain.model.walk.WalkingTrailResultData
+import com.app.majuapp.screen.walk.TimerViewModel
 import com.app.majuapp.screen.walk.WalkViewModel
 import com.app.majuapp.ui.theme.BrightGray
 import com.app.majuapp.ui.theme.GoldenPoppy
@@ -145,9 +147,7 @@ fun WalkScreenChooseStartDialog(
                     Box(
                         modifier = Modifier.clip(RoundedCornerShape(roundedCornerPadding))
                             .fillMaxWidth().height(260.dp).border(
-                                2.dp,
-                                BrightGray,
-                                shape = RoundedCornerShape(roundedCornerPadding)
+                                2.dp, BrightGray, shape = RoundedCornerShape(roundedCornerPadding)
                             ).padding(defaultPadding), contentAlignment = Alignment.BottomCenter
                     ) {
                         if (walkingTrailData.data.isNullOrEmpty()) {
@@ -162,7 +162,6 @@ fun WalkScreenChooseStartDialog(
                                 state = walkingPagerState
                             ) { page ->
                                 val coordinates = walkingTrailData.data[page]
-                                // val coordinates = mapViewModel.getCoordinatesForPage(page)
                                 val cameraPositionState = rememberCameraPositionState {
                                     position = CameraPosition.fromLatLngZoom(
                                         LatLng(coordinates.startLat, coordinates.startLon), 16f
@@ -187,17 +186,14 @@ fun WalkScreenChooseStartDialog(
                                             RoundedCornerShape(
                                                 roundedCornerPadding
                                             )
-                                        )
-                                            .fillMaxWidth().height(200.dp).background(
-                                                OuterSpace,
-                                                shape = RoundedCornerShape(roundedCornerPadding)
-                                            ),
+                                        ).fillMaxWidth().height(200.dp).background(
+                                            OuterSpace,
+                                            shape = RoundedCornerShape(roundedCornerPadding)
+                                        ),
                                         contentAlignment = Alignment.BottomCenter,
                                     ) {
-
-
                                         MapScreen(
-                                            cameraPositionState,
+                                            LatLng(coordinates.startLat, coordinates.startLon),
                                             LatLng(coordinates.startLat, coordinates.startLon),
                                             LatLng(coordinates.endLat, coordinates.endLon)
                                         )
@@ -219,13 +215,9 @@ fun WalkScreenChooseStartDialog(
                             onClickConfirm = {
                                 onClickConfirm()
 
-                                val coordinates =
-                                    walkingTrailData.data[walkingPagerState.currentPage]
-//                                walkViewModel.setCurrentCoordinate(
-//                                    CoordinateData(
-//                                        coordinates.startLon, coordinates.startLon
-//                                    )
-//                                )
+                                // 선택된 산책로 데이터를 ViewModel에 저장하기
+                                // 내가 보여줘야 할 데이터는 시작 위치 산책로 표시
+                                walkViewModel.setCurrentChooseWalkingTrail(walkingTrailData.data[walkingPagerState.currentPage])
                             },
                             Modifier.weight(1f)
                         )
@@ -244,14 +236,25 @@ fun WalkScreenChooseStartDialog(
 
 @Composable
 fun MapScreen(
-    cameraPositionState: CameraPositionState,
-    startLocation: LatLng,
-    endLocation: LatLng,
+    currentLocation: LatLng = LatLng(0.0, 0.0),
+    startLocation: LatLng = LatLng(0.0, 0.0),
+    endLocation: LatLng = LatLng(0.0, 0.0),
 ) {
+    val cameraPositionState: CameraPositionState = rememberCameraPositionState {
+        position = CameraPosition.fromLatLngZoom(currentLocation, 16f)
+    }
+
     GoogleMap(
         modifier = Modifier.fillMaxSize(),
         cameraPositionState = cameraPositionState,
     ) {
+        Marker(
+            state = MarkerState(
+                // 현재 내 위치의 아이콘
+                position = currentLocation
+            )
+        )
+
         Marker(
             state = MarkerState(
                 position = startLocation
@@ -450,6 +453,29 @@ fun WalkRecordingBox(context: Context) {/*
         }
     }
 } // End of WalkRecordingBox
+
+@Composable
+fun WalkingRecordingTimer(
+    timerViewModel: TimerViewModel = hiltViewModel()
+) {
+    val timerValue by timerViewModel.timer.collectAsState()
+
+    Text(
+        text = timerValue.formatTime(),
+        fontWeight = FontWeight.Bold,
+        fontSize = 24.sp,
+        color = Color.Black
+    )
+} // End of WalkingRecordingTimer()
+
+fun Long.formatTime(): String {
+    val hours = this / 3600
+    val minutes = (this % 3600) / 60
+    val remainingSeconds = this % 60
+    return String.format("%02d:%02d:%02d", hours, minutes, remainingSeconds)
+} // End of Long.formatTime()
+
+
 
 
 @Composable

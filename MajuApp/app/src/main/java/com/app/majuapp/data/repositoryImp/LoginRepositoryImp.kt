@@ -15,7 +15,8 @@ import javax.inject.Inject
 
 val TAG = "login_repo_imp"
 
-class LoginRepositoryImp @Inject constructor(private val loginApi: LoginApi) : LoginRepository { // End of LoginRepositoryImp Class
+class LoginRepositoryImp @Inject constructor(private val loginApi: LoginApi) :
+    LoginRepository { // End of LoginRepositoryImp Class
 
     private val _loginResult = MutableStateFlow<NetworkResult<LoginDto>>(NetworkResult.Idle())
     override val loginResult: StateFlow<NetworkResult<LoginDto>> = _loginResult
@@ -38,12 +39,14 @@ class LoginRepositoryImp @Inject constructor(private val loginApi: LoginApi) : L
                             )
                         )
                     }
+
                     response.errorBody() != null -> _loginResult.emit(
                         NetworkResult.Error(
                             response.code(),
                             response.errorBody().toString(),
                         )
                     )
+
                     else -> _loginResult.emit(
                         NetworkResult.Error(
                             response.code(),

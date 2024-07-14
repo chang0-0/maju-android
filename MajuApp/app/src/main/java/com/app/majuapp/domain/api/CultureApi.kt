@@ -3,7 +3,6 @@ package com.app.majuapp.domain.api
 import com.app.majuapp.data.dto.NetworkDto
 import com.app.majuapp.domain.model.CultureDetailDomainModel
 import com.app.majuapp.domain.model.CultureEventDomainModel
-import com.google.gson.JsonObject
 import retrofit2.Response
 import retrofit2.http.GET
 import retrofit2.http.POST

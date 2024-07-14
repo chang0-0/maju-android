@@ -5,6 +5,7 @@ import com.app.majuapp.domain.api.WalkApi
 import com.app.majuapp.domain.model.walk.CoordinateData
 import com.app.majuapp.domain.model.walk.WalkingTrailResultData
 import com.app.majuapp.screen.walk.RequestState
+import com.google.android.gms.maps.model.LatLng
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -35,10 +36,10 @@ class WalkRepository @Inject constructor(
         return flow { emit(ret) }.flowOn(Dispatchers.IO)
     } // End of getWalkingTrails()
 
-    fun getWalkingTrails2(coor: CoordinateData): Flow<RequestState<WalkingTrailResultData?>> {
+    fun getWalkingTrails2(coor: LatLng): Flow<RequestState<WalkingTrailResultData?>> {
         return flow {
             emit(RequestState.Loading)
-            val ret = walkApi.getWalkingTrails(coor.lat!!, coor.lng!!)
+            val ret = walkApi.getWalkingTrails(coor.latitude, coor.longitude)
             emit(RequestState.Success(data = ret.body()))
         }
     } // End of getWalkingTrails()
