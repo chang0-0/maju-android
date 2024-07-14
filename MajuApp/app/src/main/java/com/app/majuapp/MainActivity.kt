@@ -1,12 +1,12 @@
 package com.app.majuapp
 
+import android.app.Activity
+import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
-import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
@@ -18,8 +18,11 @@ import com.app.majuapp.screen.culture.CultureViewModel
 import com.app.majuapp.screen.login.LoginViewModel
 import com.app.majuapp.screen.login.SocialLoginViewModel
 import com.app.majuapp.ui.theme.MajuAppTheme
-import com.app.majuapp.util.checkAndRequestPermissions
+import com.kakao.sdk.common.util.Utility
 import dagger.hilt.android.AndroidEntryPoint
+
+
+private const val TAG = "MainActivity_창영"
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -31,6 +34,9 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         WindowCompat.setDecorFitsSystemWindows(window, false)
+
+        var keyHash = Utility.getKeyHash(this)
+        Log.d(TAG, "onCreate: $keyHash")
 
         setContent {
             MajuAppTheme {

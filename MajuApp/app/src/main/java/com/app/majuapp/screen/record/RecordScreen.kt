@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -14,7 +15,12 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.KeyboardArrowLeft
+import androidx.compose.material.icons.filled.KeyboardArrowRight
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.SnackbarHost
@@ -31,10 +37,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.app.majuapp.R
+import com.app.majuapp.component.fillMaxWidthSpacer
 import com.app.majuapp.component.home.GrayBorderRoundedCard
 import com.app.majuapp.component.record.CalendarWidget
 import com.app.majuapp.component.record.RecordScreenCalendarColorInform
@@ -53,6 +61,7 @@ import com.app.majuapp.ui.theme.defaultPadding
 import com.app.majuapp.ui.theme.notoSansKoreanFontFamily
 import com.app.majuapp.ui.theme.roundedCornerPadding
 import com.app.majuapp.util.DateUtil
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
 private const val TAG = "RecordScreen_창영"
@@ -64,7 +73,11 @@ fun RecordScreen(navController: NavController) {
 
 
 @Composable
-fun RecordScreenContent(navController: NavController, recordingData: RecordingDataModel) {
+fun RecordScreenContent(
+    navController: NavController,
+    recordingData: RecordingDataModel,
+    recordViewModel: RecordViewModel = hiltViewModel()
+) {
     // Context
     val context = LocalContext.current
 
@@ -72,8 +85,11 @@ fun RecordScreenContent(navController: NavController, recordingData: RecordingDa
     val modifier = Modifier
 
     // Snackbar State
-    val rememberSnackbarState = remember { SnackbarHostState() }
     val coroutineScope = rememberCoroutineScope()
+
+    val culturePagerState = rememberPagerState(pageCount = {
+        recordingData.cultureLifeRecord.size
+    })
 
     Surface(
         modifier = modifier.fillMaxSize(), color = White,
@@ -107,7 +123,7 @@ fun RecordScreenContent(navController: NavController, recordingData: RecordingDa
                         }
                     }
                 }
-                RecordCalendar(rememberSnackbarState = rememberSnackbarState) // 달력
+                RecordCalendar(recordViewModel = recordViewModel) // 달력
                 Row(
                     modifier = Modifier.fillMaxWidth().wrapContentHeight()
                         .padding(start = defaultPadding + 4.dp, top = defaultPadding / 2),
@@ -125,17 +141,12 @@ fun RecordScreenContent(navController: NavController, recordingData: RecordingDa
                 }
                 Spacer(
                     modifier = Modifier.fillMaxWidth()
-                        .padding(top = defaultPadding, bottom = defaultPadding)
-                        .height(4.dp)
+                        .padding(top = defaultPadding, bottom = defaultPadding).height(4.dp)
                         .background(BrightGray)
                 )
                 Column(
-                    modifier = Modifier.fillMaxWidth()
-                        .padding(start = 30.dp, end = 30.dp, top = defaultPadding)
+                    modifier = Modifier.fillMaxWidth().padding(start = 30.dp, end = 30.dp)
                 ) {
-                    /*
-                        산책 기록 LazyRow
-                     */
                     RecordScreenIconTextTitle(
                         painterResource(R.drawable.ic_walk_record_check),
                         SpiroDiscoBall,
@@ -145,27 +156,63 @@ fun RecordScreenContent(navController: NavController, recordingData: RecordingDa
                         modifier = Modifier.fillMaxSize(),
                         horizontalArrangement = Arrangement.spacedBy(28.dp)
                     ) {
+                        // 산책 기록 LazyRow()
                         items(recordingData.walkRecord.size) {
                             RecordScreenLazyItems(
                                 modifier = Modifier.fillParentMaxWidth()
-                            ) {
-
-                            }
+                            ) {}
                         }
                     }
-
-                    /*
-                        문화 생활 LazyRow Item
-                     */
+                    fillMaxWidthSpacer(Modifier, 20.dp)
                     RecordScreenIconTextTitle(
                         painterResource(R.drawable.ic_culture_life_check),
                         GoldenPoppy,
                         context.getString(R.string.record_screen_culture_life_content)
                     )
                 }
+                Row(
+                    modifier = Modifier.fillMaxSize(),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    // CultureLife Pager
+                    IconButton(modifier = Modifier.weight(1f), onClick = {
+                        coroutineScope.launch {
+                            if (culturePagerState.currentPage > 0) {
+                                culturePagerState.animateScrollToPage(culturePagerState.currentPage - 1)
+                            }
+                        }
+                    }) {
+                        Icon(
+                            imageVector = Icons.Filled.KeyboardArrowLeft, contentDescription = null
+                        )
+                    }
+                    HorizontalPager(
+                        modifier = Modifier.weight(8f),
+                        state = culturePagerState,
+                        contentPadding = PaddingValues()
+                    ) { page ->
+                        RecordScreenLazyItems(
+                            modifier = Modifier.fillMaxSize()
+                        ) {
+
+                        }
+                    }
+                    IconButton(modifier = Modifier.weight(1f), onClick = {
+                        coroutineScope.launch {
+                            if (culturePagerState.currentPage < culturePagerState.pageCount - 1) {
+                                culturePagerState.animateScrollToPage(culturePagerState.currentPage + 1)
+                            }
+                        }
+                    }) {
+                        Icon(
+                            imageVector = Icons.Filled.KeyboardArrowRight, contentDescription = null
+                        )
+                    }
+                }
+
+
             }
         } // End of LazyColumn()
-        SnackbarHost(hostState = rememberSnackbarState)
     } // End of Surface()
 } // End of RecordScreenContent()
 
@@ -211,10 +258,21 @@ private fun RecordScreenLazyItems(
 
 @Composable
 private fun RecordCalendar(
-    viewModel: RecordCalendarViewModel = viewModel(), rememberSnackbarState: SnackbarHostState
+    calendarViewModel: RecordCalendarViewModel = hiltViewModel(), recordViewModel: RecordViewModel
 ) {
-    val calendarUiState by viewModel.calendarUiState.collectAsState() // 달력 날짜 전체 데이터
+    val calendarUiState by calendarViewModel.calendarUiState.collectAsStateWithLifecycle() // 달력 날짜 전체 데이터
     val coroutineScope = rememberCoroutineScope()
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    SnackbarHost(hostState = snackbarHostState)
+
+    LaunchedEffect(recordViewModel.snackbarFlow) {
+        // recordViewModel의 snackbarFlow의 값이 변경되면 이를 감지하여 동작함
+        // collectLatest를 사용하여 최신 이벤트만 처리할 수 있도록 하였음
+        recordViewModel.snackbarFlow.collectLatest { message ->
+            snackbarHostState.showSnackbar(message)
+        }
+    }
 
     Surface(
         // modifier = Modifier.wrapContentHeight().verticalScroll(rememberScrollState()), color = White
@@ -224,14 +282,14 @@ private fun RecordCalendar(
             yearMonth = calendarUiState.yearMonth,
             dates = calendarUiState.dates,
             onPreviousMonthButtonClicked = { prevMonth ->
-                viewModel.toPreviousMonth(prevMonth)
+                calendarViewModel.toPreviousMonth(prevMonth)
             },
             onNextMonthButtonClicked = { nextMonth ->
-                viewModel.toNextMonth(nextMonth)
+                calendarViewModel.toNextMonth(nextMonth)
             },
             onDateClickListener = {
                 coroutineScope.launch {
-                    rememberSnackbarState.showSnackbar("날짜 선택")
+                    recordViewModel.showSnackbar("날짜 선택")
                 }
             })
     }
@@ -260,7 +318,7 @@ fun LazyRowPreview() {
 
         }
     }
-}
+} // End of LazyRowPreview()
 
 private val recordingScreenDummyData = RecordingDataModel(
     arrayListOf(
@@ -282,6 +340,9 @@ private val recordingScreenDummyData = RecordingDataModel(
             275,
         )
     ), arrayListOf(
-        CultureLifeRecord("", "", "", "", "")
+        CultureLifeRecord("", "", "", "", ""),
+        CultureLifeRecord("", "", "", "", ""),
+        CultureLifeRecord("", "", "", "", ""),
+        CultureLifeRecord("", "", "", "", ""),
     )
 )
