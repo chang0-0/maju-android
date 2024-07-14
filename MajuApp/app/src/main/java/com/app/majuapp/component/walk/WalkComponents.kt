@@ -1,6 +1,5 @@
 package com.app.majuapp.component.walk
 
-import android.R.attr.fontWeight
 import android.content.Context
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.Spring
@@ -364,10 +363,16 @@ fun WalkScreenInformDialogue(
 
 
 @Composable
-fun WalkRecordingBox(context: Context) {/*
+fun WalkRecordingBox(
+    context: Context,
+    walkViewModel: WalkViewModel = hiltViewModel()
+) {
+    /*
         바텀 시트 내부
         이동 거리, 걸음 수가 보이는 회색 박스
      */
+
+
 
     Box(
         Modifier.clip(RoundedCornerShape(8.dp)).fillMaxWidth().height(92.dp)
@@ -474,8 +479,6 @@ fun Long.formatTime(): String {
     val remainingSeconds = this % 60
     return String.format("%02d:%02d:%02d", hours, minutes, remainingSeconds)
 } // End of Long.formatTime()
-
-
 
 
 @Composable

@@ -36,12 +36,15 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.health.connect.client.permission.HealthPermission
+import androidx.health.connect.client.records.StepsRecord
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.app.majuapp.R
 import com.app.majuapp.component.Loader
 import com.app.majuapp.component.walk.MapScreen
+import com.app.majuapp.component.walk.RequestHealthPermission
 import com.app.majuapp.component.walk.RequestLocationPermission
 import com.app.majuapp.component.walk.WalkRecordingBox
 import com.app.majuapp.component.walk.WalkScreenChooseStartDialog
@@ -49,11 +52,15 @@ import com.app.majuapp.component.walk.WalkScreenInformDialogue
 import com.app.majuapp.component.walk.WalkingRecordingTimer
 import com.app.majuapp.component.walk.getCurrentLocation
 import com.app.majuapp.component.walk.getLastUserLocation
+import com.app.majuapp.domain.model.walk.HealthRecordViewModel
 import com.app.majuapp.ui.theme.SpiroDiscoBall
 import com.app.majuapp.ui.theme.White
 import com.app.majuapp.ui.theme.defaultPadding
 import com.app.majuapp.ui.theme.notoSansKoreanFontFamily
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.android.gms.fitness.Fitness
+import com.google.android.gms.fitness.FitnessOptions
+import com.google.android.gms.fitness.data.DataType
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.compose.CameraPositionState
@@ -71,6 +78,10 @@ private val permissionsToRequest = arrayOf(
     Manifest.permission.ACCESS_COARSE_LOCATION,
 )
 
+private val HEALTH_PERMISSIONS = setOf(
+    HealthPermission.getReadPermission(StepsRecord::class),
+    HealthPermission.getWritePermission(StepsRecord::class)
+)
 
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
@@ -102,10 +113,6 @@ fun WalkScreen(navController: NavController, walkViewModel: WalkViewModel = hilt
         })
      */
 
-    LaunchedEffect(Unit) {
-        // 현재 위치에 따른 산책로 추천
-        walkViewModel.getWalkingTrails()
-    }
 
     Surface(
         modifier = Modifier.fillMaxSize(),
@@ -113,6 +120,21 @@ fun WalkScreen(navController: NavController, walkViewModel: WalkViewModel = hilt
         var locationText by remember { mutableStateOf("No location obtained :(") }
         var showPermissionResultText by remember { mutableStateOf(false) }
         var permissionResultText by remember { mutableStateOf("Permission Granted...") }
+
+
+        RequestHealthPermission(onPermissionGranted = {
+            showPermissionResultText = true
+        }, onPermissionDenied = {
+            // Callback when permission is denied
+            showPermissionResultText = true
+            permissionResultText = "Permission Denied :("
+        }, onPermissionsRevoked = {
+            // Callback when permission is revoked
+            showPermissionResultText = true
+            permissionResultText = "Permission Revoked :("
+        }
+        )
+
 
         RequestLocationPermission(onPermissionGranted = {
             // Callback when permission is granted
@@ -149,6 +171,11 @@ fun WalkScreen(navController: NavController, walkViewModel: WalkViewModel = hilt
     // 사용자의 현재 위치 정보가 저장된 값을 ViewModel에서 가져옵니다.
     val currentLocation by walkViewModel.currentLocation.collectAsStateWithLifecycle()
 
+    LaunchedEffect(Unit) {
+        // 현재 위치에 따른 산책로 추천
+        walkViewModel.getWalkingTrails()
+    }
+
     if (currentLocation != null) {
         WalkScreenContent(navController, walkViewModel)
     } else {
@@ -170,6 +197,7 @@ private fun WalkScreenContent(
     navController: NavController,
     walkViewModel: WalkViewModel,
     timerViewModel: TimerViewModel = hiltViewModel(),
+    healthRecordViewModel: HealthRecordViewModel = hiltViewModel(),
 ) {
     val context = LocalContext.current
 
@@ -300,7 +328,19 @@ private fun WalkScreenContent(
                             currentChooseWalkingTrail!!.endLon
                         )
                     )
-                    timerViewModel.startTimer()
+                    timerViewModel.startTimer() // 타이머 시작하기
+                    // 산책 기록 걸음수 저장
+
+                    val fitnessOptions = FitnessOptions.builder()
+                        .addDataType(DataType.TYPE_STEP_COUNT_DELTA, FitnessOptions.ACCESS_READ)
+                        .build()
+
+
+
+                    // healthRecordViewModel.accessGoogleFit(context)
+
+
+
                 } else {
                     // 아직 데이터가 생성되지 않았을 때,
                     // 카메라 포지션 상태 변경값을 감지해서 지도 변화
@@ -361,7 +401,7 @@ private fun WalkScreenContent(
         }
     }
 
-    val showState = walkViewModel.showInfromDialog.collectAsStateWithLifecycle()
+    val showState = walkViewModel.showInformDialog.collectAsStateWithLifecycle()
     when (showState.value) {
         true -> {
             WalkScreenInformDialogue(context.getString(R.string.walk_screen_inform_dialog_title),

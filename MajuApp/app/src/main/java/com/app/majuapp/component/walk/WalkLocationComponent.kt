@@ -7,9 +7,9 @@ import android.content.pm.PackageManager
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.core.app.ActivityCompat
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.health.connect.client.permission.HealthPermission
+import androidx.health.connect.client.records.StepsRecord
 import com.app.majuapp.domain.model.walk.CoordinateData
-import com.app.majuapp.screen.walk.WalkViewModel
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
@@ -32,7 +32,7 @@ fun RequestLocationPermission(
         listOf(
             Manifest.permission.ACCESS_COARSE_LOCATION,
             Manifest.permission.ACCESS_FINE_LOCATION,
-        )
+        ),
     )
 
     // Use LaunchedEffect to handle permissions logic when the composition is launched.
@@ -61,6 +61,43 @@ fun RequestLocationPermission(
         }
     }
 } // End of RequestLocationPermission()
+
+@OptIn(ExperimentalPermissionsApi::class)
+@Composable
+fun RequestHealthPermission(
+    onPermissionGranted: () -> Unit,
+    onPermissionDenied: () -> Unit,
+    onPermissionsRevoked: () -> Unit
+) {
+    val state = rememberMultiplePermissionsState(
+        listOf(
+            HealthPermission.getReadPermission(StepsRecord::class),
+            HealthPermission.getWritePermission(StepsRecord::class)
+        )
+    )
+
+
+    LaunchedEffect(key1 = state) {
+        val allPermissionsRevoked = state.permissions.size == state.revokedPermissions.size
+
+        val permissionsToRequest = state.permissions.filter {
+            !it.status.isGranted
+        }
+
+        if (permissionsToRequest.isNotEmpty()) state.launchMultiplePermissionRequest()
+
+        if (allPermissionsRevoked) {
+            onPermissionsRevoked()
+        } else {
+            if (state.allPermissionsGranted) {
+                onPermissionGranted()
+            } else {
+                onPermissionDenied()
+            }
+        }
+    }
+}
+
 
 @SuppressLint("MissingPermission")
 fun getLastUserLocation(

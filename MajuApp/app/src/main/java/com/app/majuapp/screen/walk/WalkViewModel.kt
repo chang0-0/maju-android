@@ -2,7 +2,6 @@ package com.app.majuapp.screen.walk
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.app.majuapp.domain.model.walk.CoordinateData
 import com.app.majuapp.domain.model.walk.WalkTrailData
 import com.app.majuapp.domain.model.walk.WalkingTrailResultData
 import com.app.majuapp.domain.repository.walk.WalkRepository
@@ -23,7 +22,7 @@ class WalkViewModel @Inject constructor(
 
     // ========================================= Information Dialog ======================================
     private val _showInformDialog = MutableStateFlow<Boolean>(false)
-    val showInfromDialog = _showInformDialog.asStateFlow()
+    val showInformDialog = _showInformDialog.asStateFlow()
 
     fun setShowInfromDialog() {
         _showInformDialog.value = !_showInformDialog.value

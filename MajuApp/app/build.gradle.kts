@@ -169,6 +169,8 @@ dependencies {
 
     // Google Map
     implementation("com.google.maps.android:maps-compose:5.0.3")
+    // location service
+    implementation("com.google.android.gms:play-services-location:21.1.0")
 
     // Optionally, you can include the Compose utils library for Clustering,
     // Street View metadata checks, etc.
@@ -180,8 +182,10 @@ dependencies {
     //WebView in Compose
     implementation("com.google.accompanist:accompanist-webview:0.35.0-alpha")
 
-    // location service
-    implementation("com.google.android.gms:play-services-location:21.1.0")
+
+    // google health care
+    implementation("androidx.health.connect:connect-client:1.1.0-alpha02")
+    implementation("com.google.android.gms:play-services-fitness:21.0.1")
 
     // Permission
     implementation("com.google.accompanist:accompanist-permissions:0.35.0-alpha")
