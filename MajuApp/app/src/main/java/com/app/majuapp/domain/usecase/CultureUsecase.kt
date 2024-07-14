@@ -14,7 +14,7 @@ class CultureUsecase @Inject constructor(
 
     val cultureEventList: StateFlow<List<CultureEventDomainModel>> = cultureRepository.cultureEventList
     val cultureEventListNetworkResult: StateFlow<NetworkResult<NetworkDto<List<CultureEventDomainModel>>>> = cultureRepository.cultureEventListNetworkResult
-    val cultureEventDetail: StateFlow<NetworkResult<NetworkDto<CultureDetailDomainModel>>> = cultureRepository.cultureEventDetail
+    val cultureEventDetailNetworkResult: StateFlow<NetworkResult<NetworkDto<CultureDetailDomainModel>>> = cultureRepository.cultureEventDetailNetworkResult
     val cultureEventToggleNetworkResult: StateFlow<NetworkResult<NetworkDto<Boolean>>> = cultureRepository.cultureEventToggleNetworkResult
 
     suspend fun getAllCultureEvents() {

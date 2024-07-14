@@ -1,7 +1,5 @@
 package com.app.majuapp.data.repositoryImp
 
-import android.util.Log
-import com.app.majuapp.Application
 import com.app.majuapp.data.dto.NetworkDto
 import com.app.majuapp.domain.api.CultureApi
 import com.app.majuapp.domain.model.CultureDetailDomainModel
@@ -20,11 +18,13 @@ class CultureRepositoryImp @Inject constructor(
     private val _cultureEventList = MutableStateFlow<List<CultureEventDomainModel>>(listOf())
     override val cultureEventList: StateFlow<List<CultureEventDomainModel>> = _cultureEventList
 
+    private val _cultureEventDetail = MutableStateFlow<CultureDetailDomainModel?>(null)
+
     private val _cultureEventListNetworkResult = MutableStateFlow<NetworkResult<NetworkDto<List<CultureEventDomainModel>>>>(NetworkResult.Idle())
     override val cultureEventListNetworkResult: StateFlow<NetworkResult<NetworkDto<List<CultureEventDomainModel>>>> = _cultureEventListNetworkResult
 
-    private val _cultureEventDetail = MutableStateFlow<NetworkResult<NetworkDto<CultureDetailDomainModel>>>(NetworkResult.Idle())
-    override val cultureEventDetail: StateFlow<NetworkResult<NetworkDto<CultureDetailDomainModel>>> = _cultureEventDetail
+    private val _cultureEventDetailNetworkResult = MutableStateFlow<NetworkResult<NetworkDto<CultureDetailDomainModel>>>(NetworkResult.Idle())
+    override val cultureEventDetailNetworkResult: StateFlow<NetworkResult<NetworkDto<CultureDetailDomainModel>>> = _cultureEventDetailNetworkResult
 
     private val _cultureEventToggleNetworkResult = MutableStateFlow<NetworkResult<NetworkDto<Boolean>>>(NetworkResult.Idle())
     override val cultureEventToggleNetworkResult: StateFlow<NetworkResult<NetworkDto<Boolean>>> = _cultureEventToggleNetworkResult
@@ -63,7 +63,7 @@ class CultureRepositoryImp @Inject constructor(
 
     override suspend fun getCultureEventsDetail(eventId: Int) {
         val response = cultureApi.getCultureEventsDetail(eventId)
-        _cultureEventDetail.setNetworkResult(response)
+        _cultureEventDetailNetworkResult.setNetworkResult(response)
     }
 
     override suspend fun toggleCultureLike(eventId: Int) {

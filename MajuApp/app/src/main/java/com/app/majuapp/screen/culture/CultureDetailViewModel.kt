@@ -13,11 +13,17 @@ class CultureDetailViewModel @Inject constructor(
     private val cultureUsecase: CultureUsecase
 ): ViewModel() {
 
-    val cultureEventDetail = cultureUsecase.cultureEventDetail
+    val cultureEventDetailNetworkResult = cultureUsecase.cultureEventDetailNetworkResult
 
     fun getCultureEventDetail(cultureEventId: Int) {
         viewModelScope.launch(Dispatchers.IO) {
             cultureUsecase.getCultureEventsDetail(cultureEventId)
+        }
+    }
+
+    fun toggleCultureLike(eventId: Int) {
+        viewModelScope.launch(Dispatchers.IO) {
+            cultureUsecase.toggleCultureLike(eventId)
         }
     }
 

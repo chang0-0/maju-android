@@ -23,8 +23,6 @@ import com.app.majuapp.R
 import com.app.majuapp.component.MapMarker
 import com.app.majuapp.component.culture.CultureCard
 import com.app.majuapp.component.culture.CultureRowChoiceChips
-import com.app.majuapp.data.dto.NetworkDto
-import com.app.majuapp.domain.model.CultureEventDomainModel
 import com.app.majuapp.ui.theme.cultureDefaultPadding
 import com.app.majuapp.util.NetworkResult
 import com.app.majuapp.util.checkAndRequestPermissions
@@ -46,10 +44,8 @@ fun CultureMapScreen(
     val currentLocation = cultureViewModel.currentLocation.collectAsStateWithLifecycle()
     val cultureEventListNetworkResult =
         cultureViewModel.cultureEventListNetworkResult.collectAsStateWithLifecycle()
-    val cultureEventToggleNetworkResult =
-        cultureViewModel.cultureEventToggleNetworkResult.collectAsStateWithLifecycle()
     val cultureEventList = cultureViewModel.cultureEventList.collectAsStateWithLifecycle()
-    val focusedEvent = cultureViewModel.focusedEvent.collectAsStateWithLifecycle()
+    val focusedEventId = cultureViewModel.focusedEvent.collectAsStateWithLifecycle()
 
     /** 요청할 권한 **/
     val permissions = arrayOf(
@@ -132,34 +128,6 @@ fun CultureMapScreen(
         }
     }
 
-    LaunchedEffect(key1 = cultureEventListNetworkResult.value) {
-        cultureEventListNetworkResult.value.let {
-            when (it) {
-                is NetworkResult.Error -> {
-                    Log.e("culture Api", it.msg ?: "에러")
-                }
-
-                is NetworkResult.Idle -> {
-                    Log.d("culture Api", "IDLE")
-                }
-
-                is NetworkResult.Loading -> {
-                    Log.d("culture Api", "LOADING")
-                }
-
-                is NetworkResult.Success -> {
-                    if (it.value.status == 201) {
-                        cultureEventList.value.find { it.id == cultureViewModel.focusedEvent.value!!.id }?.let { event ->
-                            cultureViewModel.focusEvent(event.copy())
-                        }
-                    } else {
-                        Log.e("culture Api", "culture events api call failed.")
-                    }
-                }
-            }
-        }
-    }
-
     Surface(
         modifier = Modifier
             .fillMaxSize()
@@ -197,7 +165,7 @@ fun CultureMapScreen(
                             else -> R.drawable.ic_pin_experience
                         }
                     ) {
-                        cultureViewModel.focusEvent(cultureEvent)
+                        cultureViewModel.focusEvent(cultureEvent.id)
                         false
                     }
                 }
@@ -211,9 +179,9 @@ fun CultureMapScreen(
                     .offset(y = cultureDefaultPadding),
             )
 
-            if (focusedEvent.value != null)
+            cultureEventList.value.find { it.id == (focusedEventId.value) }?.let { event ->
                 CultureCard(
-                    focusedEvent.value!!,
+                    event,
                     true,
                     modifier = Modifier
                         .wrapContentSize()
@@ -224,6 +192,7 @@ fun CultureMapScreen(
                         cultureViewModel.toggleCultureLike(id)
                     }
                 )
+            }
         }
     }
 

@@ -34,8 +34,8 @@ class CultureViewModel @Inject constructor(
     private val _genreChoicedIdx = MutableStateFlow<Int>(-1)
     val genreChoicedIdx: StateFlow<Int> = _genreChoicedIdx
 
-    private val _focusedEvent = MutableStateFlow<CultureEventDomainModel?>(null)
-    val focusedEvent: StateFlow<CultureEventDomainModel?> = _focusedEvent
+    private val _focusedEvent = MutableStateFlow<Int>(-1)
+    val focusedEvent: StateFlow<Int> = _focusedEvent
 
     init {
         getCurrentLocation()
@@ -73,14 +73,14 @@ class CultureViewModel @Inject constructor(
         }
     }
 
-    fun focusEvent(event: CultureEventDomainModel) {
+    fun focusEvent(eventId: Int) {
         viewModelScope.launch(Dispatchers.IO) {
-            _focusedEvent.emit(event)
+            _focusedEvent.emit(eventId)
         }
     }
 
     fun unfocusEvent() = viewModelScope.launch(Dispatchers.IO) {
-        _focusedEvent.emit(null)
+        _focusedEvent.emit(-1)
     }
 
 }

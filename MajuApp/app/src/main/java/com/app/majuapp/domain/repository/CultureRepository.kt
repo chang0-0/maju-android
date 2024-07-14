@@ -10,7 +10,7 @@ interface CultureRepository {
 
     val cultureEventList: StateFlow<List<CultureEventDomainModel>>
     val cultureEventListNetworkResult: StateFlow<NetworkResult<NetworkDto<List<CultureEventDomainModel>>>>
-    val cultureEventDetail: StateFlow<NetworkResult<NetworkDto<CultureDetailDomainModel>>>
+    val cultureEventDetailNetworkResult: StateFlow<NetworkResult<NetworkDto<CultureDetailDomainModel>>>
     val cultureEventToggleNetworkResult: StateFlow<NetworkResult<NetworkDto<Boolean>>>
 
     suspend fun getAllCultureEvents()
