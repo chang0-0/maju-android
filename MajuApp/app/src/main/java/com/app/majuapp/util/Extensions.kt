@@ -9,7 +9,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import retrofit2.Response
 
-suspend fun <T> MutableStateFlow<NetworkResult<T>>.setNetworkResult(response: Response<T>) {
+suspend fun <T> MutableStateFlow<NetworkResult<T>>.setNetworkResult(response: Response<T>, onSuccess: () -> Unit = {}) {
     this.emit(NetworkResult.Loading())
     CoroutineScope(Dispatchers.IO).launch {
         try {
@@ -20,6 +20,7 @@ suspend fun <T> MutableStateFlow<NetworkResult<T>>.setNetworkResult(response: Re
                             response.body()!!
                         )
                     )
+                    onSuccess()
                 }
                 response.errorBody() != null -> this@setNetworkResult.emit(
                     NetworkResult.Error(

@@ -16,5 +16,6 @@ data class CultureEventDomainModel(
     val price: String,
     val startDate: String,
     val thumbnail: String,
-    val url: String
+    val url: String,
+    val likeStatus: Boolean
 ): Parcelable

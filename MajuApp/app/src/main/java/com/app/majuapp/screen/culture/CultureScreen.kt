@@ -30,22 +30,25 @@ fun CultureScreen(
             .fillMaxSize()
             .padding(top = 40.dp, start = 24.dp, end = 24.dp)
     ) {
-        val cultureEventListNetworkResult = cultureViewModel.cultureEventList.collectAsStateWithLifecycle()
+        val cultureEventListNetworkResult =
+            cultureViewModel.cultureEventListNetworkResult.collectAsStateWithLifecycle()
+        val cultureEventList = cultureViewModel.cultureEventList.collectAsStateWithLifecycle()
 
         Column {
             CultureRowChoiceChips(cultureViewModel = cultureViewModel, modifier = Modifier)
             LazyColumn(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                (cultureEventListNetworkResult.value.data as NetworkDto<List<CultureEventDomainModel>>?)?.let {
-                    items(it.data ?: listOf()) { culture ->
-                        CultureCard(culture) { id ->
-                            navController.navigate("${Screen.CultureDetail.route}/$id")
+                items(cultureEventList.value) { culture ->
+                    CultureCard(
+                        culture,
+                        onLikeClicked = { id ->
+                            cultureViewModel.toggleCultureLike(id)
                         }
+                    ) { id ->
+                        navController.navigate("${Screen.CultureDetail.route}/$id")
                     }
                 }
             }
-
         }
-
     }
 
 

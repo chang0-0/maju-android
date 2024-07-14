@@ -9,7 +9,7 @@ class SharedPreferencesUtil(context: Context) {
 
     fun addUserRefreshToken(refresh_token: String) {
         val editor = preferences.edit()
-        editor.putString(REFRESH_TOKEN, refresh_token)
+        editor.putString(REFRESH_TOKEN, "Bearer $refresh_token")
         editor.apply()
     } // End of addUserRefreshToken
 

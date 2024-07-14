@@ -54,48 +54,6 @@ fun SetUpNavGraph(
         mutableStateOf(0)
     }
 
-//    SharedTransitionLayout {
-//        NavHost(
-//            navController = navController,
-//            startDestination = Screen.Preference.route,
-//        ) {
-//            composable(
-//                route = Screen.Home.route
-//            ) {
-//                HomeScreen(navController = navController)
-//            }
-//
-//            composable(
-//                route = Screen.Main.route
-//            ) {
-//                MainScreen(navController = navController)
-//            }
-//
-//            composable(
-//                route = Screen.Preference.route
-//            ) {
-//                PreferenceScreen(navController = navController)
-//            }
-//
-//            composable(
-//                route = Screen.Culture.route
-//            ) {
-//                CultureScreen(navController = navController)
-//            }
-//
-//            composable(
-//                route = Screen.Walk.route
-//            ) {
-//                WalkScreen(navController = navController)
-//            }
-//
-//            composable(
-//                route = Screen.Test.route
-//            ) {
-//                TestScreen(navController = navController)
-//            }
-//        }
-
     Scaffold(
         bottomBar = {
             if (shouldShowBottomBar(navController = navController))
@@ -110,6 +68,7 @@ fun SetUpNavGraph(
                                 selectedItemIndex = index
                                 navController.navigate(screen.route) {
                                     popUpTo(navController.graph.findStartDestination().id) {
+                                        inclusive = true
                                         saveState = true
                                     }
                                     launchSingleTop = true
@@ -135,8 +94,6 @@ fun SetUpNavGraph(
                         )
                     }
                 }
-
-
         }
     ) { paddingValues ->
 //        SharedTransitionLayout {
@@ -185,7 +142,14 @@ fun SetUpNavGraph(
             ) {
                 CultureMapScreen(
                     navController = navController,
-                    cultureViewModel = cultureViewModel
+                    cultureViewModel = cultureViewModel,
+                    navigateToCultureScreen = {
+
+                    },
+                    onBack = {
+//                        selectedItemIndex = 0
+                        navController.popBackStack()
+                    }
                 )
             }
 

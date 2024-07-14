@@ -12,8 +12,10 @@ class CultureUsecase @Inject constructor(
     private val cultureRepository: CultureRepository
 ) {
 
-    val cultureEventList: StateFlow<NetworkResult<NetworkDto<List<CultureEventDomainModel>>>> = cultureRepository.cultureEventList
+    val cultureEventList: StateFlow<List<CultureEventDomainModel>> = cultureRepository.cultureEventList
+    val cultureEventListNetworkResult: StateFlow<NetworkResult<NetworkDto<List<CultureEventDomainModel>>>> = cultureRepository.cultureEventListNetworkResult
     val cultureEventDetail: StateFlow<NetworkResult<NetworkDto<CultureDetailDomainModel>>> = cultureRepository.cultureEventDetail
+    val cultureEventToggleNetworkResult: StateFlow<NetworkResult<NetworkDto<Boolean>>> = cultureRepository.cultureEventToggleNetworkResult
 
     suspend fun getAllCultureEvents() {
         cultureRepository.getAllCultureEvents()
@@ -25,6 +27,10 @@ class CultureUsecase @Inject constructor(
 
     suspend fun getCultureEventsDetail(eventId: Int) {
         cultureRepository.getCultureEventsDetail(eventId)
+    }
+
+    suspend fun toggleCultureLike(eventId: Int) {
+        cultureRepository.toggleCultureLike(eventId)
     }
 
 } // End of CultureUsecase

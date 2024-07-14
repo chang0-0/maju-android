@@ -8,6 +8,6 @@ data class LoginDomainModel(
     val accessToken: String,
     val isExist: Boolean,
     val isLeft: Boolean,
-    val refreshToken: String,
+    val refreshToken: String?,
     val tokenType: String
 ) : Parcelable

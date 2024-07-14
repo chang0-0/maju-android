@@ -4,6 +4,7 @@ import com.app.majuapp.Application
 import com.app.majuapp.BuildConfig
 import com.app.majuapp.domain.api.CultureApi
 import com.app.majuapp.domain.api.LoginApi
+import com.app.majuapp.domain.api.ReissueApi
 import com.app.majuapp.domain.api.TestApi
 import com.app.majuapp.util.Constants
 import dagger.Module
@@ -27,11 +28,19 @@ private const val TAG = "AppModule_창영"
 
 @Qualifier
 @Retention(AnnotationRetention.BINARY)
+annotation class RefreshHeaderInterceptorOkHttpClient
+
+@Qualifier
+@Retention(AnnotationRetention.BINARY)
 annotation class HeaderInterceptorOkHttpClient
 
 @Qualifier
 @Retention(AnnotationRetention.BINARY)
 annotation class WithoutHeaderInterceptorOkHttpClient
+
+@Qualifier
+@Retention(AnnotationRetention.BINARY)
+annotation class RefreshInterceptorRetrofit
 
 @Qualifier
 @Retention(AnnotationRetention.BINARY)
@@ -44,6 +53,15 @@ annotation class WithoutHeaderInterceptorRetrofit
 @Module
 @InstallIn(SingletonComponent::class)
 object AppModule {
+
+    class RefreshHeaderInterceptor @Inject constructor() : Interceptor {
+        override fun intercept(chain: Interceptor.Chain): Response = with(chain) {
+            val newRequest = request().newBuilder()
+                .addHeader("Authorization", Application.sharedPreferencesUtil.getUserRefreshToken())
+                .build()
+            proceed(newRequest)
+        }
+    } // End of RefreshHeaderInterceptor class
 
     class HeaderInterceptor @Inject constructor() : Interceptor {
         override fun intercept(chain: Interceptor.Chain): Response = with(chain) {
@@ -62,6 +80,27 @@ object AppModule {
             proceed(newRequest)
         }
     } // End of AppInterceptor class
+
+    @RefreshHeaderInterceptorOkHttpClient
+    @Singleton
+    @Provides
+    fun providesRefreshHeaderInterceptorOkHttpClient(appInterceptor: RefreshHeaderInterceptor): OkHttpClient {
+        val logging = HttpLoggingInterceptor()
+        if (BuildConfig.DEBUG) {
+            logging.level = HttpLoggingInterceptor.Level.BODY
+        } else {
+            logging.level = HttpLoggingInterceptor.Level.NONE
+        }
+
+        return OkHttpClient.Builder()
+            .readTimeout(30, TimeUnit.SECONDS)
+            .writeTimeout(15, TimeUnit.SECONDS)
+            .addNetworkInterceptor(HttpLoggingInterceptor())
+            .addInterceptor(HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY))
+            .connectTimeout(1, TimeUnit.MINUTES)
+            .addInterceptor(appInterceptor)
+            .build()
+    } // End of providesRefreshHeaderInterceptorOkHttpClient()
 
     @HeaderInterceptorOkHttpClient
     @Singleton
@@ -111,6 +150,18 @@ object AppModule {
         return retrofit.create(TestApi::class.java)
     } // End of providesApiService()
 
+    @RefreshInterceptorRetrofit
+    @Provides
+    @Singleton
+    fun providesRefreshHeaderInterceptorRetrofit(@RefreshHeaderInterceptorOkHttpClient okHttpClient: OkHttpClient): Retrofit {
+        val rxAdapter = RxJava3CallAdapterFactory.create()
+
+        return Retrofit.Builder().baseUrl(Constants.API_BASE_URL)
+            .addConverterFactory(GsonConverterFactory.create()).addCallAdapterFactory(rxAdapter)
+            .client(okHttpClient)
+            .build()
+    } // End of providesRefreshHeaderInterceptorRetrofit()
+
     @HeaderInterceptorRetrofit
     @Provides
     @Singleton
@@ -146,5 +197,11 @@ object AppModule {
     fun providesCultureApi(@HeaderInterceptorRetrofit retrofit: Retrofit): CultureApi {
         return retrofit.create(CultureApi::class.java)
     } // End of providesCultureApi
+
+    @Provides
+    @Singleton
+    fun providesReissueApi(@RefreshInterceptorRetrofit retrofit: Retrofit): ReissueApi {
+        return retrofit.create(ReissueApi::class.java)
+    }
 
 } // End of AppModule class

@@ -14,6 +14,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.outlined.AccessTime
 import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material.icons.outlined.LocationOn
@@ -40,6 +42,7 @@ fun CultureCard(
     culture: CultureEventDomainModel,
     favoriteButtonFlag: Boolean = true,
     modifier: Modifier = Modifier,
+    onLikeClicked: (Int) -> Unit = { _ -> },
     onClick: (Int) -> Unit = {},
 ) {
     Card(
@@ -52,10 +55,11 @@ fun CultureCard(
                 color = Color.LightGray,
                 shape = CardDefaults.shape
             ),
-        colors = CardDefaults.cardColors(containerColor = Color.White, )
+        colors = CardDefaults.cardColors(containerColor = Color.White)
     ) {
         Row(
-            modifier = Modifier.height(IntrinsicSize.Min)
+            modifier = Modifier
+                .height(IntrinsicSize.Min)
                 .padding(16.dp),
             horizontalArrangement = Arrangement.SpaceEvenly
         ) {
@@ -79,11 +83,14 @@ fun CultureCard(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     CultureDetailCategoryChip(cultureDetailCategory = culture.category)
-                    if (favoriteButtonFlag)
-                        Icon(
-                            imageVector = Icons.Outlined.FavoriteBorder,
-                            contentDescription = "favorite"
-                        )
+                    Icon(
+                        imageVector = if (!culture.likeStatus) Icons.Outlined.FavoriteBorder else Icons.Filled.Favorite,
+                        contentDescription = "favorite",
+                        modifier = Modifier.clickable {
+                            onLikeClicked(culture.id)
+                        },
+                        tint = if (!culture.likeStatus) Color.LightGray else Color.Red
+                    )
                 }
                 Spacer(modifier = Modifier.weight(1f))
                 Text(

@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.app.majuapp.data.dto.LoginDto
 import com.app.majuapp.domain.usecase.LoginUsecase
+import com.app.majuapp.domain.usecase.ReissueUsecase
 import com.app.majuapp.util.NetworkResult
 import com.kakao.sdk.auth.model.OAuthToken
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -15,7 +16,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class LoginViewModel @Inject constructor(
-    private val loginUsecase: LoginUsecase
+    private val loginUsecase: LoginUsecase, private val reissueUsecase: ReissueUsecase
 ) : ViewModel() {
     val loginResult: StateFlow<NetworkResult<LoginDto>> = loginUsecase.loginResult
 
@@ -31,6 +32,10 @@ class LoginViewModel @Inject constructor(
 
     fun idle() = viewModelScope.launch(Dispatchers.IO) {
         loginUsecase.idle()
+    }
+
+    fun reissue() = viewModelScope.launch(Dispatchers.IO) {
+        reissueUsecase.reissue()
     }
 
 } // End of LoginViewModel class

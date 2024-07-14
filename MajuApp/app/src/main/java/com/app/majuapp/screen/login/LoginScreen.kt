@@ -64,13 +64,14 @@ fun LoginScreen(
                             it.value.data?.let { loginDto ->
                                 Application.sharedPreferencesUtil.apply {
                                     addUserAccessToken(loginDto.accessToken)
-                                    addUserRefreshToken(loginDto.refreshToken)
+                                    addUserRefreshToken(loginDto.refreshToken!!)
                                 }
                                 navController.navigate(Screen.Home.route) {
                                     popUpTo(Screen.Login.route) {
                                         inclusive = true
                                     }
                                 }
+                                loginViewModel.reissue()
                                 loginViewModel.idle()
                             }
                         }

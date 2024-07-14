@@ -1,6 +1,7 @@
 package com.app.majuapp.screen.culture
 
 import android.util.Log
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Box
@@ -36,13 +37,18 @@ import com.google.maps.android.compose.rememberCameraPositionState
 @Composable
 fun CultureMapScreen(
     navController: NavHostController = rememberNavController(),
-    cultureViewModel: CultureViewModel
+    cultureViewModel: CultureViewModel,
+    navigateToCultureScreen: () -> Unit,
+    onBack: () -> Unit
 ) {
 
     val context = LocalContext.current
     val currentLocation = cultureViewModel.currentLocation.collectAsStateWithLifecycle()
     val cultureEventListNetworkResult =
-        cultureViewModel.cultureEventList.collectAsStateWithLifecycle()
+        cultureViewModel.cultureEventListNetworkResult.collectAsStateWithLifecycle()
+    val cultureEventToggleNetworkResult =
+        cultureViewModel.cultureEventToggleNetworkResult.collectAsStateWithLifecycle()
+    val cultureEventList = cultureViewModel.cultureEventList.collectAsStateWithLifecycle()
     val focusedEvent = cultureViewModel.focusedEvent.collectAsStateWithLifecycle()
 
     /** 요청할 권한 **/
@@ -63,8 +69,12 @@ fun CultureMapScreen(
         /** 권한 요청시 거부 했을 경우 **/
         else {
             Log.d("permission", "권한이 거부되었습니다.")
-            navController.popBackStack()
+            onBack()
         }
+    }
+
+    BackHandler {
+        onBack()
     }
 
     var latLng = LatLng(37.7387295, 127.0458908)
@@ -113,7 +123,35 @@ fun CultureMapScreen(
 
                 is NetworkResult.Success -> {
                     if (it.value.status == 200) {
-//                        cultureEvents = it.value.data ?: listOf()
+                        cultureViewModel.unfocusEvent()
+                    } else {
+                        Log.e("culture Api", "culture events api call failed.")
+                    }
+                }
+            }
+        }
+    }
+
+    LaunchedEffect(key1 = cultureEventListNetworkResult.value) {
+        cultureEventListNetworkResult.value.let {
+            when (it) {
+                is NetworkResult.Error -> {
+                    Log.e("culture Api", it.msg ?: "에러")
+                }
+
+                is NetworkResult.Idle -> {
+                    Log.d("culture Api", "IDLE")
+                }
+
+                is NetworkResult.Loading -> {
+                    Log.d("culture Api", "LOADING")
+                }
+
+                is NetworkResult.Success -> {
+                    if (it.value.status == 201) {
+                        cultureEventList.value.find { it.id == cultureViewModel.focusedEvent.value!!.id }?.let { event ->
+                            cultureViewModel.focusEvent(event.copy())
+                        }
                     } else {
                         Log.e("culture Api", "culture events api call failed.")
                     }
@@ -143,26 +181,24 @@ fun CultureMapScreen(
                     cultureViewModel.unfocusEvent()
                 }
             ) {
-                (cultureEventListNetworkResult.value.data as NetworkDto<List<CultureEventDomainModel>>?)?.let {
-                    for (cultureEvent in it.data ?: listOf()) {
-                        MapMarker(
-                            position = LatLng(
-                                cultureEvent.lat,
-                                cultureEvent.lon
-                            ),
-                            title = cultureEvent.eventName,
-                            snippet = "Marker",
-                            iconResourceId = when (cultureEvent.genre) {
-                                "음악" -> R.drawable.ic_pin_music
-                                "전시" -> R.drawable.ic_pin_exhibition
-                                "연극" -> R.drawable.ic_pin_theater
-                                "체험" -> R.drawable.ic_pin_experience
-                                else -> R.drawable.ic_pin_experience
-                            }
-                        ) {
-                            cultureViewModel.focusEvent(cultureEvent)
-                            false
+                for (cultureEvent in cultureEventList.value) {
+                    MapMarker(
+                        position = LatLng(
+                            cultureEvent.lat,
+                            cultureEvent.lon
+                        ),
+                        title = cultureEvent.eventName,
+                        snippet = "Marker",
+                        iconResourceId = when (cultureEvent.genre) {
+                            "음악" -> R.drawable.ic_pin_music
+                            "전시" -> R.drawable.ic_pin_exhibition
+                            "연극" -> R.drawable.ic_pin_theater
+                            "체험" -> R.drawable.ic_pin_experience
+                            else -> R.drawable.ic_pin_experience
                         }
+                    ) {
+                        cultureViewModel.focusEvent(cultureEvent)
+                        false
                     }
                 }
             }
@@ -184,6 +220,9 @@ fun CultureMapScreen(
                         .align(Alignment.BottomCenter)
                         .padding(start = cultureDefaultPadding, end = cultureDefaultPadding)
                         .offset(y = -cultureDefaultPadding),
+                    onLikeClicked = { id ->
+                        cultureViewModel.toggleCultureLike(id)
+                    }
                 )
         }
     }
