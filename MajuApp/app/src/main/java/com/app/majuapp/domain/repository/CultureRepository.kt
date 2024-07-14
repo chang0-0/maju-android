@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.StateFlow
 interface CultureRepository {
 
     val cultureEventList: StateFlow<List<CultureEventDomainModel>>
+    val cultureEventDetail: StateFlow<CultureDetailDomainModel?>
     val cultureEventListNetworkResult: StateFlow<NetworkResult<NetworkDto<List<CultureEventDomainModel>>>>
     val cultureEventDetailNetworkResult: StateFlow<NetworkResult<NetworkDto<CultureDetailDomainModel>>>
     val cultureEventToggleNetworkResult: StateFlow<NetworkResult<NetworkDto<Boolean>>>

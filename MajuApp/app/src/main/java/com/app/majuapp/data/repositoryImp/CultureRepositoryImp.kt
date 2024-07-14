@@ -19,6 +19,7 @@ class CultureRepositoryImp @Inject constructor(
     override val cultureEventList: StateFlow<List<CultureEventDomainModel>> = _cultureEventList
 
     private val _cultureEventDetail = MutableStateFlow<CultureDetailDomainModel?>(null)
+    override val cultureEventDetail: StateFlow<CultureDetailDomainModel?> = _cultureEventDetail
 
     private val _cultureEventListNetworkResult = MutableStateFlow<NetworkResult<NetworkDto<List<CultureEventDomainModel>>>>(NetworkResult.Idle())
     override val cultureEventListNetworkResult: StateFlow<NetworkResult<NetworkDto<List<CultureEventDomainModel>>>> = _cultureEventListNetworkResult
@@ -63,7 +64,18 @@ class CultureRepositoryImp @Inject constructor(
 
     override suspend fun getCultureEventsDetail(eventId: Int) {
         val response = cultureApi.getCultureEventsDetail(eventId)
-        _cultureEventDetailNetworkResult.setNetworkResult(response)
+        _cultureEventDetailNetworkResult.setNetworkResult(response) {
+            response.body()?.let {
+                when(it.status) {
+                    200 -> {
+                        _cultureEventDetail.value = it.data
+                    }
+                    else -> {
+
+                    }
+                }
+            }
+        }
     }
 
     override suspend fun toggleCultureLike(eventId: Int) {
@@ -78,6 +90,9 @@ class CultureRepositoryImp @Inject constructor(
                             }
                             else it
                         }
+                        _cultureEventDetail.value = _cultureEventDetail.value?.copy(
+                            likeStatus = networkResult.message.toBoolean()
+                        )
                     }
                     else -> {
 

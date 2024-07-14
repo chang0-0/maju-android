@@ -56,7 +56,9 @@ fun CultureDetailScreen(
     cultureDetailViewModel: CultureDetailViewModel
 ) {
 
-    val cultureEventDetailNetworkResult = cultureDetailViewModel.cultureEventDetailNetworkResult.collectAsStateWithLifecycle()
+    val cultureEventDetailNetworkResult =
+        cultureDetailViewModel.cultureEventDetailNetworkResult.collectAsStateWithLifecycle()
+    val cultureEventDetail = cultureDetailViewModel.cultureEventDetail.collectAsStateWithLifecycle()
     LaunchedEffect(key1 = true) {
         cultureDetailViewModel.getCultureEventDetail(cultureEventId)
     }
@@ -70,8 +72,7 @@ fun CultureDetailScreen(
             modifier = Modifier
                 .verticalScroll(rememberScrollState()),
         ) {
-            cultureEventDetailNetworkResult.value.data?.let { it ->
-                (it as NetworkDto<CultureDetailDomainModel>).data?.let { culture ->
+            cultureEventDetail.value?.let { culture ->
                 NetworkImageCard(
                     networkUrl = culture.thumbnail,
                     modifier = Modifier.fillMaxWidth()
@@ -151,7 +152,6 @@ fun CultureDetailScreen(
                         modifier = Modifier.weight(1f)
                     )
                 }
-            }
             }
         }
     }
