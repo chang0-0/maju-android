@@ -1,5 +1,6 @@
 package com.app.majuapp.screen.record
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -27,7 +28,11 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -61,6 +66,7 @@ import com.app.majuapp.ui.theme.defaultPadding
 import com.app.majuapp.ui.theme.notoSansKoreanFontFamily
 import com.app.majuapp.ui.theme.roundedCornerPadding
 import com.app.majuapp.util.DateUtil
+import com.app.majuapp.util.NetworkResult
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
@@ -104,7 +110,9 @@ fun RecordScreenContent(
                     )
                 ) {
                     Row(
-                        modifier = Modifier.fillMaxWidth().wrapContentHeight(),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .wrapContentHeight(),
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
@@ -125,7 +133,9 @@ fun RecordScreenContent(
                 }
                 RecordCalendar(recordViewModel = recordViewModel) // 달력
                 Row(
-                    modifier = Modifier.fillMaxWidth().wrapContentHeight()
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .wrapContentHeight()
                         .padding(start = defaultPadding + 4.dp, top = defaultPadding / 2),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
@@ -140,12 +150,16 @@ fun RecordScreenContent(
                     )
                 }
                 Spacer(
-                    modifier = Modifier.fillMaxWidth()
-                        .padding(top = defaultPadding, bottom = defaultPadding).height(4.dp)
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = defaultPadding, bottom = defaultPadding)
+                        .height(4.dp)
                         .background(BrightGray)
                 )
                 Column(
-                    modifier = Modifier.fillMaxWidth().padding(start = 30.dp, end = 30.dp)
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(start = 30.dp, end = 30.dp)
                 ) {
                     RecordScreenIconTextTitle(
                         painterResource(R.drawable.ic_walk_record_check),
@@ -223,7 +237,9 @@ private fun RecordScreenLazyItems(
     val context = LocalContext.current
 
     Column(
-        modifier = modifier.fillMaxSize().wrapContentHeight()
+        modifier = modifier
+            .fillMaxSize()
+            .wrapContentHeight()
     ) {
         GrayBorderRoundedCard(
             // 홈 화면 알림 카드
@@ -235,9 +251,11 @@ private fun RecordScreenLazyItems(
             color = arrayListOf(Color.Transparent, Color.Transparent),
         ) {
             Column(
-                modifier = Modifier.fillMaxWidth().padding(
-                    start = 34.dp, end = 34.dp, top = 14.dp, bottom = 14.dp
-                ),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(
+                        start = 34.dp, end = 34.dp, top = 14.dp, bottom = 14.dp
+                    ),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
             ) {
@@ -264,6 +282,16 @@ private fun RecordCalendar(
     val coroutineScope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
 
+    val monthEvents = calendarViewModel.monthEvents.collectAsStateWithLifecycle()
+    val walkingHistoryMonthEvents = calendarViewModel.walkingHistoryMonthEventsNetworkResult.collectAsStateWithLifecycle()
+    val cultureLikeMonthEvents = calendarViewModel.cultureLikeMonthEventsNetworkResult.collectAsStateWithLifecycle()
+
+    LaunchedEffect(key1 = cultureLikeMonthEvents.value, key2 = walkingHistoryMonthEvents.value) {
+        if (walkingHistoryMonthEvents.value is NetworkResult.Success && cultureLikeMonthEvents.value is NetworkResult.Success) {
+            calendarViewModel.getMonthEvents(calendarUiState.yearMonth.toString())
+        }
+    }
+
     SnackbarHost(hostState = snackbarHostState)
 
     LaunchedEffect(recordViewModel.snackbarFlow) {
@@ -281,11 +309,16 @@ private fun RecordCalendar(
         CalendarWidget(days = DateUtil.daysOfWeek,
             yearMonth = calendarUiState.yearMonth,
             dates = calendarUiState.dates,
+            monthEvents = monthEvents.value,
             onPreviousMonthButtonClicked = { prevMonth ->
                 calendarViewModel.toPreviousMonth(prevMonth)
+                calendarViewModel.getCultureLikeMonthEvents(prevMonth.toString())
+                calendarViewModel.getWalkingHistoryMonthEvents(prevMonth.toString())
             },
             onNextMonthButtonClicked = { nextMonth ->
                 calendarViewModel.toNextMonth(nextMonth)
+                calendarViewModel.getCultureLikeMonthEvents(nextMonth.toString())
+                calendarViewModel.getWalkingHistoryMonthEvents(nextMonth.toString())
             },
             onDateClickListener = {
                 coroutineScope.launch {

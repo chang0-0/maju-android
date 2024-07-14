@@ -3,7 +3,6 @@ package com.app.majuapp.domain.api
 import com.app.majuapp.data.dto.NetworkDto
 import com.app.majuapp.domain.model.CultureDetailDomainModel
 import com.app.majuapp.domain.model.CultureEventDomainModel
-import com.google.gson.JsonObject
 import retrofit2.Response
 import retrofit2.http.GET
 import retrofit2.http.POST
@@ -23,5 +22,11 @@ interface CultureApi {
 
     @POST("culture-like")
     suspend fun toggleCultureLike(@Query("cultureEventId") eventId: Int): Response<NetworkDto<Boolean>>
+
+    @GET("culture-like/month/{month}")
+    suspend fun getCultureLikeMonthEvents(@Path("month") date: String): Response<NetworkDto<Map<String, Boolean>>>
+
+    @GET("culture-like/date/{date}")
+    suspend fun getCultureLikeDateEvents(@Path("date") date: String): Response<NetworkDto<List<CultureEventDomainModel>>>
 
 } // End of CultureApi

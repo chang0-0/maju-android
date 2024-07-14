@@ -2,9 +2,11 @@ package com.app.majuapp.di
 
 import com.app.majuapp.domain.repository.CultureRepository
 import com.app.majuapp.domain.repository.LoginRepository
+import com.app.majuapp.domain.repository.RecordCalendarRepository
 import com.app.majuapp.domain.repository.ReissueRepository
 import com.app.majuapp.domain.usecase.CultureUsecase
 import com.app.majuapp.domain.usecase.LoginUsecase
+import com.app.majuapp.domain.usecase.RecordCalendarUsecase
 import com.app.majuapp.domain.usecase.ReissueUsecase
 import dagger.Module
 import dagger.Provides
@@ -27,5 +29,9 @@ object DomainModule {
     @Singleton
     @Provides
     fun provideReissueUsecase(reissueRepository: ReissueRepository): ReissueUsecase = ReissueUsecase(reissueRepository)
+
+    @Singleton
+    @Provides
+    fun provideRecordCalendarUsecase(recordCalendarRepository: RecordCalendarRepository): RecordCalendarUsecase = RecordCalendarUsecase(recordCalendarRepository)
 
 }
