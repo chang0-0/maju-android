@@ -42,7 +42,6 @@ import androidx.compose.ui.window.DialogProperties
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.app.majuapp.R
 import com.app.majuapp.component.fillMaxWidthSpacer
-import com.app.majuapp.domain.model.walk.CoordinateData
 import com.app.majuapp.domain.model.walk.WalkingTrailResultData
 import com.app.majuapp.screen.walk.WalkViewModel
 import com.app.majuapp.ui.theme.BrightGray
@@ -222,11 +221,11 @@ fun WalkScreenChooseStartDialog(
 
                                 val coordinates =
                                     walkingTrailData.data[walkingPagerState.currentPage]
-                                walkViewModel.setCurrentCoordinate(
-                                    CoordinateData(
-                                        coordinates.startLon, coordinates.startLon
-                                    )
-                                )
+//                                walkViewModel.setCurrentCoordinate(
+//                                    CoordinateData(
+//                                        coordinates.startLon, coordinates.startLon
+//                                    )
+//                                )
                             },
                             Modifier.weight(1f)
                         )

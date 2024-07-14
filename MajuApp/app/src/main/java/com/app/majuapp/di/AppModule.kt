@@ -33,7 +33,7 @@ object AppModule {
         override fun intercept(chain: Interceptor.Chain): Response = with(chain) {
             val newRequest = request().newBuilder()
                 //.addHeader("Content-Type", "application/json")
-                // .addHeader("Authorization", sharedPreferencesUtil.getUserAccessToken())
+                .addHeader("Authorization", sharedPreferencesUtil.getUserAccessToken())
                 .build()
             proceed(newRequest)
         }
@@ -49,14 +49,10 @@ object AppModule {
             logging.level = HttpLoggingInterceptor.Level.NONE
         }
 
-        return OkHttpClient.Builder()
-            .readTimeout(30, TimeUnit.SECONDS)
-            .writeTimeout(15, TimeUnit.SECONDS)
-            .addNetworkInterceptor(HttpLoggingInterceptor())
+        return OkHttpClient.Builder().readTimeout(30, TimeUnit.SECONDS)
+            .writeTimeout(15, TimeUnit.SECONDS).addNetworkInterceptor(HttpLoggingInterceptor())
             .addInterceptor(HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY))
-            .connectTimeout(1, TimeUnit.MINUTES)
-            .addInterceptor(appInterceptor)
-            .build()
+            .connectTimeout(1, TimeUnit.MINUTES).addInterceptor(appInterceptor).build()
     } // End of providesOkHttpClient()
 
     @Singleton
@@ -72,8 +68,7 @@ object AppModule {
 
         return Retrofit.Builder().baseUrl(Constants.API_BASE_URL)
             .addConverterFactory(GsonConverterFactory.create()).addCallAdapterFactory(rxAdapter)
-            .client(providesOkHttpClient(appInterceptor))
-            .build()
+            .client(providesOkHttpClient(appInterceptor)).build()
     } // End of providesRetrofit()
 
     @Provides

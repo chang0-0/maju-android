@@ -38,6 +38,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.app.majuapp.R
@@ -259,7 +260,7 @@ private fun RecordScreenLazyItems(
 private fun RecordCalendar(
     calendarViewModel: RecordCalendarViewModel = hiltViewModel(), recordViewModel: RecordViewModel
 ) {
-    val calendarUiState by calendarViewModel.calendarUiState.collectAsState() // 달력 날짜 전체 데이터
+    val calendarUiState by calendarViewModel.calendarUiState.collectAsStateWithLifecycle() // 달력 날짜 전체 데이터
     val coroutineScope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
 

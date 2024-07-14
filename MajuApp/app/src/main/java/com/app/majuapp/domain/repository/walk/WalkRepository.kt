@@ -1,5 +1,6 @@
 package com.app.majuapp.domain.repository.walk
 
+import android.util.Log
 import com.app.majuapp.domain.api.WalkApi
 import com.app.majuapp.domain.model.walk.CoordinateData
 import com.app.majuapp.domain.model.walk.WalkingTrailResultData
@@ -11,6 +12,7 @@ import kotlinx.coroutines.flow.flowOn
 import retrofit2.Response
 import javax.inject.Inject
 
+private const val TAG = "WalkRepository_창영"
 class WalkRepository @Inject constructor(
     private val walkApi: WalkApi
 ) {
