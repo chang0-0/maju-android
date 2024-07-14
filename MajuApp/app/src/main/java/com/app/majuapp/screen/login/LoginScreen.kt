@@ -28,7 +28,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
-import androidx.navigation.compose.rememberNavController
 import com.app.majuapp.Application
 import com.app.majuapp.R
 import com.app.majuapp.component.KakaoLoginButton
@@ -55,8 +54,7 @@ fun LoginScreen(
             when (it) {
                 is NetworkResult.Success<LoginDto> -> {
                     Log.d(
-                        TAG,
-                        "서버 통신 로그인 성공"
+                        TAG, "서버 통신 로그인 성공"
                     )
 
                     when (it.value.status) {
@@ -96,12 +94,10 @@ fun LoginScreen(
                 }
             }
         }
-
     }
 
     Surface(
-        modifier = Modifier
-            .fillMaxSize()
+        modifier = Modifier.fillMaxSize()
             .padding(top = 40.dp, start = 24.dp, end = 24.dp, bottom = 40.dp)
     ) {
         Box {
@@ -115,8 +111,7 @@ fun LoginScreen(
                 Image(
                     painter = painterResource(id = R.drawable.ic_splash_logo),
                     contentDescription = "로고 이미지",
-                    modifier = Modifier
-                        .size(288.dp),
+                    modifier = Modifier.size(288.dp),
                     contentScale = ContentScale.FillWidth
                 )
                 Column(
@@ -130,10 +125,7 @@ fun LoginScreen(
                     }
                     Spacer(modifier = Modifier.weight(1f))
                     KakaoLoginButton(
-                        modifier = Modifier
-                            .fillMaxWidth(),
-                        socialLoginViewModel,
-                        loginViewModel
+                        modifier = Modifier.fillMaxWidth(), socialLoginViewModel, loginViewModel
                     )
                 }
             }

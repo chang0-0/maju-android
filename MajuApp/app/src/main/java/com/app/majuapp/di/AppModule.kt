@@ -6,6 +6,7 @@ import com.app.majuapp.domain.api.CultureApi
 import com.app.majuapp.domain.api.LoginApi
 import com.app.majuapp.domain.api.ReissueApi
 import com.app.majuapp.domain.api.TestApi
+import com.app.majuapp.domain.api.WalkApi
 import com.app.majuapp.util.Constants
 import dagger.Module
 import dagger.Provides
@@ -53,6 +54,7 @@ annotation class WithoutHeaderInterceptorRetrofit
 @Module
 @InstallIn(SingletonComponent::class)
 object AppModule {
+    val sharedPreferencesUtil = Application.sharedPreferencesUtil
 
     class RefreshHeaderInterceptor @Inject constructor() : Interceptor {
         override fun intercept(chain: Interceptor.Chain): Response = with(chain) {
@@ -75,7 +77,6 @@ object AppModule {
     class AppInterceptor @Inject constructor() : Interceptor {
         override fun intercept(chain: Interceptor.Chain): Response = with(chain) {
             val newRequest = request().newBuilder()
-                // 여기서 토큰이나 API Key넣으면 됨
                 .build()
             proceed(newRequest)
         }
@@ -134,14 +135,10 @@ object AppModule {
             logging.level = HttpLoggingInterceptor.Level.NONE
         }
 
-        return OkHttpClient.Builder()
-            .readTimeout(30, TimeUnit.SECONDS)
-            .writeTimeout(15, TimeUnit.SECONDS)
-            .addNetworkInterceptor(HttpLoggingInterceptor())
+        return OkHttpClient.Builder().readTimeout(30, TimeUnit.SECONDS)
+            .writeTimeout(15, TimeUnit.SECONDS).addNetworkInterceptor(HttpLoggingInterceptor())
             .addInterceptor(HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY))
-            .connectTimeout(1, TimeUnit.MINUTES)
-            .addInterceptor(appInterceptor)
-            .build()
+            .connectTimeout(1, TimeUnit.MINUTES).addInterceptor(appInterceptor).build()
     } // End of providesOkHttpClient()
 
     @Singleton
@@ -203,5 +200,11 @@ object AppModule {
     fun providesReissueApi(@RefreshInterceptorRetrofit retrofit: Retrofit): ReissueApi {
         return retrofit.create(ReissueApi::class.java)
     }
+
+    @Provides
+    @Singleton
+    fun providesWalkApi(@HeaderInterceptorRetrofit retrofit: Retrofit): WalkApi {
+        return retrofit.create(WalkApi::class.java)
+    } // End of providesWalkApi()
 
 } // End of AppModule class

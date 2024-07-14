@@ -2,14 +2,18 @@ package com.app.majuapp.screen.record
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.YearMonth
+import javax.inject.Inject
 
-class RecordCalendarViewModel : ViewModel() {
+
+@HiltViewModel
+class RecordCalendarViewModel @Inject constructor() : ViewModel() {
     private val dataSource by lazy { CalendarDataSource() }
 
     private val _calendarUiState = MutableStateFlow(CalendarUiState.Init)
@@ -30,8 +34,7 @@ class RecordCalendarViewModel : ViewModel() {
         viewModelScope.launch {
             _calendarUiState.update { currentState ->
                 currentState.copy(
-                    yearMonth = nextMonth,
-                    dates = dataSource.getDates(nextMonth)
+                    yearMonth = nextMonth, dates = dataSource.getDates(nextMonth)
                 )
             }
         }
@@ -41,8 +44,7 @@ class RecordCalendarViewModel : ViewModel() {
         viewModelScope.launch {
             _calendarUiState.update { currentState ->
                 currentState.copy(
-                    yearMonth = prevMonth,
-                    dates = dataSource.getDates(prevMonth)
+                    yearMonth = prevMonth, dates = dataSource.getDates(prevMonth)
                 )
             }
         }

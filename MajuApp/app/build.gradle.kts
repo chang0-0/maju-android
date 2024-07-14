@@ -93,6 +93,7 @@ dependencies {
         implementation("androidx.compose.material3:material3-window-size-class:1.2.1")
         implementation("androidx.compose.material3:material3-adaptive-navigation-suite:1.0.0-alpha05")
         implementation("androidx.compose.material:material-icons-extended:1.6.6")
+        implementation("androidx.compose.material:material:1.2.0")
     }
 
     // OkHttp3
@@ -176,13 +177,14 @@ dependencies {
     // Optionally, you can include the widgets library for ScaleBar, etc.
     implementation("com.google.maps.android:maps-compose-widgets:5.0.3")
 
-    //위치 얻어오기
-    implementation("com.google.android.gms:play-services-location:17.1.0")
-
     //WebView in Compose
     implementation("com.google.accompanist:accompanist-webview:0.35.0-alpha")
 
+    // location service
+    implementation("com.google.android.gms:play-services-location:21.1.0")
 
+    // Permission
+    implementation("com.google.accompanist:accompanist-permissions:0.35.0-alpha")
 }
 
 secrets {

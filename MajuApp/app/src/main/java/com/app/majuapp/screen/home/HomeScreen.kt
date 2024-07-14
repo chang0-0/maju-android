@@ -1,5 +1,6 @@
 package com.app.majuapp.screen.home
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -38,6 +39,7 @@ import androidx.navigation.ExperimentalSafeArgsApi
 import androidx.navigation.NavController
 import coil.compose.SubcomposeAsyncImage
 import coil.request.ImageRequest
+import com.app.majuapp.Application
 import com.app.majuapp.R
 import com.app.majuapp.component.Loader
 import com.app.majuapp.component.home.GrayBorderRoundedCard
@@ -55,6 +57,10 @@ fun HomeScreen(
     navController: NavController
 ) {
     HomeScreenContent(navController)
+//    val accessToken = Application.sharedPreferencesUtil.getUserAccessToken()
+//    val refreshToken = Application.sharedPreferencesUtil.getUserRefreshToken()
+//    Log.d(TAG, "accessToken: $accessToken")
+//    Log.d(TAG, "refreshToken: $refreshToken")
 } // End of HomeScreen()
 
 @Composable
