@@ -44,6 +44,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.app.majuapp.R
 import com.app.majuapp.component.fillMaxWidthSpacer
+import com.app.majuapp.domain.model.walk.WalkDateHistoryDomainModel
 import com.app.majuapp.domain.model.walk.WalkingTrailResultData
 import com.app.majuapp.screen.walk.TimerViewModel
 import com.app.majuapp.screen.walk.WalkViewModel
@@ -478,28 +479,6 @@ fun WalkRecordingBox(
         }
     }
 } // End of WalkRecordingBox
-
-@Composable
-fun WalkingRecordingTimer(
-    timerViewModel: TimerViewModel = hiltViewModel()
-) {
-    val timerValue by timerViewModel.timer.collectAsState()
-
-    Text(
-        text = timerValue.formatTime(),
-        fontWeight = FontWeight.Bold,
-        fontSize = 24.sp,
-        color = Color.Black
-    )
-} // End of WalkingRecordingTimer()
-
-fun Long.formatTime(): String {
-    val hours = this / 3600
-    val minutes = (this % 3600) / 60
-    val remainingSeconds = this % 60
-    return String.format("%02d:%02d:%02d", hours, minutes, remainingSeconds)
-} // End of Long.formatTime()
-
 
 @Composable
 fun WalkComponentButton(

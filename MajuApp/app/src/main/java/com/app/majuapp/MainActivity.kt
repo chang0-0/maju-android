@@ -22,6 +22,7 @@ import androidx.navigation.compose.rememberNavController
 import com.app.majuapp.navigation.SetUpNavGraph
 import com.app.majuapp.screen.culture.CultureDetailViewModel
 import com.app.majuapp.screen.culture.CultureViewModel
+import com.app.majuapp.screen.home.HomeViewModel
 import com.app.majuapp.screen.login.LoginViewModel
 import com.app.majuapp.screen.login.SocialLoginViewModel
 import com.app.majuapp.screen.walk.WalkingRecordViewModel
@@ -36,9 +37,10 @@ private const val TAG = "MainActivity_창영"
 @AndroidEntryPoint
 class MainActivity : ComponentActivity(), SensorEventListener { // End of MainActivity class
 
-    private val socialLoginViewModel: SocialLoginViewModel by viewModels()
+    private val homeViewModel: HomeViewModel by viewModels()
     private val loginViewModel: LoginViewModel by viewModels()
     private val cultureViewModel: CultureViewModel by viewModels()
+    private val socialLoginViewModel: SocialLoginViewModel by viewModels()
     private val cultureDetailViewModel: CultureDetailViewModel by viewModels()
     private val walkingRecordViewModel: WalkingRecordViewModel by viewModels()
 

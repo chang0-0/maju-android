@@ -1,13 +1,8 @@
 package com.app.majuapp.screen.webview
 
-import android.annotation.SuppressLint
-import android.util.Log
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -27,7 +22,7 @@ fun WebViewScreen(
     cultureDetailViewModel: CultureDetailViewModel
 ) {
     val cultureEventDetailNetworkResult =
-        cultureDetailViewModel.cultureEventDetail.collectAsStateWithLifecycle()
+        cultureDetailViewModel.cultureEventDetailNetworkResult.collectAsStateWithLifecycle()
     Box() {
         if (cultureEventDetailNetworkResult.value is NetworkResult.Loading) {
             CircularProgressIndicator(modifier = Modifier.size(24.dp).align(Alignment.Center))

@@ -1,6 +1,6 @@
 package com.app.majuapp.screen.culture
 
-import androidx.compose.foundation.gestures.scrollable
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.outlined.AccessTime
 import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material.icons.outlined.LocationOn
@@ -23,6 +24,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -30,18 +32,14 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
-import androidx.navigation.compose.rememberNavController
 import com.app.majuapp.R
-import com.app.majuapp.component.culture.CultureDetailButton
-import com.app.majuapp.component.culture.CultureDetailCategoryChip
 import com.app.majuapp.component.MultiLineTextWithIconOnStart
 import com.app.majuapp.component.NetworkImageCard
 import com.app.majuapp.component.SingleLineTextWithIconOnStart
+import com.app.majuapp.component.culture.CultureDetailButton
+import com.app.majuapp.component.culture.CultureDetailCategoryChip
 import com.app.majuapp.data.dto.NetworkDto
-import com.app.majuapp.data.repositoryImp.CultureRepositoryImp
-import com.app.majuapp.domain.api.CultureApi
 import com.app.majuapp.domain.model.CultureDetailDomainModel
-import com.app.majuapp.domain.usecase.CultureUsecase
 import com.app.majuapp.navigation.Screen
 import com.app.majuapp.ui.theme.GoldenPoppy
 import com.app.majuapp.ui.theme.Gray
@@ -50,9 +48,6 @@ import com.app.majuapp.ui.theme.cultureDetailMediumSpacerSize
 import com.app.majuapp.ui.theme.cultureDetailSmallSpacerSize
 import com.app.majuapp.ui.theme.cultureDetailTextWithIconSize
 import com.app.majuapp.ui.theme.cultureDetailTitleFontSize
-import com.app.majuapp.util.dummyList
-import com.google.accompanist.web.WebView
-import com.google.accompanist.web.rememberWebViewState
 
 @Composable
 fun CultureDetailScreen(
@@ -61,7 +56,9 @@ fun CultureDetailScreen(
     cultureDetailViewModel: CultureDetailViewModel
 ) {
 
-    val cultureEventDetailNetworkResult = cultureDetailViewModel.cultureEventDetail.collectAsStateWithLifecycle()
+    val cultureEventDetailNetworkResult =
+        cultureDetailViewModel.cultureEventDetailNetworkResult.collectAsStateWithLifecycle()
+    val cultureEventDetail = cultureDetailViewModel.cultureEventDetail.collectAsStateWithLifecycle()
     LaunchedEffect(key1 = true) {
         cultureDetailViewModel.getCultureEventDetail(cultureEventId)
     }
@@ -75,7 +72,7 @@ fun CultureDetailScreen(
             modifier = Modifier
                 .verticalScroll(rememberScrollState()),
         ) {
-            (cultureEventDetailNetworkResult.value.data as NetworkDto<CultureDetailDomainModel>?)?.data?.let { culture ->
+            cultureEventDetail.value?.let { culture ->
                 NetworkImageCard(
                     networkUrl = culture.thumbnail,
                     modifier = Modifier.fillMaxWidth()
@@ -91,8 +88,12 @@ fun CultureDetailScreen(
                     ) {
                         CultureDetailCategoryChip(cultureDetailCategory = culture.category)
                         Icon(
-                            imageVector = Icons.Outlined.FavoriteBorder,
-                            contentDescription = stringResource(id = R.string.icon_favorite_description)
+                            imageVector = if (!culture.likeStatus) Icons.Outlined.FavoriteBorder else Icons.Filled.Favorite,
+                            contentDescription = stringResource(id = R.string.icon_favorite_description),
+                            modifier = Modifier.clickable {
+                                cultureDetailViewModel.toggleCultureLike(cultureEventId)
+                            },
+                            tint = if (!culture.likeStatus) Color.LightGray else Color.Red
                         )
                     }
                     Spacer(modifier = Modifier.height(cultureDetailMediumSpacerSize))
