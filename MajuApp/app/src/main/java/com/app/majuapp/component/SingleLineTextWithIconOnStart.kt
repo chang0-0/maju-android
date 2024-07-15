@@ -38,6 +38,7 @@ fun SingleLineTextWithIconOnStart(
             fontWeight = FontWeight.Medium,
             fontSize = size.sp,
             text = textContent,
+            textAlign = TextAlign.Start,
             maxLines = 1
         )
     }

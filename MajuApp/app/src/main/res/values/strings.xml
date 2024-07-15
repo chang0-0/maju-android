@@ -44,6 +44,8 @@
 
     <string name="record_screen_walk_recording_content">산책 기록</string>
     <string name="record_screen_culture_life_content">문화 생활</string>
+    <string name="record_screen_no_activity">해당 날짜에 활동 내역이 존재하지 않아요</string>
+
 
     // Login
     <string name="login_fail">로그인에 실패하였습니다</string>

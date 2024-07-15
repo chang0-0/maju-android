@@ -2,9 +2,11 @@ package com.app.majuapp.screen.culture
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.app.majuapp.domain.model.CultureDetailDomainModel
 import com.app.majuapp.domain.usecase.CultureUsecase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -13,11 +15,18 @@ class CultureDetailViewModel @Inject constructor(
     private val cultureUsecase: CultureUsecase
 ): ViewModel() {
 
-    val cultureEventDetail = cultureUsecase.cultureEventDetail
+    val cultureEventDetailNetworkResult = cultureUsecase.cultureEventDetailNetworkResult
+    val cultureEventDetail: StateFlow<CultureDetailDomainModel?> = cultureUsecase.cultureEventDetail
 
     fun getCultureEventDetail(cultureEventId: Int) {
         viewModelScope.launch(Dispatchers.IO) {
             cultureUsecase.getCultureEventsDetail(cultureEventId)
+        }
+    }
+
+    fun toggleCultureLike(eventId: Int) {
+        viewModelScope.launch(Dispatchers.IO) {
+            cultureUsecase.toggleCultureLike(eventId)
         }
     }
 

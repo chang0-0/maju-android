@@ -66,6 +66,7 @@ fun checkAndRequestPermissions(
     context: Context,
     permissions: Array<String>,
     launcher: ManagedActivityResultLauncher<Array<String>, Map<String, Boolean>>,
+    onAleardyPermission: () -> Unit = {}
 ) {
     val TAG = "permission"
     if (permissions.all {
@@ -75,6 +76,7 @@ fun checkAndRequestPermissions(
             ) == PackageManager.PERMISSION_GRANTED
         }) {
         Log.d(TAG, "권한이 이미 존재합니다.")
+        onAleardyPermission()
     } else {
         launcher.launch(permissions)
         Log.d(TAG, "권한을 요청했습니다.")

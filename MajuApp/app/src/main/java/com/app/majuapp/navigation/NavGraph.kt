@@ -2,6 +2,8 @@ package com.app.majuapp.navigation
 
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.BottomNavigation
+import androidx.compose.material.BottomNavigationItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
@@ -13,6 +15,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
@@ -27,6 +30,7 @@ import com.app.majuapp.screen.culture.CultureMapScreen
 import com.app.majuapp.screen.culture.CultureScreen
 import com.app.majuapp.screen.culture.CultureViewModel
 import com.app.majuapp.screen.home.HomeScreen
+import com.app.majuapp.screen.home.HomeViewModel
 import com.app.majuapp.screen.login.LoginScreen
 import com.app.majuapp.screen.login.LoginViewModel
 import com.app.majuapp.screen.login.SocialLoginViewModel
@@ -45,7 +49,8 @@ fun SetUpNavGraph(
     socialLoginViewModel: SocialLoginViewModel,
     loginViewModel: LoginViewModel,
     cultureViewModel: CultureViewModel,
-    cultureDetailViewModel: CultureDetailViewModel
+    cultureDetailViewModel: CultureDetailViewModel,
+    homeViewModel: HomeViewModel
 ) {
     val screenList = listOf(
         Screen.CultureMap, Screen.Culture
@@ -56,23 +61,21 @@ fun SetUpNavGraph(
 
     Scaffold(
         bottomBar = {
-            if (shouldShowBottomBar(navController = navController))
+            if (shouldShowBottomBar(navController = navController)) {
                 NavigationBar() {
                     val navBackStackEntry by navController.currentBackStackEntryAsState()
                     val currentDestination = navBackStackEntry?.destination
 
                     screenList.forEachIndexed { index, screen ->
+                        var selected = currentDestination?.hierarchy?.any {
+                            it.route == screen.route
+                        } == true
                         NavigationBarItem(
-                            selected = selectedItemIndex == index,
+                            selected = selected,
                             onClick = {
-                                selectedItemIndex = index
                                 navController.navigate(screen.route) {
-                                    popUpTo(navController.graph.findStartDestination().id) {
-                                        inclusive = true
-                                        saveState = true
-                                    }
+                                    popUpTo(screen.route)
                                     launchSingleTop = true
-                                    restoreState = true
                                 }
                             },
                             label = {
@@ -81,19 +84,20 @@ fun SetUpNavGraph(
                             alwaysShowLabel = false,
                             icon = {
                                 Icon(
-                                    imageVector = if (index == selectedItemIndex) {
+                                    imageVector = if (selected) {
                                         screen.selectedIcon!!
                                     } else {
                                         screen.unSelectedIcon!!
                                     },
                                     contentDescription = screen.title,
-                                    tint = if (index == selectedItemIndex) SpiroDiscoBall else SonicSilver
+                                    tint = if (selected) SpiroDiscoBall else SonicSilver
 
                                 )
                             }
                         )
                     }
                 }
+            }
         }
     ) { paddingValues ->
 //        SharedTransitionLayout {
@@ -106,7 +110,7 @@ fun SetUpNavGraph(
             composable(
                 route = Screen.Home.route
             ) {
-                HomeScreen(navController = navController)
+                HomeScreen(navController = navController, homeViewModel = homeViewModel)
             }
 
             composable(
@@ -134,7 +138,11 @@ fun SetUpNavGraph(
                 })
             ) {
                 val cultureEventId = it.arguments?.getInt("id") ?: 0
-                CultureDetailScreen(navController = navController, cultureEventId, cultureDetailViewModel)
+                CultureDetailScreen(
+                    navController = navController,
+                    cultureEventId,
+                    cultureDetailViewModel
+                )
             }
 
             composable(
