@@ -29,4 +29,7 @@ interface CultureApi {
     @GET("culture-like/date/{date}")
     suspend fun getCultureLikeDateEvents(@Path("date") date: String): Response<NetworkDto<List<CultureEventDomainModel>>>
 
+    @GET("culture-events/home-recommendation/{lat}/{lon}")
+    suspend fun getCultureHomeRecommendation(@Path("lat") lat: String, @Path("lon") lon: String): Response<NetworkDto<CultureEventDomainModel?>>
+
 } // End of CultureApi

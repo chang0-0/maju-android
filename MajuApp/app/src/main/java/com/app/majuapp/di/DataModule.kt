@@ -2,6 +2,7 @@ package com.app.majuapp.di
 
 import android.app.Application
 import com.app.majuapp.data.repositoryImp.CultureRepositoryImp
+import com.app.majuapp.data.repositoryImp.HomeCultureRepositoryImp
 import com.app.majuapp.data.repositoryImp.LocationTrackerImp
 import com.app.majuapp.data.repositoryImp.LoginRepositoryImp
 import com.app.majuapp.data.repositoryImp.RecordCalendarRepositoryImp
@@ -11,6 +12,7 @@ import com.app.majuapp.domain.api.LoginApi
 import com.app.majuapp.domain.api.ReissueApi
 import com.app.majuapp.domain.api.WalkApi
 import com.app.majuapp.domain.repository.CultureRepository
+import com.app.majuapp.domain.repository.HomeCultureRepository
 import com.app.majuapp.domain.repository.LocationTracker
 import com.app.majuapp.domain.repository.LoginRepository
 import com.app.majuapp.domain.repository.RecordCalendarRepository
@@ -42,6 +44,10 @@ object DataModule {
     @Singleton
     @Provides
     fun providesRecordCalendarRepository(cultureApi: CultureApi, walkApi: WalkApi): RecordCalendarRepository = RecordCalendarRepositoryImp(cultureApi, walkApi)
+
+    @Singleton
+    @Provides
+    fun providesHomeCultureRepository(cultureApi: CultureApi): HomeCultureRepository = HomeCultureRepositoryImp(cultureApi)
 
 
     @Provides

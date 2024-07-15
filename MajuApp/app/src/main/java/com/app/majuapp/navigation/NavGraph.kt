@@ -30,6 +30,7 @@ import com.app.majuapp.screen.culture.CultureMapScreen
 import com.app.majuapp.screen.culture.CultureScreen
 import com.app.majuapp.screen.culture.CultureViewModel
 import com.app.majuapp.screen.home.HomeScreen
+import com.app.majuapp.screen.home.HomeViewModel
 import com.app.majuapp.screen.login.LoginScreen
 import com.app.majuapp.screen.login.LoginViewModel
 import com.app.majuapp.screen.login.SocialLoginViewModel
@@ -48,7 +49,8 @@ fun SetUpNavGraph(
     socialLoginViewModel: SocialLoginViewModel,
     loginViewModel: LoginViewModel,
     cultureViewModel: CultureViewModel,
-    cultureDetailViewModel: CultureDetailViewModel
+    cultureDetailViewModel: CultureDetailViewModel,
+    homeViewModel: HomeViewModel
 ) {
     val screenList = listOf(
         Screen.CultureMap, Screen.Culture
@@ -108,7 +110,7 @@ fun SetUpNavGraph(
             composable(
                 route = Screen.Home.route
             ) {
-                HomeScreen(navController = navController)
+                HomeScreen(navController = navController, homeViewModel = homeViewModel)
             }
 
             composable(
