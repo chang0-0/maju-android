@@ -42,6 +42,7 @@ import androidx.compose.ui.window.DialogProperties
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.app.majuapp.R
 import com.app.majuapp.component.fillMaxWidthSpacer
+import com.app.majuapp.domain.model.walk.WalkDateHistoryDomainModel
 import com.app.majuapp.domain.model.walk.WalkingTrailResultData
 import com.app.majuapp.screen.walk.WalkViewModel
 import com.app.majuapp.ui.theme.BrightGray
@@ -451,6 +452,96 @@ fun WalkRecordingBox(context: Context) {/*
     }
 } // End of WalkRecordingBox
 
+@Composable
+fun WalkRecordingBox(context: Context, walkDateHistoryDomainModel: WalkDateHistoryDomainModel) {/*
+        바텀 시트 내부
+        이동 거리, 걸음 수가 보이는 회색 박스
+     */
+
+    Box(
+        Modifier.clip(RoundedCornerShape(8.dp)).fillMaxWidth().height(92.dp)
+            .background(color = BrightGray), contentAlignment = Alignment.Center
+    ) {
+        Row(
+            modifier = Modifier.matchParentSize(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            Box(
+                // 이동 거리 박스
+                modifier = Modifier.fillMaxWidth().wrapContentHeight().weight(1f).align(
+                    Alignment.CenterVertically,
+                ),
+            ) {
+                Column(
+                    modifier = Modifier.fillMaxWidth().wrapContentHeight(),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(
+                        textAlign = TextAlign.Center,
+                        color = SonicSilver,
+                        text = context.getString(R.string.walk_screen_walking_bottom_sheet_box_distanced_traveled),
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Medium,
+                    )
+                    Row {
+                        Text(
+                            textAlign = TextAlign.Center,
+                            text = "${walkDateHistoryDomainModel.distance}",
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Bold,
+                        )
+                        Text(
+                            textAlign = TextAlign.Center,
+                            text = context.getString(R.string.walk_screen_walking_bottom_sheet_box_distanced_traveled_unit),
+                            fontSize = 10.sp,
+                            fontWeight = FontWeight.Medium,
+                        )
+                    }
+                }
+            }
+            Spacer(
+                // 회색 박스 중간 구분선
+                modifier = Modifier.width(1.dp).fillMaxHeight().padding(
+                    top = defaultPadding + 8.dp, bottom = defaultPadding + 8.dp
+                ).background(SilverSand)
+            )
+            Box(
+                // 걸음 수 박스
+                modifier = Modifier.fillMaxWidth().wrapContentHeight().weight(1f).align(
+                    Alignment.CenterVertically,
+                ),
+            ) {
+                Column(
+                    modifier = Modifier.fillMaxWidth().wrapContentHeight(),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(
+                        color = SonicSilver,
+                        textAlign = TextAlign.Center,
+                        text = context.getString(R.string.walk_screen_walking_bottom_sheet_box_step_count_title),
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Medium,
+                    )
+                    Row() {
+                        Text(
+                            textAlign = TextAlign.Center,
+                            text = "${walkDateHistoryDomainModel.steps}",
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Bold,
+                        )
+                        Text(
+                            textAlign = TextAlign.Center,
+                            text = context.getString(R.string.walk_screen_walking_bottom_sheet_box_step_count_unit),
+                            fontSize = 10.sp,
+                            fontWeight = FontWeight.Medium,
+                        )
+                    }
+                }
+            }
+        }
+    }
+} // End of WalkRecordingBox
 
 @Composable
 fun WalkComponentButton(

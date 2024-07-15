@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -38,7 +39,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -57,6 +60,7 @@ import com.app.majuapp.component.walk.WalkRecordingBox
 import com.app.majuapp.domain.model.CultureLifeRecord
 import com.app.majuapp.domain.model.RecordingDataModel
 import com.app.majuapp.domain.model.RecordingWalkRecord
+import com.app.majuapp.domain.model.walk.WalkDateHistoryDomainModel
 import com.app.majuapp.ui.theme.BrightGray
 import com.app.majuapp.ui.theme.GoldenPoppy
 import com.app.majuapp.ui.theme.MajuAppTheme
@@ -98,11 +102,14 @@ fun RecordScreenContent(
     val cultureLikeDateEvents =
         calendarViewModel.cultureLikeDateEvents.collectAsStateWithLifecycle()
 
+    val walkingHistoryDateEvents =
+        calendarViewModel.walkingHistoryDateEvents.collectAsStateWithLifecycle()
+
     val culturePagerState = rememberPagerState(pageCount = {
         cultureLikeDateEvents.value.size
     })
 
-    
+
     Surface(
         modifier = modifier.fillMaxSize(), color = White,
     ) {
@@ -172,14 +179,25 @@ fun RecordScreenContent(
                         SpiroDiscoBall,
                         context.getString(R.string.record_screen_walk_recording_content)
                     )
+
+                    if (walkingHistoryDateEvents.value.isEmpty())
+                        Text(
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 24.sp,
+                            text = stringResource(id = R.string.record_screen_no_activity),
+                            color = SonicSilver,
+                            textAlign = TextAlign.Center,
+                        )
+
                     LazyRow(
                         modifier = Modifier.fillMaxSize(),
                         horizontalArrangement = Arrangement.spacedBy(28.dp)
                     ) {
                         // 산책 기록 LazyRow()
-                        items(recordingData.walkRecord.size) {
+                        items(walkingHistoryDateEvents.value) { item ->
                             RecordScreenLazyItems(
-                                modifier = Modifier.fillParentMaxWidth()
+                                modifier = Modifier.fillParentMaxWidth(),
+                                walkingHistoryDateEvents = item
                             ) {}
                         }
                     }
@@ -206,12 +224,26 @@ fun RecordScreenContent(
                             imageVector = Icons.Filled.KeyboardArrowLeft, contentDescription = null
                         )
                     }
+
+                    if (culturePagerState.pageCount < 1)
+                        Text(
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 24.sp,
+                            text = stringResource(id = R.string.record_screen_no_activity),
+                            color = SonicSilver,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.padding(horizontal = defaultPadding)
+                        )
+
                     HorizontalPager(
                         modifier = Modifier.weight(8f),
                         state = culturePagerState,
                         contentPadding = PaddingValues()
                     ) { page ->
-                        CultureCard(culture = cultureLikeDateEvents.value.get(page), favoriteButtonFlag = false)
+                        CultureCard(
+                            culture = cultureLikeDateEvents.value.get(page),
+                            favoriteButtonFlag = false
+                        )
                     }
                     IconButton(modifier = Modifier.weight(1f), onClick = {
                         coroutineScope.launch {
@@ -234,7 +266,9 @@ fun RecordScreenContent(
 
 @Composable
 private fun RecordScreenLazyItems(
-    modifier: Modifier, composableContent: @Composable () -> Unit
+    modifier: Modifier,
+    walkingHistoryDateEvents: WalkDateHistoryDomainModel,
+    composableContent: @Composable () -> Unit
 ) {
     val context = LocalContext.current
 
@@ -261,14 +295,10 @@ private fun RecordScreenLazyItems(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
             ) {
-                Text(
-                    text = "보라매공원 산책로",
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 16.sp,
-                    fontFamily = notoSansKoreanFontFamily
+                WalkRecordingBox(
+                    context,
+                    walkingHistoryDateEvents
                 )
-                Spacer(modifier = Modifier.height(10.dp))
-                WalkRecordingBox(context)
             }
         }
         composableContent() // 내부 컴포저블 함수
@@ -337,9 +367,7 @@ private fun RecordCalendar(
 fun CalendarAppPreview() {
     MajuAppTheme() {
         RecordScreenContent(
-            rememberNavController(), RecordingDataModel(
-                arrayListOf(), arrayListOf()
-            )
+            rememberNavController(), recordingScreenDummyData
         )
     }
 } // End of CalendarAppPreview()
@@ -349,7 +377,7 @@ fun CalendarAppPreview() {
 fun LazyRowPreview() {
     MajuAppTheme() {
         RecordScreenLazyItems(
-            modifier = Modifier
+            modifier = Modifier, WalkDateHistoryDomainModel(0, 0.22, 275)
         ) {
 
         }

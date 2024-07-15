@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.app.majuapp.data.dto.NetworkDto
 import com.app.majuapp.domain.model.CultureEventDomainModel
+import com.app.majuapp.domain.model.walk.WalkDateHistoryDomainModel
 import com.app.majuapp.domain.usecase.RecordCalendarUsecase
 import com.app.majuapp.util.NetworkResult
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -14,7 +15,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import java.time.LocalDate
 import java.time.YearMonth
 import java.util.Date
 import javax.inject.Inject
@@ -31,6 +31,7 @@ class RecordCalendarViewModel @Inject constructor(
 
     val monthEvents = recordCalendarUsecase.monthEvents
     val walkingHistoryMonthEvents = recordCalendarUsecase.walkingHistoryMonthEvents
+    val walkingHistoryDateEvents = recordCalendarUsecase.walkingHistoryDateEvents
     val cultureLikeMonthEvents: StateFlow<Map<String, Boolean>> =
         recordCalendarUsecase.cultureLikeMonthEvents
     val cultureLikeDateEvents: StateFlow<List<CultureEventDomainModel>> =
@@ -39,8 +40,8 @@ class RecordCalendarViewModel @Inject constructor(
         recordCalendarUsecase.cultureLikeMonthEventsNetworkResult
     val cultureLikeDateEventsNetworkResult: StateFlow<NetworkResult<NetworkDto<List<CultureEventDomainModel>>>> =
         recordCalendarUsecase.cultureLikeDateEventsNetworkResult
-
     val walkingHistoryMonthEventsNetworkResult: StateFlow<NetworkResult<NetworkDto<Map<String, Boolean>>>> = recordCalendarUsecase.walkingHistoryMonthEventsNetworkResult
+    val walkingHistoryDateEventsNetworkResult: StateFlow<NetworkResult<NetworkDto<List<WalkDateHistoryDomainModel>>>> = recordCalendarUsecase.walkingHistoryDateEventsNetworkResult
 
 
     init {
@@ -54,7 +55,9 @@ class RecordCalendarViewModel @Inject constructor(
         }
         getCultureLikeMonthEvents(_calendarUiState.value.yearMonth.toString())
         getWalkingHistoryMonthEvents(_calendarUiState.value.yearMonth.toString())
-        getCultureLikeDateEvents(SimpleDateFormat("yyyy-MM-dd").format(Date(System.currentTimeMillis())))
+        val yyyyMMtoday = SimpleDateFormat("yyyy-MM-dd").format(Date(System.currentTimeMillis()))
+        getCultureLikeDateEvents(yyyyMMtoday)
+        getWalkingHistoryDateEvents(yyyyMMtoday)
     }
 
     fun toNextMonth(nextMonth: YearMonth) {
@@ -106,6 +109,12 @@ class RecordCalendarViewModel @Inject constructor(
     fun getWalkingHistoryMonthEvents(yearMonth: String) {
         viewModelScope.launch(Dispatchers.IO) {
             recordCalendarUsecase.getWalkingHistoryMonthEvents(yearMonth)
+        }
+    }
+
+    fun getWalkingHistoryDateEvents(yearMonthDay: String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            recordCalendarUsecase.getWalkingHistoryDateEvents(yearMonthDay)
         }
     }
 

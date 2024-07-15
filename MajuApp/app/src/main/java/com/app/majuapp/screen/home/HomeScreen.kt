@@ -15,10 +15,15 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -29,6 +34,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -46,8 +52,10 @@ import com.app.majuapp.component.home.GrayBorderRoundedCard
 import com.app.majuapp.component.home.HomeScreenSpacer
 import com.app.majuapp.navigation.Screen
 import com.app.majuapp.ui.theme.SkyBlue
+import com.app.majuapp.ui.theme.SonicSilver
 import com.app.majuapp.ui.theme.SpiroDiscoBall
 import com.app.majuapp.ui.theme.defaultPadding
+import com.app.majuapp.ui.theme.notoSansKoreanFontFamily
 import com.app.majuapp.ui.theme.roundedCornerPadding
 
 private const val TAG = "HomeScreen_창영"
@@ -69,11 +77,45 @@ private fun HomeScreenContent(navController: NavController) {
     val context = LocalContext.current
     val brightGrayColor = ContextCompat.getColor(context, R.color.brightGray)
 
-    Surface(modifier = Modifier.fillMaxSize().padding(top = 64.dp)) {
+    Surface(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(top = 32.dp)
+    ) {
         LazyColumn(
             contentPadding = PaddingValues(horizontal = defaultPadding)
         ) {
             item {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .wrapContentHeight(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Icon(
+                        painter = painterResource(R.drawable.ic_home_logo),
+                        tint = Color.Black,
+                        contentDescription = null,
+                        modifier = Modifier
+                            .width(60.dp)
+                            .height(30.dp)
+                    )
+                    IconButton(modifier = Modifier, onClick = {
+                        navController.navigate("record_screen") {
+                            launchSingleTop = true
+                            restoreState = true
+                        }
+                    }) {
+                        Icon(
+                            painter = painterResource(R.drawable.ic_default_user),
+                            tint = SonicSilver,
+                            contentDescription = null,
+                            modifier = Modifier.size(24.dp)
+                        )
+                    }
+                }
+                Spacer(modifier = Modifier.height(defaultPadding))
                 GrayBorderRoundedCard(
                     // 홈 화면 날씨 카드
                     modifier = Modifier,
@@ -91,7 +133,9 @@ private fun HomeScreenContent(navController: NavController) {
                 GrayBorderRoundedCard(
                     // 홈 화면 알림 카드
                     modifier = Modifier.border(
-                        width = 2.dp, color = Color(brightGrayColor), shape = RoundedCornerShape(
+                        width = 2.dp,
+                        color = Color(brightGrayColor),
+                        shape = RoundedCornerShape(
                             roundedCornerPadding
                         )
                     ),
@@ -112,11 +156,14 @@ private fun HomeScreenContent(navController: NavController) {
 private fun HomeScreenWeatherBox(weatherData: String) {
     val context = LocalContext.current
     Row(
-        modifier = Modifier.fillMaxSize().padding(defaultPadding),
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(defaultPadding),
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
         Column(
-            modifier = Modifier.wrapContentSize()
+            modifier = Modifier
+                .wrapContentSize()
                 .padding(start = defaultPadding, top = defaultPadding),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
@@ -157,13 +204,21 @@ private fun HomeScreenNoticeBox(navController: NavController, weatherData: Strin
      */
 
     val context = LocalContext.current
-    Column(modifier = Modifier.fillMaxSize().padding(defaultPadding)) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(defaultPadding)
+    ) {
         Box(
-            modifier = Modifier.clip(RoundedCornerShape(roundedCornerPadding)).fillMaxWidth()
+            modifier = Modifier
+                .clip(RoundedCornerShape(roundedCornerPadding))
+                .fillMaxWidth()
                 .height(120.dp)
         ) {
             SubcomposeAsyncImage(
-                modifier = Modifier.fillMaxSize().clip(RoundedCornerShape(12.dp)),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .clip(RoundedCornerShape(12.dp)),
                 model = ImageRequest.Builder(context)
                     .data("https://cdn.woman.chosun.com/news/photo/202309/112221_118277_4824.jpg")
                     .crossfade(true).build(),
@@ -181,18 +236,22 @@ private fun HomeScreenNoticeBox(navController: NavController, weatherData: Strin
                 "임영웅 콘서트",
                 fontWeight = FontWeight.Bold,
                 fontSize = 20.sp,
-                modifier = Modifier.align(Alignment.Bottom).clickable() {
-                    navController.navigate("record_screen") {
-                        launchSingleTop = true
-                        restoreState = true
-                    }
-                },
+                modifier = Modifier
+                    .align(Alignment.Bottom)
+                    .clickable() {
+                        navController.navigate("record_screen") {
+                            launchSingleTop = true
+                            restoreState = true
+                        }
+                    },
             )
             Text(
                 text = "2024년 6월 11일",
                 fontSize = 12.sp,
                 fontWeight = FontWeight.Light,
-                modifier = Modifier.align(Alignment.Bottom).padding(10.dp)
+                modifier = Modifier
+                    .align(Alignment.Bottom)
+                    .padding(10.dp)
             )
         }
     }
@@ -205,13 +264,18 @@ private fun RowOfCategoryBox(categoryList: List<Category>, navController: NavCon
     val context = LocalContext.current
 
     Row(
-        modifier = Modifier.fillMaxWidth().padding(bottom = 24.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(bottom = 24.dp),
         horizontalArrangement = Arrangement.spacedBy(24.dp),
     ) {
         categoryList.forEach { categoryBox ->
             Box(
-                modifier = Modifier.weight(1f).aspectRatio(1f)
-                    .clip(RoundedCornerShape(roundedCornerPadding)).clickable {
+                modifier = Modifier
+                    .weight(1f)
+                    .aspectRatio(1f)
+                    .clip(RoundedCornerShape(roundedCornerPadding))
+                    .clickable {
                         when (categoryBox.title) {
                             "산책" -> {
                                 navController.navigate("walk_screen") {
@@ -239,7 +303,9 @@ private fun RowOfCategoryBox(categoryList: List<Category>, navController: NavCon
                         Loader()
                     })
                 Box(
-                    modifier = Modifier.background(Color.DarkGray.copy(alpha = 0.4f)).fillMaxSize()
+                    modifier = Modifier
+                        .background(Color.DarkGray.copy(alpha = 0.4f))
+                        .fillMaxSize()
                 )
                 Text(
                     fontWeight = FontWeight.Bold,
@@ -251,7 +317,12 @@ private fun RowOfCategoryBox(categoryList: List<Category>, navController: NavCon
                 )
             }
             if (categoryList.size < 2) {
-                Box(modifier = Modifier.weight(1f).aspectRatio(1f).padding(4.dp))
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .aspectRatio(1f)
+                        .padding(4.dp)
+                )
             }
         }
     }
