@@ -94,7 +94,8 @@ class MainActivity : ComponentActivity(), SensorEventListener { // End of MainAc
                     socialLoginViewModel,
                     loginViewModel,
                     cultureViewModel,
-                    cultureDetailViewModel
+                    cultureDetailViewModel,
+                    homeViewModel
                 )
 
 //                Column(

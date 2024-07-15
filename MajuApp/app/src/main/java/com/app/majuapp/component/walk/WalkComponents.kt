@@ -498,3 +498,24 @@ fun WalkComponentButton(
         )
     }
 } // End of WalkComponentButton()
+
+@Composable
+fun WalkingRecordingTimer(
+    timerViewModel: TimerViewModel = hiltViewModel()
+) {
+    val timerValue by timerViewModel.timer.collectAsState()
+
+    Text(
+        text = timerValue.formatTime(),
+        fontWeight = FontWeight.Bold,
+        fontSize = 24.sp,
+        color = Color.Black
+    )
+} // End of WalkingRecordingTimer()
+
+fun Long.formatTime(): String {
+    val hours = this / 3600
+    val minutes = (this % 3600) / 60
+    val remainingSeconds = this % 60
+    return String.format("%02d:%02d:%02d", hours, minutes, remainingSeconds)
+} // End of Long.formatTime()

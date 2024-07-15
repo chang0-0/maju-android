@@ -62,8 +62,6 @@ import com.app.majuapp.ui.theme.White
 import com.app.majuapp.ui.theme.defaultPadding
 import com.app.majuapp.ui.theme.notoSansKoreanFontFamily
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
-import com.google.android.gms.fitness.FitnessOptions
-import com.google.android.gms.fitness.data.DataType
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.compose.CameraPositionState
@@ -222,14 +220,14 @@ private fun WalkScreenContent(
 
     /* Sensor */
 
-
-    val fitnessOptions = FitnessOptions.builder()
-        .addDataType(DataType.TYPE_STEP_COUNT_DELTA, FitnessOptions.ACCESS_READ)
-        .addDataType(DataType.AGGREGATE_STEP_COUNT_DELTA, FitnessOptions.ACCESS_READ)
-        .addDataType(DataType.TYPE_CALORIES_EXPENDED, FitnessOptions.ACCESS_READ)
-        .addDataType(DataType.AGGREGATE_CALORIES_EXPENDED, FitnessOptions.ACCESS_READ)
-        .addDataType(DataType.TYPE_DISTANCE_DELTA, FitnessOptions.ACCESS_READ)
-        .addDataType(DataType.AGGREGATE_DISTANCE_DELTA, FitnessOptions.ACCESS_READ).build()
+    //
+    //    val fitnessOptions = FitnessOptions.builder()
+    //        .addDataType(DataType.TYPE_STEP_COUNT_DELTA, FitnessOptions.ACCESS_READ)
+    //        .addDataType(DataType.AGGREGATE_STEP_COUNT_DELTA, FitnessOptions.ACCESS_READ)
+    //        .addDataType(DataType.TYPE_CALORIES_EXPENDED, FitnessOptions.ACCESS_READ)
+    //        .addDataType(DataType.AGGREGATE_CALORIES_EXPENDED, FitnessOptions.ACCESS_READ)
+    //        .addDataType(DataType.TYPE_DISTANCE_DELTA, FitnessOptions.ACCESS_READ)
+    //        .addDataType(DataType.AGGREGATE_DISTANCE_DELTA, FitnessOptions.ACCESS_READ).build()
 
 //    val account = GoogleSignIn.getAccountForExtension(context, fitnessOptions)
 //

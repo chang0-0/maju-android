@@ -297,7 +297,8 @@ private fun RecordScreenLazyItems(
             ) {
                 WalkRecordingBox(
                     context,
-                    walkingHistoryDateEvents
+                    walkingHistoryDateEvents.steps,
+                    walkingHistoryDateEvents.distance
                 )
             }
         }

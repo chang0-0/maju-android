@@ -73,7 +73,7 @@ fun HomeScreen(
     navController: NavController,
     homeViewModel: HomeViewModel,
 ) {
-  HomeScreenContent(navController)
+    HomeScreenContent(navController, homeViewModel)
     val accessToken = Application.sharedPreferencesUtil.getUserAccessToken()
     val refreshToken = Application.sharedPreferencesUtil.getUserRefreshToken()
     Log.d(TAG, "accessToken: $accessToken")
