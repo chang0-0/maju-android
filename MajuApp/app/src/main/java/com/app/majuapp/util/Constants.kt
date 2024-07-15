@@ -10,4 +10,7 @@ object Constants {
     val GENRE_THEATER = "연극"
     val GENRES = listOf(GENRE_MUSIC, GENRE_EXHIBITION, GENRE_EXPERIENCE, GENRE_THEATER)
 
+    const val DATABASE = "database"
+
+
 }

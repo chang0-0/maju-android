@@ -1,6 +1,7 @@
 package com.app.majuapp.component.walk
 
 import android.content.Context
+import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
@@ -40,11 +41,14 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.app.majuapp.R
 import com.app.majuapp.component.fillMaxWidthSpacer
 import com.app.majuapp.domain.model.walk.WalkDateHistoryDomainModel
 import com.app.majuapp.domain.model.walk.WalkingTrailResultData
+import com.app.majuapp.screen.walk.TimerViewModel
 import com.app.majuapp.screen.walk.WalkViewModel
+import com.app.majuapp.screen.walk.WalkingRecordViewModel
 import com.app.majuapp.ui.theme.BrightGray
 import com.app.majuapp.ui.theme.GoldenPoppy
 import com.app.majuapp.ui.theme.OuterSpace
@@ -62,6 +66,7 @@ import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.compose.CameraPositionState
 import com.google.maps.android.compose.GoogleMap
+import com.google.maps.android.compose.MapProperties
 import com.google.maps.android.compose.Marker
 import com.google.maps.android.compose.MarkerState
 import com.google.maps.android.compose.rememberCameraPositionState
@@ -146,9 +151,7 @@ fun WalkScreenChooseStartDialog(
                     Box(
                         modifier = Modifier.clip(RoundedCornerShape(roundedCornerPadding))
                             .fillMaxWidth().height(260.dp).border(
-                                2.dp,
-                                BrightGray,
-                                shape = RoundedCornerShape(roundedCornerPadding)
+                                2.dp, BrightGray, shape = RoundedCornerShape(roundedCornerPadding)
                             ).padding(defaultPadding), contentAlignment = Alignment.BottomCenter
                     ) {
                         if (walkingTrailData.data.isNullOrEmpty()) {
@@ -163,7 +166,6 @@ fun WalkScreenChooseStartDialog(
                                 state = walkingPagerState
                             ) { page ->
                                 val coordinates = walkingTrailData.data[page]
-                                // val coordinates = mapViewModel.getCoordinatesForPage(page)
                                 val cameraPositionState = rememberCameraPositionState {
                                     position = CameraPosition.fromLatLngZoom(
                                         LatLng(coordinates.startLat, coordinates.startLon), 16f
@@ -188,17 +190,15 @@ fun WalkScreenChooseStartDialog(
                                             RoundedCornerShape(
                                                 roundedCornerPadding
                                             )
-                                        )
-                                            .fillMaxWidth().height(200.dp).background(
-                                                OuterSpace,
-                                                shape = RoundedCornerShape(roundedCornerPadding)
-                                            ),
+                                        ).fillMaxWidth().height(200.dp).background(
+                                            OuterSpace,
+                                            shape = RoundedCornerShape(roundedCornerPadding)
+                                        ),
                                         contentAlignment = Alignment.BottomCenter,
                                     ) {
-
-
                                         MapScreen(
-                                            cameraPositionState,
+                                            modifier = Modifier,
+                                            LatLng(coordinates.startLat, coordinates.startLon),
                                             LatLng(coordinates.startLat, coordinates.startLon),
                                             LatLng(coordinates.endLat, coordinates.endLon)
                                         )
@@ -220,13 +220,9 @@ fun WalkScreenChooseStartDialog(
                             onClickConfirm = {
                                 onClickConfirm()
 
-                                val coordinates =
-                                    walkingTrailData.data[walkingPagerState.currentPage]
-//                                walkViewModel.setCurrentCoordinate(
-//                                    CoordinateData(
-//                                        coordinates.startLon, coordinates.startLon
-//                                    )
-//                                )
+                                // 선택된 산책로 데이터를 ViewModel에 저장하기
+                                // 내가 보여줘야 할 데이터는 시작 위치 산책로 표시
+                                walkViewModel.setCurrentChooseWalkingTrail(walkingTrailData.data[walkingPagerState.currentPage])
                             },
                             Modifier.weight(1f)
                         )
@@ -245,14 +241,31 @@ fun WalkScreenChooseStartDialog(
 
 @Composable
 fun MapScreen(
-    cameraPositionState: CameraPositionState,
-    startLocation: LatLng,
-    endLocation: LatLng,
+    modifier: Modifier,
+    currentLocation: LatLng = LatLng(0.0, 0.0),
+    startLocation: LatLng = LatLng(0.0, 0.0),
+    endLocation: LatLng = LatLng(0.0, 0.0),
 ) {
+    val cameraPositionState: CameraPositionState = rememberCameraPositionState {
+        position = CameraPosition.fromLatLngZoom(currentLocation, 16f)
+    }
+
     GoogleMap(
-        modifier = Modifier.fillMaxSize(),
+        modifier = modifier.fillMaxSize(),
         cameraPositionState = cameraPositionState,
+        properties = MapProperties(
+            isMyLocationEnabled = true,
+            isBuildingEnabled = true
+        )
+
     ) {
+        Marker(
+            state = MarkerState(
+                // 현재 내 위치의 아이콘
+                position = currentLocation
+            )
+        )
+
         Marker(
             state = MarkerState(
                 position = startLocation
@@ -362,10 +375,25 @@ fun WalkScreenInformDialogue(
 
 
 @Composable
-fun WalkRecordingBox(context: Context) {/*
+fun WalkRecordingBox(
+    context: Context,
+    stepCount: Int,
+    moveDist: Double,
+    walkingRecordViewModel: WalkingRecordViewModel = hiltViewModel()
+) {
+    /*
         바텀 시트 내부
         이동 거리, 걸음 수가 보이는 회색 박스
      */
+
+    val stepCount by walkingRecordViewModel.stepCount.collectAsStateWithLifecycle()
+    val moveDist by walkingRecordViewModel.moveDist.collectAsStateWithLifecycle()
+    val todayStepCount = walkingRecordViewModel.todayStepCount.collectAsState()
+    Log.d(
+        TAG,
+        "WalkRecordingBox walkingRecordViewModel.todayStepCount.collectAsState() : ${todayStepCount.value}"
+    )
+    val todayStepCount2 = walkingRecordViewModel.todayStepCount2.value
 
     Box(
         Modifier.clip(RoundedCornerShape(8.dp)).fillMaxWidth().height(92.dp)
@@ -396,7 +424,7 @@ fun WalkRecordingBox(context: Context) {/*
                     Row {
                         Text(
                             textAlign = TextAlign.Center,
-                            text = "0.22",
+                            text = "$moveDist",
                             fontSize = 16.sp,
                             fontWeight = FontWeight.Bold,
                         )
@@ -432,101 +460,10 @@ fun WalkRecordingBox(context: Context) {/*
                         fontSize = 16.sp,
                         fontWeight = FontWeight.Medium,
                     )
-                    Row() {
-                        Text(
-                            textAlign = TextAlign.Center,
-                            text = "275",
-                            fontSize = 16.sp,
-                            fontWeight = FontWeight.Bold,
-                        )
-                        Text(
-                            textAlign = TextAlign.Center,
-                            text = context.getString(R.string.walk_screen_walking_bottom_sheet_box_step_count_unit),
-                            fontSize = 10.sp,
-                            fontWeight = FontWeight.Medium,
-                        )
-                    }
-                }
-            }
-        }
-    }
-} // End of WalkRecordingBox
-
-@Composable
-fun WalkRecordingBox(context: Context, walkDateHistoryDomainModel: WalkDateHistoryDomainModel) {/*
-        바텀 시트 내부
-        이동 거리, 걸음 수가 보이는 회색 박스
-     */
-
-    Box(
-        Modifier.clip(RoundedCornerShape(8.dp)).fillMaxWidth().height(92.dp)
-            .background(color = BrightGray), contentAlignment = Alignment.Center
-    ) {
-        Row(
-            modifier = Modifier.matchParentSize(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            Box(
-                // 이동 거리 박스
-                modifier = Modifier.fillMaxWidth().wrapContentHeight().weight(1f).align(
-                    Alignment.CenterVertically,
-                ),
-            ) {
-                Column(
-                    modifier = Modifier.fillMaxWidth().wrapContentHeight(),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Text(
-                        textAlign = TextAlign.Center,
-                        color = SonicSilver,
-                        text = context.getString(R.string.walk_screen_walking_bottom_sheet_box_distanced_traveled),
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.Medium,
-                    )
                     Row {
                         Text(
                             textAlign = TextAlign.Center,
-                            text = "${walkDateHistoryDomainModel.distance}",
-                            fontSize = 16.sp,
-                            fontWeight = FontWeight.Bold,
-                        )
-                        Text(
-                            textAlign = TextAlign.Center,
-                            text = context.getString(R.string.walk_screen_walking_bottom_sheet_box_distanced_traveled_unit),
-                            fontSize = 10.sp,
-                            fontWeight = FontWeight.Medium,
-                        )
-                    }
-                }
-            }
-            Spacer(
-                // 회색 박스 중간 구분선
-                modifier = Modifier.width(1.dp).fillMaxHeight().padding(
-                    top = defaultPadding + 8.dp, bottom = defaultPadding + 8.dp
-                ).background(SilverSand)
-            )
-            Box(
-                // 걸음 수 박스
-                modifier = Modifier.fillMaxWidth().wrapContentHeight().weight(1f).align(
-                    Alignment.CenterVertically,
-                ),
-            ) {
-                Column(
-                    modifier = Modifier.fillMaxWidth().wrapContentHeight(),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Text(
-                        color = SonicSilver,
-                        textAlign = TextAlign.Center,
-                        text = context.getString(R.string.walk_screen_walking_bottom_sheet_box_step_count_title),
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.Medium,
-                    )
-                    Row() {
-                        Text(
-                            textAlign = TextAlign.Center,
-                            text = "${walkDateHistoryDomainModel.steps}",
+                            text = "${todayStepCount.value - stepCount.toInt()}",
                             fontSize = 16.sp,
                             fontWeight = FontWeight.Bold,
                         )
