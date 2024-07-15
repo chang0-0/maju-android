@@ -1,21 +1,22 @@
 package com.app.majuapp.domain.model.walk
 
-import android.content.Context
-import android.util.Log
+import android.content.Context.SENSOR_SERVICE
+import android.hardware.Sensor
+import android.hardware.SensorEvent
+import android.hardware.SensorEventListener
+import android.hardware.SensorManager
 import androidx.lifecycle.ViewModel
-import com.google.android.gms.fitness.Fitness
-import com.google.android.gms.fitness.data.DataPoint
-import com.google.android.gms.fitness.data.DataType
-import com.google.android.gms.fitness.request.OnDataPointListener
-import com.google.android.gms.fitness.request.SensorRequest
-import dagger.hilt.android.lifecycle.HiltViewModel
+import com.app.majuapp.Application
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import java.util.concurrent.TimeUnit
-import javax.inject.Inject
 
-@HiltViewModel
-class HealthRecordViewModel @Inject constructor() : ViewModel() {
+class HealthRecordViewModel(
+    application: Application
+) : ViewModel(), SensorEventListener {
+
+    private val sensorManager: SensorManager =
+        application.getSystemService(SENSOR_SERVICE) as SensorManager
+    private val stepSensor: Sensor? = sensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER)
 
     val _stepCount = MutableStateFlow(0)
     val stepCount = _stepCount.asStateFlow()
@@ -24,27 +25,27 @@ class HealthRecordViewModel @Inject constructor() : ViewModel() {
         _stepCount.value = newStep
     } // End of updateStepCount()
 
+    init {
+        stepSensor?.let {
+            sensorManager.registerListener(this, it, SensorManager.SENSOR_DELAY_UI)
+        }
+    }
 
-//    fun accessGoogleFit(context: Context) {
-//        val client = Fitness.getSensorsClient(context, GoogleSignIn.getLastSignedInAccount(this)!!)
-//        val request = SensorRequest.Builder()
-//            .setDataType(DataType.TYPE_STEP_COUNT_DELTA)
-//            .setSamplingRate(1, TimeUnit.SECONDS)
-//            .build()
-//
-//        client.add(request, object : OnDataPointListener {
-//            override fun onDataPoint(dataPoint: DataPoint) {
-//                for (field in dataPoint.dataType.fields) {
-//                    val value = dataPoint.getValue(field).asInt()
-//                    Log.i("GoogleFit", "Field: $field Value: $value")
-//                    updateStepCount(value)
-//                }
-//            }
-//        }).addOnSuccessListener {
-//            Log.i("GoogleFit", "Listener registered!")
-//        }.addOnFailureListener { e ->
-//            Log.e("GoogleFit", "Listener not registered.", e)
-//        }
-//    }
+    override fun onSensorChanged(event: SensorEvent?) {
+        event?.let {
+            if (it.sensor.type == Sensor.TYPE_STEP_COUNTER) {
+                _stepCount.value = it.values[0].toInt()
+            }
+        }
+    }
+
+    override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {
+        // Do nothing
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        sensorManager.unregisterListener(this)
+    }
 
 } // End of HealthRecordViewModel class

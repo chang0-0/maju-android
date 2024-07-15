@@ -158,7 +158,7 @@ dependencies {
 
     // Room
     implementation("androidx.room:room-ktx:2.6.1")
-    kapt("androidx.room:room-compiler:2.6.1")
+    annotationProcessor("androidx.room:room-compiler:2.6.1")
     implementation("androidx.room:room-paging:2.6.1")
 
     // Google Fonts
@@ -185,10 +185,22 @@ dependencies {
 
     // google health care
     implementation("androidx.health.connect:connect-client:1.1.0-alpha02")
-    implementation("com.google.android.gms:play-services-fitness:21.0.1")
+    implementation("com.google.android.gms:play-services-fitness:21.2.0")
+    // Google Auth
+    implementation("com.google.android.gms:play-services-auth:21.2.0")
 
     // Permission
     implementation("com.google.accompanist:accompanist-permissions:0.35.0-alpha")
+
+    implementation("com.mutualmobile:composesensors:1.1.2")
+
+    // Work Manager
+    val work_version = "2.9.0"
+    implementation("androidx.work:work-runtime-ktx:$work_version")
+
+
+
+
 }
 
 secrets {

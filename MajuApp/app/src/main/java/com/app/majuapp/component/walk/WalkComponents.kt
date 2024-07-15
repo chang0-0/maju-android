@@ -1,6 +1,7 @@
 package com.app.majuapp.component.walk
 
 import android.content.Context
+import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
@@ -40,11 +41,13 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.app.majuapp.R
 import com.app.majuapp.component.fillMaxWidthSpacer
 import com.app.majuapp.domain.model.walk.WalkingTrailResultData
 import com.app.majuapp.screen.walk.TimerViewModel
 import com.app.majuapp.screen.walk.WalkViewModel
+import com.app.majuapp.screen.walk.WalkingRecordViewModel
 import com.app.majuapp.ui.theme.BrightGray
 import com.app.majuapp.ui.theme.GoldenPoppy
 import com.app.majuapp.ui.theme.OuterSpace
@@ -62,6 +65,7 @@ import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.compose.CameraPositionState
 import com.google.maps.android.compose.GoogleMap
+import com.google.maps.android.compose.MapProperties
 import com.google.maps.android.compose.Marker
 import com.google.maps.android.compose.MarkerState
 import com.google.maps.android.compose.rememberCameraPositionState
@@ -192,6 +196,7 @@ fun WalkScreenChooseStartDialog(
                                         contentAlignment = Alignment.BottomCenter,
                                     ) {
                                         MapScreen(
+                                            modifier = Modifier,
                                             LatLng(coordinates.startLat, coordinates.startLon),
                                             LatLng(coordinates.startLat, coordinates.startLon),
                                             LatLng(coordinates.endLat, coordinates.endLon)
@@ -235,6 +240,7 @@ fun WalkScreenChooseStartDialog(
 
 @Composable
 fun MapScreen(
+    modifier: Modifier,
     currentLocation: LatLng = LatLng(0.0, 0.0),
     startLocation: LatLng = LatLng(0.0, 0.0),
     endLocation: LatLng = LatLng(0.0, 0.0),
@@ -244,8 +250,13 @@ fun MapScreen(
     }
 
     GoogleMap(
-        modifier = Modifier.fillMaxSize(),
+        modifier = modifier.fillMaxSize(),
         cameraPositionState = cameraPositionState,
+        properties = MapProperties(
+            isMyLocationEnabled = true,
+            isBuildingEnabled = true
+        )
+
     ) {
         Marker(
             state = MarkerState(
@@ -365,14 +376,23 @@ fun WalkScreenInformDialogue(
 @Composable
 fun WalkRecordingBox(
     context: Context,
-    walkViewModel: WalkViewModel = hiltViewModel()
+    stepCount: Int,
+    moveDist: Double,
+    walkingRecordViewModel: WalkingRecordViewModel = hiltViewModel()
 ) {
     /*
         바텀 시트 내부
         이동 거리, 걸음 수가 보이는 회색 박스
      */
 
-
+    val stepCount by walkingRecordViewModel.stepCount.collectAsStateWithLifecycle()
+    val moveDist by walkingRecordViewModel.moveDist.collectAsStateWithLifecycle()
+    val todayStepCount = walkingRecordViewModel.todayStepCount.collectAsState()
+    Log.d(
+        TAG,
+        "WalkRecordingBox walkingRecordViewModel.todayStepCount.collectAsState() : ${todayStepCount.value}"
+    )
+    val todayStepCount2 = walkingRecordViewModel.todayStepCount2.value
 
     Box(
         Modifier.clip(RoundedCornerShape(8.dp)).fillMaxWidth().height(92.dp)
@@ -403,7 +423,7 @@ fun WalkRecordingBox(
                     Row {
                         Text(
                             textAlign = TextAlign.Center,
-                            text = "0.22",
+                            text = "$moveDist",
                             fontSize = 16.sp,
                             fontWeight = FontWeight.Bold,
                         )
@@ -439,10 +459,10 @@ fun WalkRecordingBox(
                         fontSize = 16.sp,
                         fontWeight = FontWeight.Medium,
                     )
-                    Row() {
+                    Row {
                         Text(
                             textAlign = TextAlign.Center,
-                            text = "275",
+                            text = "${todayStepCount.value - stepCount.toInt()}",
                             fontSize = 16.sp,
                             fontWeight = FontWeight.Bold,
                         )

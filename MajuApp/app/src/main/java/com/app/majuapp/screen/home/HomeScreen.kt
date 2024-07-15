@@ -57,10 +57,10 @@ fun HomeScreen(
     navController: NavController
 ) {
     HomeScreenContent(navController)
-//    val accessToken = Application.sharedPreferencesUtil.getUserAccessToken()
-//    val refreshToken = Application.sharedPreferencesUtil.getUserRefreshToken()
-//    Log.d(TAG, "accessToken: $accessToken")
-//    Log.d(TAG, "refreshToken: $refreshToken")
+    val accessToken = Application.sharedPreferencesUtil.getUserAccessToken()
+    val refreshToken = Application.sharedPreferencesUtil.getUserRefreshToken()
+    Log.d(TAG, "accessToken: $accessToken")
+    Log.d(TAG, "refreshToken: $refreshToken")
 } // End of HomeScreen()
 
 @Composable

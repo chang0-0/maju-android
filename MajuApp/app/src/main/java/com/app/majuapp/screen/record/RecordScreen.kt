@@ -248,7 +248,7 @@ private fun RecordScreenLazyItems(
                     fontFamily = notoSansKoreanFontFamily
                 )
                 Spacer(modifier = Modifier.height(10.dp))
-                WalkRecordingBox(context)
+                WalkRecordingBox(context, 0, 0.0)
             }
         }
         composableContent() // 내부 컴포저블 함수

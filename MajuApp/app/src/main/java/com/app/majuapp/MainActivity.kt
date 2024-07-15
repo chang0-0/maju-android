@@ -1,48 +1,51 @@
 package com.app.majuapp
 
 import android.Manifest
-import android.content.Intent
+import android.content.Context
 import android.graphics.Color
+import android.hardware.Sensor
+import android.hardware.SensorEvent
+import android.hardware.SensorEventListener
+import android.hardware.SensorManager
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.material3.Button
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.unit.dp
 import androidx.core.app.ActivityCompat
 import androidx.core.view.WindowCompat
 import androidx.navigation.compose.rememberNavController
+import com.app.majuapp.navigation.SetUpNavGraph
 import com.app.majuapp.screen.culture.CultureDetailViewModel
 import com.app.majuapp.screen.culture.CultureViewModel
 import com.app.majuapp.screen.login.LoginViewModel
 import com.app.majuapp.screen.login.SocialLoginViewModel
-import com.app.majuapp.service.RecordingService
+import com.app.majuapp.screen.walk.WalkingRecordViewModel
 import com.app.majuapp.ui.theme.MajuAppTheme
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 
 
 private const val TAG = "MainActivity_창영"
 
 @AndroidEntryPoint
-class MainActivity : ComponentActivity() {
+class MainActivity : ComponentActivity(), SensorEventListener { // End of MainActivity class
 
     private val socialLoginViewModel: SocialLoginViewModel by viewModels()
     private val loginViewModel: LoginViewModel by viewModels()
     private val cultureViewModel: CultureViewModel by viewModels()
     private val cultureDetailViewModel: CultureDetailViewModel by viewModels()
+    private val walkingRecordViewModel: WalkingRecordViewModel by viewModels()
+
+    private lateinit var sensorManager: SensorManager
+    private val _stepCount = MutableStateFlow(0)
+    val stepCount: StateFlow<Int> = _stepCount
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -57,53 +60,75 @@ class MainActivity : ComponentActivity() {
             )
         }
 
+        sensorManager =
+            application.getSystemService(Context.SENSOR_SERVICE) as SensorManager
+        val stepSensor: Sensor? = sensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER)
+
+        stepSensor?.let {
+            sensorManager.registerListener(this, it, SensorManager.SENSOR_DELAY_UI)
+        }
+
+        Log.d(TAG, "onCreate: $stepSensor")
+
+
+//        sensorManager = (getSystemService(Context.SENSOR_SERVICE) as SensorManager?)!!
+//        val sensor: Sensor? = sensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER)
+//        sensor?.let {
+//            sensorManager.registerListener(
+//                this@MainActivity,
+//                it,
+//                SensorManager.SENSOR_DELAY_FASTEST
+//            )
+//        }
+
+
         setContent {
             MajuAppTheme {
                 StatusBarColorChange()
 
                 val navController = rememberNavController()
-//                SetUpNavGraph(
-//                    navController,
-//                    socialLoginViewModel,
-//                    loginViewModel,
-//                    cultureViewModel,
-//                    cultureDetailViewModel
-//                )
+                SetUpNavGraph(
+                    navController,
+                    socialLoginViewModel,
+                    loginViewModel,
+                    cultureViewModel,
+                    cultureDetailViewModel
+                )
 
-                Column(
-                    modifier = Modifier.fillMaxSize(),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center
-                ) {
-                    Button(
-                        onClick = {
-                            Intent(
-                                applicationContext,
-                                RecordingService::class.java,
-                            ).also {
-                                it.action = RecordingService.Actions.START.toString()
-                                startService(it)
-                            }
-                        }
-                    ) {
-                        Text("start walk")
-                    }
-
-                    Spacer(modifier = Modifier.fillMaxWidth().height(40.dp))
-                    Button(
-                        onClick = {
-                            Intent(
-                                applicationContext,
-                                RecordingService::class.java,
-                            ).also {
-                                it.action = RecordingService.Actions.STOP.toString()
-                                startService(it)
-                            }
-                        }
-                    ) {
-                        Text("stop walk")
-                    }
-                }
+//                Column(
+//                    modifier = Modifier.fillMaxSize(),
+//                    horizontalAlignment = Alignment.CenterHorizontally,
+//                    verticalArrangement = Arrangement.Center
+//                ) {
+//                    Button(
+//                        onClick = {
+//                            Intent(
+//                                applicationContext,
+//                                RecordingService::class.java,
+//                            ).also {
+//                                it.action = RecordingService.Actions.START.toString()
+//                                startService(it)
+//                            }
+//                        }
+//                    ) {
+//                        Text("start walk")
+//                    }
+//
+//                    Spacer(modifier = Modifier.fillMaxWidth().height(40.dp))
+//                    Button(
+//                        onClick = {
+//                            Intent(
+//                                applicationContext,
+//                                RecordingService::class.java,
+//                            ).also {
+//                                it.action = RecordingService.Actions.STOP.toString()
+//                                startService(it)
+//                            }
+//                        }
+//                    ) {
+//                        Text("stop walk")
+//                    }
+//                }
 
             }
         }
@@ -114,7 +139,34 @@ class MainActivity : ComponentActivity() {
         super.onResume()
     }
 
-} // End of MainActivity class
+    override fun onStop() {
+        super.onStop()
+        sensorManager.unregisterListener(this)
+    }
+
+    override fun onSensorChanged(event: SensorEvent?) {
+        event?.let {
+            if (it.sensor.type == Sensor.TYPE_STEP_COUNTER) {
+                _stepCount.value = it.values[0].toInt()
+                val steps = it.values[0].toInt()
+
+
+                _stepCount.value = steps
+                walkingRecordViewModel.setStepCount(steps)
+                walkingRecordViewModel.setTodayStepCount(steps)
+
+                val todayStepCount = steps
+                walkingRecordViewModel.setTodayStepCount(todayStepCount)
+                Log.d(TAG, "MainActivity -> todayStepCount: ${todayStepCount}")
+                Log.d(TAG, "MainActivity onSensorChanged: ${_stepCount.value}")
+            }
+        }
+    }
+
+    override fun onAccuracyChanged(p0: Sensor?, p1: Int) {
+        // Do nothing
+    }
+}
 
 @Composable
 fun StatusBarColorChange() {
