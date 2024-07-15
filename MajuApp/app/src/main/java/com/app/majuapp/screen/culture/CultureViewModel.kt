@@ -38,7 +38,6 @@ class CultureViewModel @Inject constructor(
     val focusedEvent: StateFlow<Int> = _focusedEvent
 
     init {
-        getCurrentLocation()
         getAllCultureEvents()
     }
 

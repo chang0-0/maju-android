@@ -85,7 +85,9 @@ fun CultureMapScreen(
             context,
             permissions,
             launcherMultiplePermissions
-        )
+        ) {
+            cultureViewModel.getCurrentLocation()
+        }
     }
 
     LaunchedEffect(key1 = currentLocation.value) {
