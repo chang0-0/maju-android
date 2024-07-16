@@ -8,6 +8,7 @@ import androidx.compose.animation.core.spring
 import androidx.compose.animation.expandVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -23,6 +24,8 @@ import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.AlertDialog
+import androidx.compose.material.Divider
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -44,7 +47,6 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.app.majuapp.R
 import com.app.majuapp.component.fillMaxWidthSpacer
-import com.app.majuapp.domain.model.walk.WalkDateHistoryDomainModel
 import com.app.majuapp.domain.model.walk.WalkingTrailResultData
 import com.app.majuapp.screen.walk.TimerViewModel
 import com.app.majuapp.screen.walk.WalkViewModel
@@ -512,6 +514,92 @@ fun WalkingRecordingTimer(
         color = Color.Black
     )
 } // End of WalkingRecordingTimer()
+
+@Composable
+fun PermissionDialog(
+    permissionTextProvider: PermissionTextProvider,
+    isPermanentlyDeclined: Boolean,
+    onDismiss: () -> Unit,
+    onOkClick: () -> Unit,
+    onGoToAppSettingsClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        buttons = {
+            Column(
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Divider()
+                Text(
+                    text = if (isPermanentlyDeclined) {
+                        "설정으로 가기"
+                    } else {
+                        "확인"
+                    },
+                    fontWeight = FontWeight.Bold,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable {
+                            if (isPermanentlyDeclined) {
+                                onGoToAppSettingsClick()
+                            } else {
+                                onOkClick()
+                            }
+                        }
+                        .padding(16.dp)
+                )
+            }
+        },
+        title = {
+            Text(text = "권한 요청 알림")
+        },
+        text = {
+            Text(
+                text = permissionTextProvider.getDescription(
+                    isPermanentlyDeclined = isPermanentlyDeclined
+                )
+            )
+        },
+        modifier = modifier
+    )
+} // End of PermissionDialog()
+
+interface PermissionTextProvider {
+    fun getDescription(isPermanentlyDeclined: Boolean): String
+}
+
+class AccessFineLocationPermissionTextProvider : PermissionTextProvider {
+    override fun getDescription(isPermanentlyDeclined: Boolean): String {
+        return if (isPermanentlyDeclined) {
+            "위치 권한을 거부하셨습니다.\n앱 설정으로 이동하여 권한을 허용해주세요"
+        } else {
+            "해당 기능은 산책 기록을 위하여 권한을 필요로 합니다."
+        }
+    }
+}
+
+class ActivityRecognitionPermissionTextProvider : PermissionTextProvider {
+    override fun getDescription(isPermanentlyDeclined: Boolean): String {
+        return if (isPermanentlyDeclined) {
+            "신체 활동 권한을 거부하셨습니다.\n앱 설정으로 이동하여 권한을 허용해주세요"
+        } else {
+            "해당 기능은 산책 중 걸음 수 측정을 위해 권한을 필요로 합니다."
+        }
+    }
+}
+
+class PostNotificationPermissionTextProvider : PermissionTextProvider {
+    override fun getDescription(isPermanentlyDeclined: Boolean): String {
+        return if (isPermanentlyDeclined) {
+            "알림 권한을 거부하셨습니다.\n앱 설정으로 이동하여 권한을 허용해주세요"
+        } else {
+            "해당 기능은 백그라운드 기록을 위해 권한을 필요로 합니다."
+        }
+    }
+}
+
 
 fun Long.formatTime(): String {
     val hours = this / 3600

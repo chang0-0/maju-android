@@ -100,6 +100,7 @@ fun RequestHealthPermission(
 
 
 @SuppressLint("MissingPermission")
+@Composable
 fun getLastUserLocation(
     context: Context,
     onGetLastLocationSuccess: (CoordinateData) -> Unit,

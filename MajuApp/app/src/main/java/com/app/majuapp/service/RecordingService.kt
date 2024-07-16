@@ -1,6 +1,5 @@
 package com.app.majuapp.service
 
-import android.R
 import android.app.PendingIntent
 import android.app.Service
 import android.content.Intent
@@ -10,14 +9,13 @@ import android.hardware.SensorEventListener
 import android.hardware.SensorManager
 import android.os.IBinder
 import android.util.Log
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.core.app.NotificationCompat
 import com.app.majuapp.MainActivity
+import com.app.majuapp.R
+import com.app.majuapp.R.*
 import com.app.majuapp.room.RecordingRepository
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 
@@ -66,7 +64,7 @@ class RecordingService : Service(), SensorEventListener { // End of RunningServi
         )
 
         val notification = NotificationCompat.Builder(this, "walking_channel")
-            .setSmallIcon(R.drawable.ic_notification_overlay).setContentTitle("산책중입니다!")
+            .setSmallIcon(R.drawable.ic_home_logo).setContentTitle("산책중입니다!")
             .setContentIntent(pendingIntent).setContentText("Elapsed time").build()
         startForeground(1, notification)
     } // End of start()

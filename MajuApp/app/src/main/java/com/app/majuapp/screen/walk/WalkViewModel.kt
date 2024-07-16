@@ -1,5 +1,6 @@
 package com.app.majuapp.screen.walk
 
+import androidx.compose.runtime.mutableStateListOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.app.majuapp.domain.model.walk.WalkTrailData
@@ -73,5 +74,18 @@ class WalkViewModel @Inject constructor(
         }
     }
 
-// End of getWalkingTrails()
+    val visiblePermissionDialogQueue = mutableStateListOf<String>()
+
+    fun dismissPermissionDialog() {
+        visiblePermissionDialogQueue.removeFirst()
+    } // End of dismissPermissionDialog()
+
+    fun onPermissionResult(
+        permission: String,
+        isGranted: Boolean,
+    ) {
+        if (!isGranted && !visiblePermissionDialogQueue.contains(permission)) {
+            visiblePermissionDialogQueue.add(permission)
+        }
+    } // End of onPermissionResult()
 } // End of WalkViewModel

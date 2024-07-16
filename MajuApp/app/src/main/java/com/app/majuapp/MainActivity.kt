@@ -1,13 +1,11 @@
 package com.app.majuapp
 
-import android.Manifest
 import android.content.Context
 import android.graphics.Color
 import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
-import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
@@ -16,7 +14,6 @@ import androidx.activity.viewModels
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.platform.LocalContext
-import androidx.core.app.ActivityCompat
 import androidx.core.view.WindowCompat
 import androidx.navigation.compose.rememberNavController
 import com.app.majuapp.navigation.SetUpNavGraph
@@ -53,15 +50,6 @@ class MainActivity : ComponentActivity(), SensorEventListener { // End of MainAc
         super.onCreate(savedInstanceState)
         WindowCompat.setDecorFitsSystemWindows(window, false)
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            ActivityCompat.requestPermissions(
-                this,
-                arrayOf(
-                    Manifest.permission.POST_NOTIFICATIONS,
-                ), 0
-            )
-        }
-
         sensorManager =
             application.getSystemService(Context.SENSOR_SERVICE) as SensorManager
         val stepSensor: Sensor? = sensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER)
@@ -69,8 +57,6 @@ class MainActivity : ComponentActivity(), SensorEventListener { // End of MainAc
         stepSensor?.let {
             sensorManager.registerListener(this, it, SensorManager.SENSOR_DELAY_UI)
         }
-
-        Log.d(TAG, "onCreate: $stepSensor")
 
 
 //        sensorManager = (getSystemService(Context.SENSOR_SERVICE) as SensorManager?)!!
@@ -97,41 +83,6 @@ class MainActivity : ComponentActivity(), SensorEventListener { // End of MainAc
                     cultureDetailViewModel,
                     homeViewModel
                 )
-
-//                Column(
-//                    modifier = Modifier.fillMaxSize(),
-//                    horizontalAlignment = Alignment.CenterHorizontally,
-//                    verticalArrangement = Arrangement.Center
-//                ) {
-//                    Button(
-//                        onClick = {
-//                            Intent(
-//                                applicationContext,
-//                                RecordingService::class.java,
-//                            ).also {
-//                                it.action = RecordingService.Actions.START.toString()
-//                                startService(it)
-//                            }
-//                        }
-//                    ) {
-//                        Text("start walk")
-//                    }
-//
-//                    Spacer(modifier = Modifier.fillMaxWidth().height(40.dp))
-//                    Button(
-//                        onClick = {
-//                            Intent(
-//                                applicationContext,
-//                                RecordingService::class.java,
-//                            ).also {
-//                                it.action = RecordingService.Actions.STOP.toString()
-//                                startService(it)
-//                            }
-//                        }
-//                    ) {
-//                        Text("stop walk")
-//                    }
-//                }
 
             }
         }
@@ -160,8 +111,6 @@ class MainActivity : ComponentActivity(), SensorEventListener { // End of MainAc
 
                 val todayStepCount = steps
                 walkingRecordViewModel.setTodayStepCount(todayStepCount)
-                Log.d(TAG, "MainActivity -> todayStepCount: ${todayStepCount}")
-                Log.d(TAG, "MainActivity onSensorChanged: ${_stepCount.value}")
             }
         }
     }
