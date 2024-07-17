@@ -256,8 +256,7 @@ fun MapScreen(
         modifier = modifier.fillMaxSize(),
         cameraPositionState = cameraPositionState,
         properties = MapProperties(
-            isMyLocationEnabled = true,
-            isBuildingEnabled = true
+            isMyLocationEnabled = true, isBuildingEnabled = true
         )
 
     ) {
@@ -379,23 +378,17 @@ fun WalkScreenInformDialogue(
 @Composable
 fun WalkRecordingBox(
     context: Context,
-    stepCount: Int,
     moveDist: Double,
+    moveStepCount: Int,
+    todayStepCount: Int = 0,
     walkingRecordViewModel: WalkingRecordViewModel = hiltViewModel()
-) {
-    /*
+) {/*
         바텀 시트 내부
         이동 거리, 걸음 수가 보이는 회색 박스
      */
-
-    val stepCount by walkingRecordViewModel.stepCount.collectAsStateWithLifecycle()
-    val moveDist by walkingRecordViewModel.moveDist.collectAsStateWithLifecycle()
-    val todayStepCount = walkingRecordViewModel.todayStepCount.collectAsState()
-    Log.d(
-        TAG,
-        "WalkRecordingBox walkingRecordViewModel.todayStepCount.collectAsState() : ${todayStepCount.value}"
-    )
-    val todayStepCount2 = walkingRecordViewModel.todayStepCount2.value
+    Log.d(TAG, "WalkRecordingBox: $todayStepCount")
+    Log.d(TAG, "WalkRecordingBox: $moveStepCount")
+    val todayStepCount = walkingRecordViewModel.todayStepCount.collectAsStateWithLifecycle()
 
     Box(
         Modifier.clip(RoundedCornerShape(8.dp)).fillMaxWidth().height(92.dp)
@@ -465,7 +458,7 @@ fun WalkRecordingBox(
                     Row {
                         Text(
                             textAlign = TextAlign.Center,
-                            text = "${todayStepCount.value - stepCount.toInt()}",
+                            text = "${moveStepCount.toInt() - todayStepCount.value}",
                             fontSize = 16.sp,
                             fontWeight = FontWeight.Bold,
                         )
@@ -524,45 +517,37 @@ fun PermissionDialog(
     onGoToAppSettingsClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        buttons = {
-            Column(
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Divider()
-                Text(
-                    text = if (isPermanentlyDeclined) {
-                        "설정으로 가기"
-                    } else {
-                        "확인"
-                    },
-                    fontWeight = FontWeight.Bold,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clickable {
-                            if (isPermanentlyDeclined) {
-                                onGoToAppSettingsClick()
-                            } else {
-                                onOkClick()
-                            }
-                        }
-                        .padding(16.dp)
-                )
-            }
-        },
-        title = {
-            Text(text = "권한 요청 알림")
-        },
-        text = {
+    AlertDialog(onDismissRequest = onDismiss, buttons = {
+        Column(
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Divider()
             Text(
-                text = permissionTextProvider.getDescription(
-                    isPermanentlyDeclined = isPermanentlyDeclined
-                )
+                text = if (isPermanentlyDeclined) {
+                    "설정으로 가기"
+                } else {
+                    "확인"
+                },
+                fontWeight = FontWeight.Bold,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.fillMaxWidth().clickable {
+                    if (isPermanentlyDeclined) {
+                        onGoToAppSettingsClick()
+                    } else {
+                        onOkClick()
+                    }
+                }.padding(16.dp)
             )
-        },
-        modifier = modifier
+        }
+    }, title = {
+        Text(text = "권한 요청 알림")
+    }, text = {
+        Text(
+            text = permissionTextProvider.getDescription(
+                isPermanentlyDeclined = isPermanentlyDeclined
+            )
+        )
+    }, modifier = modifier
     )
 } // End of PermissionDialog()
 

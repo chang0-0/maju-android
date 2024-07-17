@@ -1,6 +1,5 @@
 package com.app.majuapp.screen.record
 
-import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -297,8 +296,8 @@ private fun RecordScreenLazyItems(
             ) {
                 WalkRecordingBox(
                     context,
-                    walkingHistoryDateEvents.steps,
-                    walkingHistoryDateEvents.distance
+                    walkingHistoryDateEvents.distance,
+                    walkingHistoryDateEvents.steps
                 )
             }
         }

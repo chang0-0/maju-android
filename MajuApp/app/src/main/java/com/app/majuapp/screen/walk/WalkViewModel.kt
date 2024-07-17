@@ -1,5 +1,6 @@
 package com.app.majuapp.screen.walk
 
+import android.util.Log
 import androidx.compose.runtime.mutableStateListOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -11,6 +12,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -61,12 +63,15 @@ class WalkViewModel @Inject constructor(
 
 
     fun getWalkingTrails() {
+        Log.d(TAG, "WalkViewModel getWalkingTrails: ??")
+
         viewModelScope.launch {
             _currentLocation.collectLatest { location ->
                 if (location != null) {
-                    walkRepository.getWalkingTrails2(location).collect { result ->
-                        _walkingTrailData.value = result
-                    }
+                    walkRepository.getWalkingTrails(location).distinctUntilChanged()
+                        .collect { result ->
+                            _walkingTrailData.value = result
+                        }
                 } else {
                     _walkingTrailData.value = RequestState.Idle
                 }

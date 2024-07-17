@@ -31,12 +31,13 @@ class WalkRepository @Inject constructor(
 //        emit(NetworkResult.Error(0, it.message.toString(), null))
 //    }.flowOn(Dispatchers.IO)
 
-    suspend fun getWalkingTrails(coor: CoordinateData): Flow<Response<WalkingTrailResultData>> {
-        val ret = walkApi.getWalkingTrails(coor.lat!!, coor.lng!!)
-        return flow { emit(ret) }.flowOn(Dispatchers.IO)
-    } // End of getWalkingTrails()
+//    suspend fun getWalkingTrails(coor: CoordinateData): Flow<Response<WalkingTrailResultData>> {
+//        val ret = walkApi.getWalkingTrails(coor.lat!!, coor.lng!!)
+//        return flow { emit(ret) }.flowOn(Dispatchers.IO)
+//    } // End of getWalkingTrails()
 
-    fun getWalkingTrails2(coor: LatLng): Flow<RequestState<WalkingTrailResultData?>> {
+    fun getWalkingTrails(coor: LatLng): Flow<RequestState<WalkingTrailResultData?>> {
+        Log.d(TAG, "WalkRepository: getWalkingTrails")
         return flow {
             emit(RequestState.Loading)
             val ret = walkApi.getWalkingTrails(coor.latitude, coor.longitude)

@@ -33,6 +33,8 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberBottomSheetScaffoldState
@@ -86,11 +88,11 @@ import com.google.maps.android.compose.MapProperties
 import com.google.maps.android.compose.MapType
 import com.google.maps.android.compose.MapUiSettings
 import com.google.maps.android.compose.rememberCameraPositionState
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 private const val TAG = "WalkScreen_창영"
-
-private var todayStepCount = 0
 
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
@@ -107,18 +109,19 @@ fun WalkScreen(
     val currentLifecycleState by stateFlow.collectAsState()
 
     WalkingTrailgetPermission(context) // 권한 설정
+    StepCounterSensorManager(walkingRecordViewModel)
+    Log.d(
+        TAG,
+        "todayStepCount: ${walkingRecordViewModel.todayStepCount.value}"
+    )
 
     val lifeCycleOwner = LocalLifecycleOwner.current
     DisposableEffect(lifeCycleOwner) {
         val observer = LifecycleEventObserver { _, event ->
             if (event == Lifecycle.Event.ON_CREATE) {
-                Log.d(TAG, "WalkScreen: ON_CREATE")
-
 
             } else if (event == Lifecycle.Event.ON_START) {
                 // Service 시작
-                Log.d(TAG, "WalkScreen: ON_START")
-
             } else if (event == Lifecycle.Event.ON_DESTROY) {
                 // ON_STOP에서 Foreground Service 종료
                 Intent(
@@ -140,9 +143,9 @@ fun WalkScreen(
 
     // 위치 정보를 가져오는데 성공
 
-    var locationText by remember { mutableStateOf("No location obtained :(") }
-    var showPermissionResultText by remember { mutableStateOf(false) }
-    var permissionResultText by remember { mutableStateOf("Permission Granted...") }
+    var locationText by rememberSaveable { mutableStateOf("No location obtained :(") }
+    var showPermissionResultText by rememberSaveable { mutableStateOf(false) }
+    var permissionResultText by rememberSaveable { mutableStateOf("Permission Granted...") }
 
     getLastUserLocation(context, onGetLastLocationSuccess = {
         locationText = "Location using LAST-LOCATION: LATITUDE: ${it.lat}, LONGITUDE: ${it.lng}"
@@ -161,71 +164,92 @@ fun WalkScreen(
         })
     })
 
-    /*
-        RequestHealthPermission(onPermissionGranted = {
-            showPermissionResultText = true
-        }, onPermissionDenied = {
-            // Callback when permission is denied
-            showPermissionResultText = true
-            permissionResultText = "Permission Denied :("
-        }, onPermissionsRevoked = {
-            // Callback when permission is revoked
-            showPermissionResultText = true
-            permissionResultText = "Permission Revoked :("
-        })
-
-
-        RequestLocationPermission(onPermissionGranted = {
-            // Callback when permission is granted
-            showPermissionResultText = true
-            // Attempt to get the last known user location
-            getLastUserLocation(context, onGetLastLocationSuccess = {
-                locationText = "Location using LAST-LOCATION: LATITUDE: ${it.lat}, LONGITUDE: ${it.lng}"
-            }, onGetLastLocationFailed = { exception ->
-                showPermissionResultText = true
-                locationText = exception.localizedMessage ?: "Error Getting Last Location"
-            }, onGetLastLocationIsNull = {
-                // Attempt to get the current user location
-                getCurrentLocation(context, onGetCurrentLocationSuccess = {
-                    locationText =
-                        "Location using CURRENT-LOCATION: LATITUDE: ${it.lat}, LONGITUDE: ${it.lng}"
-                    walkViewModel.setCurrentLocation(LatLng(it.lat!!, it.lng!!))
-                }, onGetCurrentLocationFailed = {
-                    showPermissionResultText = true
-                    locationText = it.localizedMessage ?: "Error Getting Current Location"
-                })
-            })
-        }, onPermissionDenied = {
-            // Callback when permission is denied
-            showPermissionResultText = true
-            permissionResultText = "Permission Denied :("
-        }, onPermissionsRevoked = {
-            // Callback when permission is revoked
-            showPermissionResultText = true
-            permissionResultText = "Permission Revoked :("
-        })
-    */
-
 
     // 사용자의 현재 위치 정보가 저장된 값을 ViewModel에서 가져옵니다.
     val currentLocation by walkViewModel.currentLocation.collectAsStateWithLifecycle()
-    rememberStepCounterSensorState(walkingRecordViewModel).toInt()
-
+    // val todayStepCount by walkingRecordViewModel.todayStepCount.collectAsStateWithLifecycle()
+    // Log.d(TAG, "WalkScreen -> todayStepCount:  $todayStepCount")
 
     if (currentLocation != null) {
-        // 현재 위치 정보가 업데이트 되었을 때
-        // 현재 위치에 따른 산책로 추천
+        // 현재 위치 정보가 업데이트 되었을 때 현재 위치에 따른 산책로 추천
+
+        val coroutine = rememberCoroutineScope()
+        val walkingTrailData by walkViewModel.walkingTrailData.collectAsState()
+        var showChooseStartDialog by rememberSaveable { mutableStateOf(true) }
+
         LaunchedEffect(Unit) {
             walkViewModel.getWalkingTrails()
         }
 
-        WalkScreenContent(navController, walkViewModel)
+        val updateState = rememberUpdatedState("sdf")
+
+        when (walkingTrailData) {
+            is RequestState.Loading -> {
+                Log.d(TAG, "WalkScreen -> RequestState.Loading")
+                Column(
+                    modifier = Modifier.fillMaxSize(),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
+                ) {
+                    Loader()
+                    Text(text = "현재 위치 정보를 가져오는 중입니다.")
+                }
+            }
+
+            is RequestState.Success -> {
+                Log.d(
+                    TAG,
+                    "WalkScreen -> walkingTrailData.getSuccessData()!!.data ${walkingTrailData.getSuccessData()!!.data}"
+                )
+                Log.d(TAG, "WalkScreen -> RequestState.Success")
+                if (walkingTrailData.getSuccessData() != null && showChooseStartDialog) {
+                    WalkScreenChooseStartDialog(context.getString(R.string.walk_screen_dialog_choose_promenade_title),
+                        context.getString(R.string.walk_screen_dialog_choose_promenade_content),
+                        walkingTrailData.getSuccessData()!!,
+                        onClickDismiss = {
+                            showChooseStartDialog = false
+                            navController.popBackStack()
+                        },
+                        onClickConfirm = {
+                            showChooseStartDialog = false
+                        })
+                } else {
+                    WalkScreenContent(navController, walkViewModel)
+                }
+            }
+
+            is RequestState.Error -> {
+                Text(text = walkingTrailData.getErrorMessage())
+            }
+
+            else -> {
+                Column(
+                    modifier = Modifier.fillMaxSize(),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
+                ) {
+                    Loader()
+                    Text(text = "현재 위치 정보를 가져오는 중입니다.")
+                }
+            }
+        }
     } else {
+        val coroutine = rememberCoroutineScope()
+        val snackbarHostState = remember { SnackbarHostState() }
+        SnackbarHost(hostState = snackbarHostState)
+
         Column(
             modifier = Modifier.fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
+            val call: () -> Unit = {
+                coroutine.launch(Dispatchers.IO) {
+                    delay(5000)
+                    snackbarHostState.showSnackbar("위치 정보를 가져오는데 실패하였습니다.")
+                    navController.popBackStack()
+                }
+            }
             Loader()
             Text(text = "현재 위치 정보를 가져오는 중입니다.")
         }
@@ -300,10 +324,15 @@ private fun WalkScreenContent(
                 // BottomSheet Content
                 // 바텀 시트 내부 콘텐트
                 // 산책 기록 박스
-                // val step = rememberStepCounterSensorState()
-                // walkingRecordViewModel.setStepCount(step.toInt())
-                val stepCount by walkingRecordViewModel.stepCount.collectAsStateWithLifecycle()
+
                 val moveDist by walkingRecordViewModel.moveDist.collectAsStateWithLifecycle()
+                val todayStepCount by
+                remember { mutableIntStateOf(walkingRecordViewModel.todayStepCount.value) }
+//                val todayStepCount by walkingRecordViewModel.todayStepCount.collectAsStateWithLifecycle()
+//                val moveStepCount by walkingRecordViewModel.stepCount.collectAsStateWithLifecycle()
+                val moveStepCount = 0
+                Log.d(TAG, "WalkRecordingBox todayStepCount: $todayStepCount")
+                Log.d(TAG, "WalkRecordingBox moveStepCount: $moveStepCount")
 
                 Column(
                     modifier = Modifier.fillMaxWidth().padding(top = defaultPadding),
@@ -319,7 +348,7 @@ private fun WalkScreenContent(
                         WalkingRecordingTimer()
                         Spacer(modifier = Modifier.height(30.dp))
                         WalkRecordingBox(
-                            context, stepCount, moveDist
+                            context, moveDist, moveStepCount, todayStepCount
                         ) // 현재 산책 기록 데이터
                         Spacer(modifier = Modifier.height(defaultPadding))
                         Button(
@@ -394,41 +423,6 @@ private fun WalkScreenContent(
         } // End of BottomSheetScaffold {}
     } // End of Surface {}
 
-    if (showChooseStartDialog) {/*
-            산책로 리스트를 받아오는데, 이 리스트가 비어있으면
-            다이얼로그에서 보여지는 텍스트들이 변경된다.
-
-            산책로가 하나도 없을 경우,
-            주변 산책로 없음, 홈으로 돌아가기로 보인다.
-
-            다이얼로그에서 내가 선택한 산책로로 시작하면 해당 산책로 정보가 보이고,
-         */
-
-        val walkingTrailData by walkViewModel.walkingTrailData.collectAsStateWithLifecycle()
-
-        if (walkingTrailData.isLoading()) {
-            Column(
-                modifier = Modifier.fillMaxSize(),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center
-            ) {
-                Loader()
-            }
-        } else if (walkingTrailData.isSuccess()) {
-            WalkScreenChooseStartDialog(context.getString(R.string.walk_screen_dialog_choose_promenade_title),
-                context.getString(R.string.walk_screen_dialog_choose_promenade_content),
-                walkingTrailData.getSuccessData()!!,
-                onClickDismiss = {
-                    showChooseStartDialog = false
-                    navController.popBackStack()
-                },
-                onClickConfirm = {
-                    showChooseStartDialog = false
-                })
-        } else if (walkingTrailData.isError()) {
-            Text(text = walkingTrailData.getErrorMessage())
-        }
-    }
 
     val showState = walkViewModel.showInformDialog.collectAsStateWithLifecycle()
     when (showState.value) {
@@ -452,9 +446,9 @@ private fun WalkScreenContent(
 } // End of WalkScreenContent()
 
 @Composable
-fun rememberStepCounterSensorState(
+fun StepCounterSensorManager(
     walkingRecordViewModel: WalkingRecordViewModel
-): Float {
+) {
     val context = LocalContext.current
     val sensorManager = remember {
         context.getSystemService(Context.SENSOR_SERVICE) as SensorManager
@@ -462,9 +456,9 @@ fun rememberStepCounterSensorState(
 
     var stepCount by remember { mutableFloatStateOf(0f) }
 
-    DisposableEffect(Unit) {
-        val stepCounterSensor = sensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER)
-        val sensorEventListener = object : SensorEventListener {
+    val stepCounterSensor = sensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER)
+    val sensorEventListener = remember {
+        object : SensorEventListener {
             override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {
                 // 정확도 변경 처리
             }
@@ -472,12 +466,16 @@ fun rememberStepCounterSensorState(
             override fun onSensorChanged(event: SensorEvent) {
                 // 걸음 수 업데이트 처리
                 stepCount = event.values[0]
+                walkingRecordViewModel.setTodayStepCount(stepCount.toInt())
+                Log.d(TAG, "onSensorChanged: ${walkingRecordViewModel.todayStepCount.value}")
             }
         }
+    }
 
+    DisposableEffect(Unit) {
         stepCounterSensor?.let {
             sensorManager.registerListener(
-                sensorEventListener, it, SensorManager.SENSOR_DELAY_NORMAL
+                sensorEventListener, it, SensorManager.SENSOR_DELAY_FASTEST
             )
         }
 
@@ -486,8 +484,7 @@ fun rememberStepCounterSensorState(
         }
     }
 
-    walkingRecordViewModel.setStepCount(stepCount.toInt())
-    return stepCount
+    // walkingRecordViewModel.setTodayStepCount(stepCount.toInt())
 } // End of rememberStepCounterSensorState()
 
 @Composable

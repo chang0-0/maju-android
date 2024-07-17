@@ -1,13 +1,10 @@
 package com.app.majuapp
 
-import android.content.Context
 import android.graphics.Color
 import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
-import android.hardware.SensorManager
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
@@ -22,11 +19,8 @@ import com.app.majuapp.screen.culture.CultureViewModel
 import com.app.majuapp.screen.home.HomeViewModel
 import com.app.majuapp.screen.login.LoginViewModel
 import com.app.majuapp.screen.login.SocialLoginViewModel
-import com.app.majuapp.screen.walk.WalkingRecordViewModel
 import com.app.majuapp.ui.theme.MajuAppTheme
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 
 
 private const val TAG = "MainActivity_창영"
@@ -39,24 +33,24 @@ class MainActivity : ComponentActivity(), SensorEventListener { // End of MainAc
     private val cultureViewModel: CultureViewModel by viewModels()
     private val socialLoginViewModel: SocialLoginViewModel by viewModels()
     private val cultureDetailViewModel: CultureDetailViewModel by viewModels()
-    private val walkingRecordViewModel: WalkingRecordViewModel by viewModels()
 
-    private lateinit var sensorManager: SensorManager
-    private val _stepCount = MutableStateFlow(0)
-    val stepCount: StateFlow<Int> = _stepCount
+//    private val walkingRecordViewModel: WalkingRecordViewModel by viewModels()
+//    private lateinit var sensorManager: SensorManager
+//    private val _stepCount = MutableStateFlow(0)
+//    val stepCount: StateFlow<Int> = _stepCount
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         WindowCompat.setDecorFitsSystemWindows(window, false)
 
-        sensorManager =
-            application.getSystemService(Context.SENSOR_SERVICE) as SensorManager
-        val stepSensor: Sensor? = sensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER)
-
-        stepSensor?.let {
-            sensorManager.registerListener(this, it, SensorManager.SENSOR_DELAY_UI)
-        }
+//        sensorManager =
+//            application.getSystemService(Context.SENSOR_SERVICE) as SensorManager
+//        val stepSensor: Sensor? = sensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER)
+//
+//        stepSensor?.let {
+//            sensorManager.registerListener(this, it, SensorManager.SENSOR_DELAY_UI)
+//        }
 
 
 //        sensorManager = (getSystemService(Context.SENSOR_SERVICE) as SensorManager?)!!
@@ -95,24 +89,24 @@ class MainActivity : ComponentActivity(), SensorEventListener { // End of MainAc
 
     override fun onStop() {
         super.onStop()
-        sensorManager.unregisterListener(this)
+        // sensorManager.unregisterListener(this)
     }
 
     override fun onSensorChanged(event: SensorEvent?) {
-        event?.let {
-            if (it.sensor.type == Sensor.TYPE_STEP_COUNTER) {
-                _stepCount.value = it.values[0].toInt()
-                val steps = it.values[0].toInt()
-
-
-                _stepCount.value = steps
-                walkingRecordViewModel.setStepCount(steps)
-                walkingRecordViewModel.setTodayStepCount(steps)
-
-                val todayStepCount = steps
-                walkingRecordViewModel.setTodayStepCount(todayStepCount)
-            }
-        }
+//        event?.let {
+//            if (it.sensor.type == Sensor.TYPE_STEP_COUNTER) {
+//                _stepCount.value = it.values[0].toInt()
+//                val steps = it.values[0].toInt()
+//
+//
+//                _stepCount.value = steps
+////                walkingRecordViewModel.setStepCount(steps)
+////                walkingRecordViewModel.setTodayStepCount(steps)
+//
+//                val todayStepCount = steps
+//                // walkingRecordViewModel.setTodayStepCount(todayStepCount)
+//            }
+//        }
     }
 
     override fun onAccuracyChanged(p0: Sensor?, p1: Int) {
