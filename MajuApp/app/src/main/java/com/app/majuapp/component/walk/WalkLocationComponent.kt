@@ -4,103 +4,19 @@ import android.Manifest
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.pm.PackageManager
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.core.app.ActivityCompat
-import androidx.health.connect.client.permission.HealthPermission
-import androidx.health.connect.client.records.StepsRecord
 import com.app.majuapp.domain.model.walk.CoordinateData
-import com.google.accompanist.permissions.ExperimentalPermissionsApi
-import com.google.accompanist.permissions.isGranted
-import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.Priority
 import com.google.android.gms.tasks.CancellationTokenSource
 
 private lateinit var fusedLocationProviderClient: FusedLocationProviderClient
-
-@OptIn(ExperimentalPermissionsApi::class)
-@Composable
-fun RequestLocationPermission(
-    onPermissionGranted: () -> Unit,
-    onPermissionDenied: () -> Unit,
-    onPermissionsRevoked: () -> Unit
-) {
-    // Initialize the state for managing multiple location permissions.
-    val permissionState = rememberMultiplePermissionsState(
-        listOf(
-            Manifest.permission.ACCESS_COARSE_LOCATION,
-            Manifest.permission.ACCESS_FINE_LOCATION,
-        ),
-    )
-
-    // Use LaunchedEffect to handle permissions logic when the composition is launched.
-    LaunchedEffect(key1 = permissionState) {
-        // Check if all previously granted permissions are revoked.
-        val allPermissionsRevoked =
-            permissionState.permissions.size == permissionState.revokedPermissions.size
-
-        // Filter permissions that need to be requested.
-        val permissionsToRequest = permissionState.permissions.filter {
-            !it.status.isGranted
-        }
-
-        // If there are permissions to request, launch the permission request.
-        if (permissionsToRequest.isNotEmpty()) permissionState.launchMultiplePermissionRequest()
-
-        // Execute callbacks based on permission status.
-        if (allPermissionsRevoked) {
-            onPermissionsRevoked()
-        } else {
-            if (permissionState.allPermissionsGranted) {
-                onPermissionGranted()
-            } else {
-                onPermissionDenied()
-            }
-        }
-    }
-} // End of RequestLocationPermission()
-
-@OptIn(ExperimentalPermissionsApi::class)
-@Composable
-fun RequestHealthPermission(
-    onPermissionGranted: () -> Unit,
-    onPermissionDenied: () -> Unit,
-    onPermissionsRevoked: () -> Unit
-) {
-    val state = rememberMultiplePermissionsState(
-        listOf(
-            HealthPermission.getReadPermission(StepsRecord::class),
-            HealthPermission.getWritePermission(StepsRecord::class)
-        )
-    )
-
-
-    LaunchedEffect(key1 = state) {
-        val allPermissionsRevoked = state.permissions.size == state.revokedPermissions.size
-
-        val permissionsToRequest = state.permissions.filter {
-            !it.status.isGranted
-        }
-
-        if (permissionsToRequest.isNotEmpty()) state.launchMultiplePermissionRequest()
-
-        if (allPermissionsRevoked) {
-            onPermissionsRevoked()
-        } else {
-            if (state.allPermissionsGranted) {
-                onPermissionGranted()
-            } else {
-                onPermissionDenied()
-            }
-        }
-    }
-}
+private lateinit var locationCallback: LocationCallback
 
 
 @SuppressLint("MissingPermission")
-@Composable
 fun getLastUserLocation(
     context: Context,
     onGetLastLocationSuccess: (CoordinateData) -> Unit,
@@ -126,10 +42,11 @@ fun getLastUserLocation(
                 onGetLastLocationFailed(exception)
             }
     }
+
+
 } // End of getLastUserLocation()
 
 
-// https://www.youtube.com/watch?v=f7YLwr4oUFE
 @SuppressLint("MissingPermission")
 fun getCurrentLocation(
     context: Context,

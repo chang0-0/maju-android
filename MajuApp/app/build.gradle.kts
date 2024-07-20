@@ -197,6 +197,8 @@ dependencies {
     // Work Manager
     val work_version = "2.9.0"
     implementation("androidx.work:work-runtime-ktx:$work_version")
+
+    implementation("org.greenrobot:eventbus:3.3.1")
 }
 
 secrets {

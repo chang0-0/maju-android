@@ -1,11 +1,11 @@
 package com.app.majuapp.screen.walk
 
-import android.util.Log
 import androidx.compose.runtime.mutableStateListOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.app.majuapp.domain.model.walk.WalkTrailData
 import com.app.majuapp.domain.model.walk.WalkingTrailResultData
+import com.app.majuapp.domain.model.walk.WalkingTrailTraceData
 import com.app.majuapp.domain.repository.walk.WalkRepository
 import com.google.android.gms.maps.model.LatLng
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -63,8 +63,6 @@ class WalkViewModel @Inject constructor(
 
 
     fun getWalkingTrails() {
-        Log.d(TAG, "WalkViewModel getWalkingTrails: ??")
-
         viewModelScope.launch {
             _currentLocation.collectLatest { location ->
                 if (location != null) {
@@ -93,4 +91,31 @@ class WalkViewModel @Inject constructor(
             visiblePermissionDialogQueue.add(permission)
         }
     } // End of onPermissionResult()
+
+
+    // =================================== getWalkingTrailTrace ================================
+
+    private val _walkingTrailTrace =
+        MutableStateFlow<RequestState<WalkingTrailTraceData?>>(RequestState.Idle)
+    val walkingTrailTrace = _walkingTrailTrace.asStateFlow()
+
+    fun getWalkingTrailTrace(
+        startLat: Double,
+        startLon: Double,
+        endLat: Double,
+        endLon: Double,
+    ) {
+        viewModelScope.launch {
+            _walkingTrailTrace.collectLatest {
+                walkRepository.getWalkingTrailTrace(
+                    startLat,
+                    startLon,
+                    endLat,
+                    endLon
+                ).collectLatest { result ->
+                    _walkingTrailTrace.value = result
+                }
+            }
+        }
+    } // End of getWalkingTrailTrace()
 } // End of WalkViewModel

@@ -1,21 +1,18 @@
 package com.app.majuapp.domain.repository.walk
 
-import android.util.Log
-import com.app.majuapp.domain.api.WalkApi
-import com.app.majuapp.domain.model.walk.CoordinateData
+import com.app.majuapp.domain.api.WalkingTrailApi
 import com.app.majuapp.domain.model.walk.WalkingTrailResultData
+import com.app.majuapp.domain.model.walk.WalkingTrailTraceData
 import com.app.majuapp.screen.walk.RequestState
 import com.google.android.gms.maps.model.LatLng
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.flowOn
-import retrofit2.Response
 import javax.inject.Inject
 
 private const val TAG = "WalkRepository_창영"
+
 class WalkRepository @Inject constructor(
-    private val walkApi: WalkApi
+    private val walkingTrailApi: WalkingTrailApi
 ) {
     // ========================================= getWalkingTrails ======================================
 //    suspend fun getWalkingTrails(coor: CoordinateData) = flow {
@@ -37,12 +34,24 @@ class WalkRepository @Inject constructor(
 //    } // End of getWalkingTrails()
 
     fun getWalkingTrails(coor: LatLng): Flow<RequestState<WalkingTrailResultData?>> {
-        Log.d(TAG, "WalkRepository: getWalkingTrails")
         return flow {
             emit(RequestState.Loading)
-            val ret = walkApi.getWalkingTrails(coor.latitude, coor.longitude)
+            val ret = walkingTrailApi.getWalkingTrails(coor.latitude, coor.longitude)
             emit(RequestState.Success(data = ret.body()))
         }
     } // End of getWalkingTrails()
+
+    fun getWalkingTrailTrace(
+        startLat: Double,
+        startLon: Double,
+        endLat: Double,
+        endLon: Double,
+    ): Flow<RequestState<WalkingTrailTraceData?>> {
+        return flow {
+            emit(RequestState.Loading)
+            val ret = walkingTrailApi.getWalkingTrailTrace(startLat, startLon, endLat, endLon)
+            emit(RequestState.Success(data = ret.body()))
+        }
+    } // End of getWalkingTrailTrace()
 
 } // End of WalkRepository class

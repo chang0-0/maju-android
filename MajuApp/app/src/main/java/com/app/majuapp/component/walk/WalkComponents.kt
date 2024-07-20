@@ -1,6 +1,7 @@
 package com.app.majuapp.component.walk
 
 import android.content.Context
+import android.location.Location
 import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.Spring
@@ -19,6 +20,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.pager.HorizontalPager
@@ -36,6 +38,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -43,11 +46,15 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import androidx.compose.ui.zIndex
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import coil.compose.SubcomposeAsyncImage
+import coil.request.ImageRequest
 import com.app.majuapp.R
 import com.app.majuapp.component.fillMaxWidthSpacer
 import com.app.majuapp.domain.model.walk.WalkingTrailResultData
+import com.app.majuapp.screen.walk.RequestState
 import com.app.majuapp.screen.walk.TimerViewModel
 import com.app.majuapp.screen.walk.WalkViewModel
 import com.app.majuapp.screen.walk.WalkingRecordViewModel
@@ -69,9 +76,11 @@ import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.compose.CameraPositionState
 import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.MapProperties
+import com.google.maps.android.compose.MapUiSettings
 import com.google.maps.android.compose.Marker
 import com.google.maps.android.compose.MarkerState
 import com.google.maps.android.compose.rememberCameraPositionState
+import com.mutualmobile.composesensors.rememberHeadingSensorState
 
 
 private const val TAG = "WalkComponents_창영"
@@ -85,9 +94,8 @@ fun WalkScreenChooseStartDialog(
     onClickConfirm: () -> Unit,
     onClickDismiss: () -> Unit,
     walkViewModel: WalkViewModel = hiltViewModel()
-) {/*
-        산책 기능 다이얼로그 화면
-     */
+) {
+    // 산책 난이도 및 출발지 선택 다이얼로그
     // Context
     val context = LocalContext.current
 
@@ -152,65 +160,122 @@ fun WalkScreenChooseStartDialog(
                     Spacer(modifier = Modifier.height(18.dp))
                     Box(
                         modifier = Modifier.clip(RoundedCornerShape(roundedCornerPadding))
-                            .fillMaxWidth().height(260.dp).border(
+                            .fillMaxWidth().zIndex(1f).height(260.dp).border(
                                 2.dp, BrightGray, shape = RoundedCornerShape(roundedCornerPadding)
-                            ).padding(defaultPadding), contentAlignment = Alignment.BottomCenter
+                            ).padding(top = defaultPadding, bottom = defaultPadding),
+                        contentAlignment = Alignment.BottomCenter
                     ) {
-                        if (walkingTrailData.data.isNullOrEmpty()) {
-                            Text(
-                                "주변 산책로가\n존재하지 않습니다.",
-                                fontSize = 14.sp,
-                                fontWeight = FontWeight.Bold,
-                                fontFamily = notoSansKoreanFontFamily
-                            )
-                        } else {
-                            HorizontalPager(
-                                state = walkingPagerState
-                            ) { page ->
-                                val coordinates = walkingTrailData.data[page]
-                                val cameraPositionState = rememberCameraPositionState {
-                                    position = CameraPosition.fromLatLngZoom(
-                                        LatLng(coordinates.startLat, coordinates.startLon), 16f
-                                    )
-                                }
+                        Box(modifier = Modifier.zIndex(1f)) {
+                            if (walkingTrailData.data.isEmpty()) {
+                                Text(
+                                    "주변 산책로가\n존재하지 않습니다.",
+                                    fontSize = 14.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    fontFamily = notoSansKoreanFontFamily
+                                )
+                            } else {
+                                Box(modifier = Modifier.zIndex(1f)) {
+                                    HorizontalPager(
+                                        modifier = Modifier,
+                                        state = walkingPagerState
+                                    ) { page ->
+                                        val coordinates = walkingTrailData.data[page]
+                                        Box(
+                                            modifier = Modifier.zIndex(1f)
+                                        ) {
+                                            Box(
+                                                modifier = Modifier
+                                                    .padding(top = 22.dp, start = 10.dp)
+                                                    .zIndex(3f)
+                                            ) {
+                                                SubcomposeAsyncImage(
+                                                    modifier = Modifier.size(60.dp),
+                                                    model = ImageRequest.Builder(LocalContext.current)
+                                                        .data(
+                                                            when (walkingTrailData.data[page].level) {
+                                                                "상" -> R.drawable.ic_difficulty_level
+                                                                "중" -> R.drawable.ic_intermediate_difficulty_level
+                                                                else -> R.drawable.ic_easy_difficulty_leve
+                                                            }
+                                                        ).crossfade(true).build(),
+                                                    contentScale = ContentScale.Crop,
+                                                    alignment = Alignment.TopStart,
+                                                    contentDescription = "산책로 난이도"
+                                                )
+                                            }
+                                            Box(modifier = Modifier.zIndex(2f)) {
+                                                Column(
+                                                    modifier = Modifier.fillMaxSize().zIndex(1f),
+                                                    verticalArrangement = Arrangement.Center,
+                                                    horizontalAlignment = Alignment.CenterHorizontally
+                                                ) {
+                                                    Text(
+                                                        text = walkingTrailData.data[page].name,
+                                                        fontSize = 16.sp,
+                                                        fontWeight = FontWeight.Bold,
+                                                        color = Color.Black,
+                                                        textAlign = TextAlign.Center
+                                                    )
+                                                    Spacer(
+                                                        modifier = Modifier.fillMaxWidth()
+                                                            .height(18.dp)
+                                                    )
+                                                    Box(
+                                                        modifier = Modifier.padding(
+                                                            start = defaultPadding,
+                                                            end = defaultPadding
+                                                        )
+                                                            .fillMaxSize()
+                                                            .height(200.dp)
+                                                            .clip(
+                                                                RoundedCornerShape(
+                                                                    roundedCornerPadding
+                                                                )
+                                                            )
+                                                            .background(
+                                                                OuterSpace,
+                                                                shape = RoundedCornerShape(
+                                                                    roundedCornerPadding
+                                                                )
+                                                            ),
+                                                        contentAlignment = Alignment.TopStart
+                                                    ) {
+                                                        MapScreen(
+                                                            modifier = Modifier
+                                                                .fillMaxSize(),
+                                                            LatLng(
+                                                                coordinates.startLat,
+                                                                coordinates.startLon
+                                                            ),
+                                                            LatLng(
+                                                                coordinates.startLat,
+                                                                coordinates.startLon
+                                                            ),
+                                                            LatLng(
+                                                                coordinates.endLat,
+                                                                coordinates.endLon
+                                                            ), mapProperties = MapProperties(
+                                                                isMyLocationEnabled = false,
+                                                                isBuildingEnabled = false
+                                                            ),
+                                                            mapUiSetting = MapUiSettings(
+                                                                compassEnabled = false
+                                                            )
+                                                        )
+                                                    }
+                                                }
+                                            }
+                                        }
 
-                                Column(
-                                    modifier = Modifier.fillMaxWidth().fillMaxHeight(),
-                                    verticalArrangement = Arrangement.Center,
-                                    horizontalAlignment = Alignment.CenterHorizontally
-                                ) {
-                                    Text(
-                                        text = walkingTrailData.data[page].name,
-                                        fontSize = 16.sp,
-                                        fontWeight = FontWeight.Bold,
-                                        color = Color.Black,
-                                        textAlign = TextAlign.Center
-                                    )
-                                    Spacer(modifier = Modifier.fillMaxWidth().height(18.dp))
-                                    Box(
-                                        modifier = Modifier.clip(
-                                            RoundedCornerShape(
-                                                roundedCornerPadding
-                                            )
-                                        ).fillMaxWidth().height(200.dp).background(
-                                            OuterSpace,
-                                            shape = RoundedCornerShape(roundedCornerPadding)
-                                        ),
-                                        contentAlignment = Alignment.BottomCenter,
-                                    ) {
-                                        MapScreen(
-                                            modifier = Modifier,
-                                            LatLng(coordinates.startLat, coordinates.startLon),
-                                            LatLng(coordinates.startLat, coordinates.startLon),
-                                            LatLng(coordinates.endLat, coordinates.endLon)
-                                        )
+
                                     }
-
                                 }
+
                             }
                         }
-                    }
 
+
+                    }
                     Spacer(modifier = Modifier.height(18.dp))
                     Row(
                         modifier = Modifier.padding(start = defaultPadding, end = defaultPadding),
@@ -247,29 +312,74 @@ fun MapScreen(
     currentLocation: LatLng = LatLng(0.0, 0.0),
     startLocation: LatLng = LatLng(0.0, 0.0),
     endLocation: LatLng = LatLng(0.0, 0.0),
+    walkingRecordViewModel: WalkingRecordViewModel = hiltViewModel(),
+    walkViewModel: WalkViewModel = hiltViewModel(),
+    mapProperties: MapProperties,
+    mapUiSetting: MapUiSettings
 ) {
-    val cameraPositionState: CameraPositionState = rememberCameraPositionState {
-        position = CameraPosition.fromLatLngZoom(currentLocation, 16f)
+    val azimuth by walkingRecordViewModel.azimuth.collectAsState()
+    Log.d(TAG, "azimuth: $azimuth")
+    val heading = rememberHeadingSensorState(autoStart = true)
+    var cameraPositionState: CameraPositionState = rememberCameraPositionState {
+        isMoving
+        position =
+            CameraPosition.builder().target(currentLocation).zoom(16f).bearing(azimuth.toFloat())
+                .build()
+    }
+    // cameraPositionState.move(CameraUpdateFactory.newCameraPosition(cameraPositionState))
+    val test by walkViewModel.walkingTrailTrace.collectAsStateWithLifecycle()
+    Log.d(TAG, "test :$test ")
+    when (test) {
+        is RequestState.Loading -> {
+
+        }
+
+        is RequestState.Success -> {
+            if (test.getSuccessData() != null) {
+                Log.d(TAG, "MapScreen: ${test.getSuccessData()!!.data}")
+            }
+        }
+
+        is RequestState.Error -> {
+            Log.d(TAG, "MapScreen: ${(test as RequestState.Error).message}")
+            Log.e(TAG, "MapScreen: ${(test as RequestState.Error).message}")
+        }
+
+        else -> {
+
+        }
     }
 
+
+    val coroutine = rememberCoroutineScope()
+    LaunchedEffect(true) {
+//        cameraPositionState.animate(
+//            update = CameraUpdateFactory.newCameraPosition(
+//                CameraPosition(
+//                    currentLocation, 15f, 0f, 0f
+//                )
+//            ), durationMs = 1000
+//        )
+    }
+
+    // https://stackoverflow.com/questions/73269330/animate-compose-googlemap-to-a-specified-location
+//    var rotation by remember { mutableStateOf(0f) }
+//    val cameraMove = object : GoogleMap.OnCameraMoveListener {
+//        override fun onCameraMove() {
+//            rotation = cameraPositionState.position.bearing
+//        }
+//    }
+
+    var location by remember { mutableStateOf<Location?>(null) }
     GoogleMap(
         modifier = modifier.fillMaxSize(),
         cameraPositionState = cameraPositionState,
-        properties = MapProperties(
-            isMyLocationEnabled = true, isBuildingEnabled = true
-        )
-
+        properties = mapProperties,
+        uiSettings = mapUiSetting
     ) {
         Marker(
             state = MarkerState(
-                // 현재 내 위치의 아이콘
                 position = currentLocation
-            )
-        )
-
-        Marker(
-            state = MarkerState(
-                position = startLocation
             )
         )
         Marker(
@@ -277,6 +387,14 @@ fun MapScreen(
                 position = endLocation
             )
         )
+        Marker(
+            state = MarkerState(
+                position = startLocation
+            )
+        )
+
+        // cameraMove.onCameraMove()
+        // cameraPositionState.position = updatePosition
     }
 } // End of MapScreen()
 
@@ -345,8 +463,9 @@ fun WalkScreenInformDialogue(
                     )
                     fillMaxWidthSpacer(Modifier, defaultPadding)
                     Row(
-                        modifier = Modifier.padding(start = defaultPadding, end = defaultPadding),
-                        Arrangement.spacedBy(8.dp)
+                        modifier = Modifier.padding(
+                            start = defaultPadding, end = defaultPadding
+                        ), Arrangement.spacedBy(8.dp)
                     ) {
                         WalkComponentButton(
                             buttonText = leftButtonText,
@@ -382,13 +501,15 @@ fun WalkRecordingBox(
     moveStepCount: Int,
     todayStepCount: Int = 0,
     walkingRecordViewModel: WalkingRecordViewModel = hiltViewModel()
-) {/*
+) {
+
+    /*
         바텀 시트 내부
         이동 거리, 걸음 수가 보이는 회색 박스
      */
-    Log.d(TAG, "WalkRecordingBox: $todayStepCount")
-    Log.d(TAG, "WalkRecordingBox: $moveStepCount")
-    val todayStepCount = walkingRecordViewModel.todayStepCount.collectAsStateWithLifecycle()
+
+    val todayStepCount = walkingRecordViewModel.todayStepCount.value
+    val moveStepCount = walkingRecordViewModel.moveStepCount.collectAsStateWithLifecycle()
 
     Box(
         Modifier.clip(RoundedCornerShape(8.dp)).fillMaxWidth().height(92.dp)
@@ -458,7 +579,7 @@ fun WalkRecordingBox(
                     Row {
                         Text(
                             textAlign = TextAlign.Center,
-                            text = "${moveStepCount.toInt() - todayStepCount.value}",
+                            text = "${moveStepCount.value - todayStepCount}",
                             fontSize = 16.sp,
                             fontWeight = FontWeight.Bold,
                         )

@@ -1,39 +1,61 @@
 package com.app.majuapp.service
 
+import android.annotation.SuppressLint
 import android.app.PendingIntent
 import android.app.Service
+import android.content.Context
 import android.content.Intent
-import android.hardware.Sensor
-import android.hardware.SensorEvent
-import android.hardware.SensorEventListener
-import android.hardware.SensorManager
 import android.os.IBinder
+import android.os.Looper
 import android.util.Log
 import androidx.core.app.NotificationCompat
 import com.app.majuapp.MainActivity
 import com.app.majuapp.R
-import com.app.majuapp.R.*
-import com.app.majuapp.room.RecordingRepository
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import javax.inject.Inject
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationCallback
+import com.google.android.gms.location.LocationRequest
+import com.google.android.gms.location.LocationResult
+import com.google.android.gms.location.LocationServices
+import com.google.android.gms.location.Priority
+import com.google.android.gms.maps.model.LatLng
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 
 
 private const val TAG = "RecordingService_창영"
 
-class RecordingService : Service(), SensorEventListener { // End of RunningService class
+class RecordingService : Service() { // End of RunningService class
+
+    private lateinit var fusedLocationProviderClient: FusedLocationProviderClient
+    private lateinit var locationCallback: LocationCallback
 
 
-    @Inject
-    lateinit var sensorManager: SensorManager
+    // Context
+    private lateinit var context: Context
 
-    @Inject
-    lateinit var recordingRepository: RecordingRepository
+    // ServiceScope
+    private val serviceScope = CoroutineScope(
+        Dispatchers.IO + SupervisorJob()
+    )
 
-    companion object {
-        private val _stepsFlow: MutableStateFlow<Long> = MutableStateFlow(0L)
-        val stepsFlow = _stepsFlow.asStateFlow()
-    }
+    override fun onCreate() {
+        super.onCreate()
+        context = applicationContext
+        fusedLocationProviderClient =
+            LocationServices.getFusedLocationProviderClient(context)
+        locationCallback = object : LocationCallback() {
+            override fun onLocationResult(locationResult: LocationResult) {
+                super.onLocationResult(locationResult)
+                val temp = locationResult.locations[0]
+                Log.d(TAG, "onLocationResult: ${temp.latitude} , ${temp.longitude} , ${temp.time}")
+
+                val intent = Intent("currentLocation")
+                intent.putExtra("currentLocation", LatLng(temp.latitude, temp.longitude))
+                applicationContext.sendBroadcast(intent)
+            }
+        }
+    } // End of onCreate()
 
 
     override fun onBind(p0: Intent?): IBinder? {
@@ -49,12 +71,7 @@ class RecordingService : Service(), SensorEventListener { // End of RunningServi
     } // End of onStartCommand()
 
 
-    private fun registerSensor() {
-        val stepSensor = sensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER)
-        sensorManager.registerListener(this, stepSensor, SensorManager.SENSOR_DELAY_UI)
-
-    } // End of registerSensor()
-
+    @SuppressLint("MissingPermission")
     private fun start() {
         val intent = Intent(this, MainActivity::class.java).apply {
             addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP)
@@ -63,39 +80,44 @@ class RecordingService : Service(), SensorEventListener { // End of RunningServi
             this, 0, intent, PendingIntent.FLAG_MUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
         )
 
+        val locationInterval = 5000L
+        val locationFastestInterval = 500
+        val locationMaxWaitTime = 500
+
+        val locationRequest =
+            LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, locationInterval)
+                .setWaitForAccurateLocation(false)
+                .build()
+
+        fusedLocationProviderClient.requestLocationUpdates(
+            locationRequest, locationCallback, Looper.getMainLooper()
+        )
+
+
+//        getLastUserLocation(context, onGetLastLocationSuccess = {
+//            Log.d(TAG, "start: ${it.lat}, ${it.lng}")
+//        }, onGetLastLocationFailed = { exception ->
+//
+//        }, onGetLastLocationIsNull = {
+//            // Attempt to get the current user location
+//            getCurrentLocation(context, onGetCurrentLocationSuccess = {
+//            }, onGetCurrentLocationFailed = {
+//
+//            })
+//        })
+
         val notification = NotificationCompat.Builder(this, "walking_channel")
             .setSmallIcon(R.drawable.ic_home_logo).setContentTitle("산책중입니다!")
-            .setContentIntent(pendingIntent).setContentText("Elapsed time").build()
+            .setContentIntent(pendingIntent).setContentText("Elapsed time").setOngoing(true).build()
+
         startForeground(1, notification)
     } // End of start()
 
-    override fun onSensorChanged(event: SensorEvent?) {
-        if (event!!.values[0] > Int.MAX_VALUE || event.values[0] == 0f) return
-
-        event.values?.firstOrNull()?.let { steps ->
-            _stepsFlow.tryEmit(steps.toLong())
-            Log.d(TAG, "onSensorChanged: $steps")
-            // stepsFlow.value = steps.toLong()
-        }
-    }
-
-    override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {
-        Log.d(TAG, "onAccuracyChanged: ${sensor?.name}, $accuracy")
-    }
 
     override fun onDestroy() {
         stopForeground(true)
         stopSelf()
-        unregisterSensor()
         super.onDestroy()
-    }
-
-    private fun unregisterSensor() {
-        try {
-            sensorManager.unregisterListener(this)
-        } catch (e: Exception) {
-            Log.d(TAG, "unregisterSensor: ${e.message} ")
-        }
     }
 
     enum class Actions {

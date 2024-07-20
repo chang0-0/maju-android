@@ -5,8 +5,8 @@ import com.app.majuapp.BuildConfig
 import com.app.majuapp.domain.api.CultureApi
 import com.app.majuapp.domain.api.LoginApi
 import com.app.majuapp.domain.api.ReissueApi
-import com.app.majuapp.domain.api.TestApi
 import com.app.majuapp.domain.api.WalkApi
+import com.app.majuapp.domain.api.WalkingTrailApi
 import com.app.majuapp.util.Constants
 import dagger.Module
 import dagger.Provides
@@ -141,12 +141,6 @@ object AppModule {
             .connectTimeout(1, TimeUnit.MINUTES).addInterceptor(appInterceptor).build()
     } // End of providesOkHttpClient()
 
-    @Singleton
-    @Provides
-    fun providesApiService(@WithoutHeaderInterceptorOkHttpClient retrofit: Retrofit): TestApi {
-        return retrofit.create(TestApi::class.java)
-    } // End of providesApiService()
-
     @RefreshInterceptorRetrofit
     @Provides
     @Singleton
@@ -206,5 +200,12 @@ object AppModule {
     fun providesWalkApi(@HeaderInterceptorRetrofit retrofit: Retrofit): WalkApi {
         return retrofit.create(WalkApi::class.java)
     } // End of providesWalkApi()
+
+    @Provides
+    @Singleton
+    fun providesWalkingTrailApiService(@HeaderInterceptorRetrofit retrofit: Retrofit): WalkingTrailApi {
+        return retrofit.create(WalkingTrailApi::class.java)
+    } // End of providesWalkingTrailApiService()
+
 
 } // End of AppModule class

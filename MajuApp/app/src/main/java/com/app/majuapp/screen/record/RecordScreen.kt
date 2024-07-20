@@ -197,7 +197,9 @@ fun RecordScreenContent(
                             RecordScreenLazyItems(
                                 modifier = Modifier.fillParentMaxWidth(),
                                 walkingHistoryDateEvents = item
-                            ) {}
+                            ) {
+
+                            }
                         }
                     }
                     fillMaxWidthSpacer(Modifier, 20.dp)

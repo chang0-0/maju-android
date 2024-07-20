@@ -60,6 +60,7 @@ import com.app.majuapp.ui.theme.SonicSilver
 import com.app.majuapp.ui.theme.SpiroDiscoBall
 import com.app.majuapp.ui.theme.defaultPadding
 import com.app.majuapp.ui.theme.roundedCornerPadding
+import com.app.majuapp.util.SharedPreferencesUtil
 import com.app.majuapp.util.checkAndRequestPermissions
 
 private const val TAG = "HomeScreen_창영"
@@ -70,6 +71,9 @@ fun HomeScreen(
     homeViewModel: HomeViewModel,
 ) {
     HomeScreenContent(navController, homeViewModel)
+    val shared = SharedPreferencesUtil(LocalContext.current)
+    Log.d(TAG, "AcceessToken: ${shared.getUserAccessToken()} ")
+
 } // End of HomeScreen()
 
 @Composable
@@ -243,11 +247,11 @@ private fun HomeScreenNoticeBox(
 
     val context = LocalContext.current
     Column(modifier = Modifier.fillMaxWidth().padding(defaultPadding).clickable() {
-            navController.navigate("${Screen.CultureDetail.route}/${cultureEventDomainModel.id}") {
-                launchSingleTop = true
-                restoreState = true
-            }
-        }) {
+        navController.navigate("${Screen.CultureDetail.route}/${cultureEventDomainModel.id}") {
+            launchSingleTop = true
+            restoreState = true
+        }
+    }) {
         Box(
             modifier = Modifier.clip(RoundedCornerShape(roundedCornerPadding)).fillMaxWidth()
                 .height(120.dp)
