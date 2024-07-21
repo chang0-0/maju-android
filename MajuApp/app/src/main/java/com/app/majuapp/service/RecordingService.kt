@@ -25,13 +25,11 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import org.greenrobot.eventbus.EventBus
-import org.greenrobot.eventbus.Subscribe
-import org.greenrobot.eventbus.ThreadMode
 
 
 private const val TAG = "RecordingService_창영"
 
-class RecordingService : Service() { // End of RunningService class
+class RecordingService : Service() {
 
     private lateinit var fusedLocationProviderClient: FusedLocationProviderClient
     private lateinit var locationCallback: LocationCallback
@@ -50,7 +48,6 @@ class RecordingService : Service() { // End of RunningService class
         super.onCreate()
         context = applicationContext
         walkingEventBusViewModel = WalkingEventBusViewModel()
-        EventBus.getDefault().register(this)
 
         fusedLocationProviderClient =
             LocationServices.getFusedLocationProviderClient(context)
@@ -68,12 +65,6 @@ class RecordingService : Service() { // End of RunningService class
                         )
                     )
                 )
-
-                // walkingEventBusViewModel.currentLocation()
-
-//                val intent = Intent("currentLocation")
-//                intent.putExtra("currentLocation", LatLng(temp.latitude, temp.longitude))
-//                applicationContext.sendBroadcast(intent)
             }
         }
     } // End of onCreate()
@@ -101,7 +92,7 @@ class RecordingService : Service() { // End of RunningService class
             this, 0, intent, PendingIntent.FLAG_MUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
         )
 
-        val locationInterval = 5000L
+        val locationInterval = 2000L
         val locationFastestInterval = 500
         val locationMaxWaitTime = 500
 
@@ -122,15 +113,9 @@ class RecordingService : Service() { // End of RunningService class
         startForeground(1, notification)
     } // End of start()
 
-    @Subscribe(threadMode = ThreadMode.MAIN)
-    public fun onCurrentLocationEvent(event: EventBusEvent.CurrentLocationEvent) {
-        Log.d(TAG, "onMessage: $event")
-    }
-
     override fun onDestroy() {
         stopForeground(true)
         stopSelf()
-        EventBus.getDefault().unregister(this)
         super.onDestroy()
     }
 

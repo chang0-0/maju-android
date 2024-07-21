@@ -108,10 +108,6 @@ fun WalkScreen(
     val stateFlow = lifecycleOwner.lifecycle.currentStateFlow
     val currentLifecycleState by stateFlow.collectAsState()
 
-    /* EventBus */
-    val mainActivity = LocalContext.current.findActivity() as MainActivity
-
-
     /* Permission */
     WalkingTrailgetPermission(context) // 권한 설정
 
@@ -121,19 +117,11 @@ fun WalkScreen(
     /* Bearing SensorManager */
     BearingSensorManager(context, walkingRecordViewModel)
 
-    /* EventBus */
-    val subscriber = object {
-        @Subscribe(threadMode = ThreadMode.MAIN)
-        fun onCurrentLocationEvent(event: EventBusEvent.CurrentLocationEvent) {
-            Log.d(TAG, "onCurrentLocationEvent: $event")
-        }
-    }
 
     val lifeCycleOwner = LocalLifecycleOwner.current
     DisposableEffect(lifeCycleOwner) {
         val observer = LifecycleEventObserver { _, event ->
             if (event == Lifecycle.Event.ON_CREATE) {
-                EventBus.getDefault().register(subscriber)
 
             } else if (event == Lifecycle.Event.ON_START) {
 
@@ -146,8 +134,6 @@ fun WalkScreen(
                     it.action = RecordingService.Actions.STOP.toString()
                     context.applicationContext.startService(it)
                 }
-
-                EventBus.getDefault().unregister(subscriber)
             }
         }
         lifeCycleOwner.lifecycle.addObserver(observer)
@@ -158,33 +144,14 @@ fun WalkScreen(
         }
     }
 
-    // 위치 정보를 가져오는데 성공
-    var locationText by rememberSaveable { mutableStateOf("No location obtained :(") }
-    var showPermissionResultText by rememberSaveable { mutableStateOf(false) }
-    var permissionResultText by rememberSaveable { mutableStateOf("Permission Granted...") }
+    // 위치 정보 가져오기
+    val coroutineScope = rememberCoroutineScope()
+    getLastUserLocation(context, {}, {}, {})
+    getCurrentLocation(context, {}, {}, walkViewModel = walkViewModel)
+    var currentLocation = walkViewModel.currentLocation.collectAsStateWithLifecycle()
+    Log.d(TAG, "WalkScreen: ${currentLocation.value}")
 
-    getLastUserLocation(context, onGetLastLocationSuccess = {
-        locationText = "Location using LAST-LOCATION: LATITUDE: ${it.lat}, LONGITUDE: ${it.lng}"
-    }, onGetLastLocationFailed = { exception ->
-        showPermissionResultText = true
-        locationText = exception.localizedMessage ?: "Error Getting Last Location"
-    }, onGetLastLocationIsNull = {
-        // Attempt to get the current user location
-        getCurrentLocation(context, onGetCurrentLocationSuccess = {
-            locationText =
-                "Location using CURRENT-LOCATION: LATITUDE: ${it.lat}, LONGITUDE: ${it.lng}"
-            walkViewModel.setCurrentLocation(LatLng(it.lat!!, it.lng!!))
-        }, onGetCurrentLocationFailed = {
-            showPermissionResultText = true
-            locationText = it.localizedMessage ?: "Error Getting Current Location"
-        })
-    })
-
-
-    // 사용자의 현재 위치 정보가 저장된 값을 ViewModel에서 가져옵니다.
-    val currentLocation by walkViewModel.currentLocation.collectAsStateWithLifecycle()
-
-    if (currentLocation != null) {
+    if (currentLocation.value != null) {
         // 현재 위치 정보가 업데이트 되었을 때 현재 위치에 따른 산책로 추천
         LaunchedEffect(Unit) {
             walkViewModel.getWalkingTrails()
@@ -227,6 +194,7 @@ fun WalkScreen(
 //                            currentChoose.endLon,
 //                        )
                     }
+
 
                     WalkScreenContent(navController, walkViewModel)
                 }
@@ -282,7 +250,46 @@ private fun WalkScreenContent(
         targetValue = if (scaffoldState.bottomSheetState.currentValue.ordinal == 1) 180f else 0f
     )
 
-    /* Event Bus */
+    /* EventBus */
+    val lifeCycleOwner = LocalLifecycleOwner.current
+    DisposableEffect(lifeCycleOwner) {
+        val subscriber = object {
+            @Subscribe(threadMode = ThreadMode.MAIN)
+            fun onCurrentLocationEvent(event: EventBusEvent) {
+                when (event) {
+                    is EventBusEvent.CurrentLocationEvent -> {
+                        Log.d(TAG, "walkScreen -> onCurrentLocationEvent: $event")
+                        walkingRecordViewModel.setCurrentLocation(
+                            LatLng(event.location.latitude, event.location.longitude)
+                        )
+                    }
+                }
+
+            }
+        }
+
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_CREATE) {
+                walkingRecordViewModel.setCurrentLocationGenerate(walkViewModel.currentLocation.value!!)
+                EventBus.getDefault().register(subscriber)
+            } else if (event == Lifecycle.Event.ON_START) {
+
+
+            } else if (event == Lifecycle.Event.ON_DESTROY) {
+                EventBus.getDefault().unregister(subscriber)
+            }
+        }
+        lifeCycleOwner.lifecycle.addObserver(observer)
+
+        onDispose {
+            lifeCycleOwner.lifecycle.removeObserver(observer)
+        }
+    }
+
+    /* 산책로 경로 가져오기 */
+    LaunchedEffect(Unit) {
+        
+    }
 
 
     Surface(modifier = Modifier.fillMaxSize().background(White)) {
@@ -367,10 +374,9 @@ private fun WalkScreenContent(
             } // End of SheetContent
         ) {
             /* GoogleMap */
-            val currentLocation by walkViewModel.currentLocation.collectAsStateWithLifecycle() // 사용자의 현재 위치 정보
+            val currentLocation by
+            walkingRecordViewModel.currentLocation.collectAsStateWithLifecycle() // 사용자의 현재 위치 정보
             val currentChooseWalkingTrail by walkViewModel.currentChooseWalkingTrail.collectAsStateWithLifecycle() // 사용자의 선택한 산책로 정보
-
-            val count by remember { mutableIntStateOf(0) }
 
             // 전체 산책 뷰
             Column(
@@ -381,18 +387,16 @@ private fun WalkScreenContent(
                 if (currentChooseWalkingTrail != null && currentLocation != null) {
                     // 현재 위치, 선택한 산책지 데이터가 들어왔을 때,
                     MapScreen(
-                        modifier = Modifier.padding(bottom = 40.dp), currentLocation = LatLng(
-                            currentLocation!!.latitude, currentLocation!!.longitude
-
-                        ), startLocation = LatLng(
+                        modifier = Modifier.padding(bottom = 40.dp),
+                        startLocation = LatLng(
                             currentChooseWalkingTrail!!.startLat,
                             currentChooseWalkingTrail!!.startLon
                         ), endLocation = LatLng(
                             currentChooseWalkingTrail!!.endLat, currentChooseWalkingTrail!!.endLon
                         ),
                         mapProperties = MapProperties(
-                            isMyLocationEnabled = false,
-                            isBuildingEnabled = false
+                            isMyLocationEnabled = true,
+                            isBuildingEnabled = true
                         ),
                         mapUiSetting = MapUiSettings(compassEnabled = false)
                     )

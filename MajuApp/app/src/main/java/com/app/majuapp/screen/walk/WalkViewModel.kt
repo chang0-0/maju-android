@@ -37,7 +37,9 @@ class WalkViewModel @Inject constructor(
     val currentLocation = _currentLocation.asStateFlow()
 
     fun setCurrentLocation(coordinate: LatLng) {
-        _currentLocation.value = coordinate
+        viewModelScope.launch {
+            _currentLocation.value = coordinate
+        }
     } // End of setCurrentLocation()
 
 

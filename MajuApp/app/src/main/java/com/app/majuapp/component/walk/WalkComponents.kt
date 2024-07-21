@@ -54,7 +54,6 @@ import coil.request.ImageRequest
 import com.app.majuapp.R
 import com.app.majuapp.component.fillMaxWidthSpacer
 import com.app.majuapp.domain.model.walk.WalkingTrailResultData
-import com.app.majuapp.screen.walk.RequestState
 import com.app.majuapp.screen.walk.TimerViewModel
 import com.app.majuapp.screen.walk.WalkViewModel
 import com.app.majuapp.screen.walk.WalkingRecordViewModel
@@ -71,8 +70,10 @@ import com.app.majuapp.ui.theme.dialogCornerPadding
 import com.app.majuapp.ui.theme.dialogDefaultPadding
 import com.app.majuapp.ui.theme.notoSansKoreanFontFamily
 import com.app.majuapp.ui.theme.roundedCornerPadding
+import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.MarkerOptions
 import com.google.maps.android.compose.CameraPositionState
 import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.MapProperties
@@ -81,6 +82,8 @@ import com.google.maps.android.compose.Marker
 import com.google.maps.android.compose.MarkerState
 import com.google.maps.android.compose.rememberCameraPositionState
 import com.mutualmobile.composesensors.rememberHeadingSensorState
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 
 private const val TAG = "WalkComponents_창영"
@@ -317,66 +320,57 @@ fun MapScreen(
     mapProperties: MapProperties,
     mapUiSetting: MapUiSettings
 ) {
+    val currentLocation by walkingRecordViewModel.currentLocation.collectAsStateWithLifecycle()
+    Log.d(TAG, "MapScreen: $currentLocation")
+
+    val coroutinScope = rememberCoroutineScope()
     val azimuth by walkingRecordViewModel.azimuth.collectAsState()
     val heading = rememberHeadingSensorState(autoStart = true)
-    var cameraPositionState: CameraPositionState = rememberCameraPositionState {
-        isMoving
-        position =
-            CameraPosition.builder().target(currentLocation).zoom(16f).bearing(azimuth.toFloat())
-                .build()
-    }
-    // cameraPositionState.move(CameraUpdateFactory.newCameraPosition(cameraPositionState))
-    val test by walkViewModel.walkingTrailTrace.collectAsStateWithLifecycle()
-    when (test) {
-        is RequestState.Loading -> {
+    var cameraPositionState: CameraPositionState = rememberCameraPositionState {}
 
+    if (currentLocation != null) {
+        cameraPositionState = rememberCameraPositionState {
+            isMoving
+            position =
+                CameraPosition.builder()
+                    .target(LatLng(currentLocation!!.latitude, currentLocation!!.longitude))
+                    .zoom(16f)
+                    .bearing(azimuth.toFloat())
+                    .build()
         }
-
-        is RequestState.Success -> {
-            if (test.getSuccessData() != null) {
-            }
-        }
-
-        is RequestState.Error -> {
-        }
-
-        else -> {
-
+    } else {
+        cameraPositionState = rememberCameraPositionState {
+            isMoving
+            position = CameraPosition.builder()
+                .target(startLocation).zoom(16f).build()
         }
     }
 
-
-    val coroutine = rememberCoroutineScope()
-    LaunchedEffect(true) {
-//        cameraPositionState.animate(
-//            update = CameraUpdateFactory.newCameraPosition(
-//                CameraPosition(
-//                    currentLocation, 15f, 0f, 0f
-//                )
-//            ), durationMs = 1000
-//        )
-    }
-
-    // https://stackoverflow.com/questions/73269330/animate-compose-googlemap-to-a-specified-location
-//    var rotation by remember { mutableStateOf(0f) }
-//    val cameraMove = object : GoogleMap.OnCameraMoveListener {
-//        override fun onCameraMove() {
-//            rotation = cameraPositionState.position.bearing
-//        }
-//    }
 
     var location by remember { mutableStateOf<Location?>(null) }
     GoogleMap(
         modifier = modifier.fillMaxSize(),
         cameraPositionState = cameraPositionState,
         properties = mapProperties,
-        uiSettings = mapUiSetting
+        uiSettings = mapUiSetting,
     ) {
-        Marker(
-            state = MarkerState(
-                position = currentLocation
-            )
-        )
+        if (currentLocation != null) {
+            MarkerOptions().position(currentLocation!!)
+//            Marker(
+//                state = MarkerState(
+//                    position = LatLng(currentLocation!!.latitude, currentLocation!!.longitude)
+//                )
+//            )
+
+            coroutinScope.launch(Dispatchers.Main) {
+                cameraPositionState.animate(
+                    CameraUpdateFactory.newLatLng(currentLocation!!),
+                    1
+                )
+            }
+        }
+
+
         Marker(
             state = MarkerState(
                 position = endLocation
@@ -387,9 +381,6 @@ fun MapScreen(
                 position = startLocation
             )
         )
-
-        // cameraMove.onCameraMove()
-        // cameraPositionState.position = updatePosition
     }
 } // End of MapScreen()
 
@@ -502,7 +493,6 @@ fun WalkRecordingBox(
         바텀 시트 내부
         이동 거리, 걸음 수가 보이는 회색 박스
      */
-
     val todayStepCount = walkingRecordViewModel.todayStepCount.value
     val moveStepCount = walkingRecordViewModel.moveStepCount.collectAsStateWithLifecycle()
 
