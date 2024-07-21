@@ -318,7 +318,6 @@ fun MapScreen(
     mapUiSetting: MapUiSettings
 ) {
     val azimuth by walkingRecordViewModel.azimuth.collectAsState()
-    Log.d(TAG, "azimuth: $azimuth")
     val heading = rememberHeadingSensorState(autoStart = true)
     var cameraPositionState: CameraPositionState = rememberCameraPositionState {
         isMoving
@@ -328,7 +327,6 @@ fun MapScreen(
     }
     // cameraPositionState.move(CameraUpdateFactory.newCameraPosition(cameraPositionState))
     val test by walkViewModel.walkingTrailTrace.collectAsStateWithLifecycle()
-    Log.d(TAG, "test :$test ")
     when (test) {
         is RequestState.Loading -> {
 
@@ -336,13 +334,10 @@ fun MapScreen(
 
         is RequestState.Success -> {
             if (test.getSuccessData() != null) {
-                Log.d(TAG, "MapScreen: ${test.getSuccessData()!!.data}")
             }
         }
 
         is RequestState.Error -> {
-            Log.d(TAG, "MapScreen: ${(test as RequestState.Error).message}")
-            Log.e(TAG, "MapScreen: ${(test as RequestState.Error).message}")
         }
 
         else -> {

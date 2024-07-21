@@ -70,8 +70,7 @@ import com.app.majuapp.component.walk.WalkScreenInformDialogue
 import com.app.majuapp.component.walk.WalkingRecordingTimer
 import com.app.majuapp.component.walk.getCurrentLocation
 import com.app.majuapp.component.walk.getLastUserLocation
-import com.app.majuapp.domain.model.walk.eventbus.AppEvent
-import com.app.majuapp.domain.model.walk.eventbus.EventBusController
+import com.app.majuapp.domain.model.walk.eventbus.EventBusEvent
 import com.app.majuapp.service.RecordingService
 import com.app.majuapp.ui.theme.SpiroDiscoBall
 import com.app.majuapp.ui.theme.White
@@ -87,13 +86,10 @@ import com.google.maps.android.compose.MapProperties
 import com.google.maps.android.compose.MapType
 import com.google.maps.android.compose.MapUiSettings
 import com.google.maps.android.compose.rememberCameraPositionState
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
 import org.greenrobot.eventbus.EventBus
+import org.greenrobot.eventbus.Subscribe
+import org.greenrobot.eventbus.ThreadMode
 
 private const val TAG = "WalkScreen_창영"
 
@@ -113,7 +109,8 @@ fun WalkScreen(
     val currentLifecycleState by stateFlow.collectAsState()
 
     /* EventBus */
-    // EventBus.getDefault().register(context)
+    val mainActivity = LocalContext.current.findActivity() as MainActivity
+
 
     /* Permission */
     WalkingTrailgetPermission(context) // 권한 설정
@@ -124,44 +121,22 @@ fun WalkScreen(
     /* Bearing SensorManager */
     BearingSensorManager(context, walkingRecordViewModel)
 
-
-//    var location by remember { mutableStateOf<Location?>(null) }
-//    var azimuth by remember { mutableStateOf(0f) }
-//    // Sensor manager to detect device orientation
-//    val sensorManager = remember { context.getSystemService(SENSOR_SERVICE) as SensorManager }
-//    val sensorEventListener = remember {
-//        object : SensorEventListener {
-//            override fun onSensorChanged(event: SensorEvent?) {
-//                if (event?.sensor?.type == Sensor.TYPE_ROTATION_VECTOR) {
-//                    val rotationMatrix = FloatArray(9)
-//                    SensorManager.getRotationMatrixFromVector(rotationMatrix, event.values)
-//                    val orientationValues = FloatArray(3)
-//                    SensorManager.getOrientation(rotationMatrix, orientationValues)
-//                    azimuth = Math.toDegrees(orientationValues[0].toDouble()).toFloat()
-//                }
-//            }
-//
-//            override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {}
-//        }
-//    }
-//
-//    DisposableEffect(lifecycleOwner) {
-//        sensorManager.registerListener(sensorEventListener, sensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR), SensorManager.SENSOR_DELAY_UI)
-//        onDispose {
-//            sensorManager.unregisterListener(sensorEventListener)
-//        }
-//    }
-//
-//    Log.d(TAG, "azimuth: $azimuth")
-
+    /* EventBus */
+    val subscriber = object {
+        @Subscribe(threadMode = ThreadMode.MAIN)
+        fun onCurrentLocationEvent(event: EventBusEvent.CurrentLocationEvent) {
+            Log.d(TAG, "onCurrentLocationEvent: $event")
+        }
+    }
 
     val lifeCycleOwner = LocalLifecycleOwner.current
     DisposableEffect(lifeCycleOwner) {
         val observer = LifecycleEventObserver { _, event ->
             if (event == Lifecycle.Event.ON_CREATE) {
+                EventBus.getDefault().register(subscriber)
 
             } else if (event == Lifecycle.Event.ON_START) {
-                // Service 시작
+
             } else if (event == Lifecycle.Event.ON_DESTROY) {
                 // ON_STOP에서 Foreground Service 종료
                 Intent(
@@ -172,8 +147,7 @@ fun WalkScreen(
                     context.applicationContext.startService(it)
                 }
 
-                // EventBus 종료
-                EventBus.getDefault().unregister(context)
+                EventBus.getDefault().unregister(subscriber)
             }
         }
         lifeCycleOwner.lifecycle.addObserver(observer)
@@ -285,31 +259,6 @@ fun WalkScreen(
     }
 } // End of WalkScreen()
 
-@Composable
-private fun collectLocationEvent() {
-    val coroutine = rememberCoroutineScope()
-    val lifecycleOwner = LocalLifecycleOwner.current
-    val stateFlow = lifecycleOwner.lifecycle.currentStateFlow
-    val currentLifecycleState by stateFlow.collectAsState()
-
-    val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
-    scope.launch {
-        EventBusController.locationEventBus.filter { appEvent ->
-            appEvent == AppEvent.LOCATION
-        }.collectLatest { locationEvent ->
-            Log.d(TAG, "collectLocationEvent: $locationEvent")
-        }
-    }
-
-} // End of collectLocationEvent()
-
-/* EventBus */
-// EventBus 이벤트 수신
-// @Subscribe(threadMode = ThreadMode.MAIN)
-fun onLocationEventBus(event: AppEvent) {
-    Log.d(TAG, "onLocationEventBus: $event")
-} // End of onLocationEventBus()
-
 
 @SuppressLint("MissingPermission")
 @OptIn(ExperimentalMaterial3Api::class)
@@ -333,6 +282,7 @@ private fun WalkScreenContent(
         targetValue = if (scaffoldState.bottomSheetState.currentValue.ordinal == 1) 180f else 0f
     )
 
+    /* Event Bus */
 
 
     Surface(modifier = Modifier.fillMaxSize().background(White)) {
@@ -419,6 +369,8 @@ private fun WalkScreenContent(
             /* GoogleMap */
             val currentLocation by walkViewModel.currentLocation.collectAsStateWithLifecycle() // 사용자의 현재 위치 정보
             val currentChooseWalkingTrail by walkViewModel.currentChooseWalkingTrail.collectAsStateWithLifecycle() // 사용자의 선택한 산책로 정보
+
+            val count by remember { mutableIntStateOf(0) }
 
             // 전체 산책 뷰
             Column(
@@ -556,6 +508,11 @@ private fun WalkingTrailgetPermission(
         permissionResultLauncher.launch(permissionsRequest.toTypedArray())
     }
 } // End of WalkingTrailgetPermission()
+
+@Subscribe(threadMode = ThreadMode.MAIN)
+public fun onCurrentLocationEvent(event: EventBusEvent.CurrentLocationEvent) {
+    Log.d(TAG, "onMessage: $event")
+}
 
 private fun walkingService(context: Context, option: String) {
     Intent(

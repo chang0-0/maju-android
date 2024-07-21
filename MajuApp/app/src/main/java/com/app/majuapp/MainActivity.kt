@@ -1,10 +1,8 @@
 package com.app.majuapp
 
 import android.graphics.Color
-import android.hardware.Sensor
-import android.hardware.SensorEvent
-import android.hardware.SensorEventListener
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
@@ -13,6 +11,7 @@ import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.view.WindowCompat
 import androidx.navigation.compose.rememberNavController
+import com.app.majuapp.domain.model.walk.eventbus.EventBusEvent
 import com.app.majuapp.navigation.SetUpNavGraph
 import com.app.majuapp.screen.culture.CultureDetailViewModel
 import com.app.majuapp.screen.culture.CultureViewModel
@@ -20,13 +19,17 @@ import com.app.majuapp.screen.home.HomeViewModel
 import com.app.majuapp.screen.login.LoginViewModel
 import com.app.majuapp.screen.login.SocialLoginViewModel
 import com.app.majuapp.ui.theme.MajuAppTheme
+import com.google.android.gms.maps.model.LatLng
 import dagger.hilt.android.AndroidEntryPoint
+import org.greenrobot.eventbus.EventBus
+import org.greenrobot.eventbus.Subscribe
+import org.greenrobot.eventbus.ThreadMode
 
 
 private const val TAG = "MainActivity_창영"
 
 @AndroidEntryPoint
-class MainActivity : ComponentActivity(), SensorEventListener { // End of MainActivity class
+class MainActivity : ComponentActivity() { // End of MainActivity class
 
     private val homeViewModel: HomeViewModel by viewModels()
     private val loginViewModel: LoginViewModel by viewModels()
@@ -34,35 +37,9 @@ class MainActivity : ComponentActivity(), SensorEventListener { // End of MainAc
     private val socialLoginViewModel: SocialLoginViewModel by viewModels()
     private val cultureDetailViewModel: CultureDetailViewModel by viewModels()
 
-//    private val walkingRecordViewModel: WalkingRecordViewModel by viewModels()
-//    private lateinit var sensorManager: SensorManager
-//    private val _stepCount = MutableStateFlow(0)
-//    val stepCount: StateFlow<Int> = _stepCount
-
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         WindowCompat.setDecorFitsSystemWindows(window, false)
-
-//        sensorManager =
-//            application.getSystemService(Context.SENSOR_SERVICE) as SensorManager
-//        val stepSensor: Sensor? = sensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER)
-//
-//        stepSensor?.let {
-//            sensorManager.registerListener(this, it, SensorManager.SENSOR_DELAY_UI)
-//        }
-
-
-//        sensorManager = (getSystemService(Context.SENSOR_SERVICE) as SensorManager?)!!
-//        val sensor: Sensor? = sensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER)
-//        sensor?.let {
-//            sensorManager.registerListener(
-//                this@MainActivity,
-//                it,
-//                SensorManager.SENSOR_DELAY_FASTEST
-//            )
-//        }
-
 
         setContent {
             MajuAppTheme {
@@ -80,39 +57,11 @@ class MainActivity : ComponentActivity(), SensorEventListener { // End of MainAc
 
             }
         }
+
+        // onCurrentLocationEvent(EventBusEvent.CurrentLocationEvent)
     } // End of onCreate()
+} // End of MainActivity class
 
-
-    override fun onResume() {
-        super.onResume()
-    }
-
-    override fun onStop() {
-        super.onStop()
-        // sensorManager.unregisterListener(this)
-    }
-
-    override fun onSensorChanged(event: SensorEvent?) {
-//        event?.let {
-//            if (it.sensor.type == Sensor.TYPE_STEP_COUNTER) {
-//                _stepCount.value = it.values[0].toInt()
-//                val steps = it.values[0].toInt()
-//
-//
-//                _stepCount.value = steps
-////                walkingRecordViewModel.setStepCount(steps)
-////                walkingRecordViewModel.setTodayStepCount(steps)
-//
-//                val todayStepCount = steps
-//                // walkingRecordViewModel.setTodayStepCount(todayStepCount)
-//            }
-//        }
-    }
-
-    override fun onAccuracyChanged(p0: Sensor?, p1: Int) {
-        // Do nothing
-    }
-}
 
 @Composable
 fun StatusBarColorChange() {

@@ -11,6 +11,9 @@ import android.util.Log
 import androidx.core.app.NotificationCompat
 import com.app.majuapp.MainActivity
 import com.app.majuapp.R
+import com.app.majuapp.domain.model.walk.eventbus.EventBusEvent
+import com.app.majuapp.domain.model.walk.eventbus.EventBusEvent.CurrentLocationEvent
+import com.app.majuapp.screen.walk.WalkingEventBusViewModel
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationRequest
@@ -21,6 +24,9 @@ import com.google.android.gms.maps.model.LatLng
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import org.greenrobot.eventbus.EventBus
+import org.greenrobot.eventbus.Subscribe
+import org.greenrobot.eventbus.ThreadMode
 
 
 private const val TAG = "RecordingService_창영"
@@ -29,6 +35,7 @@ class RecordingService : Service() { // End of RunningService class
 
     private lateinit var fusedLocationProviderClient: FusedLocationProviderClient
     private lateinit var locationCallback: LocationCallback
+    private lateinit var walkingEventBusViewModel: WalkingEventBusViewModel
 
 
     // Context
@@ -42,17 +49,31 @@ class RecordingService : Service() { // End of RunningService class
     override fun onCreate() {
         super.onCreate()
         context = applicationContext
+        walkingEventBusViewModel = WalkingEventBusViewModel()
+        EventBus.getDefault().register(this)
+
         fusedLocationProviderClient =
             LocationServices.getFusedLocationProviderClient(context)
         locationCallback = object : LocationCallback() {
             override fun onLocationResult(locationResult: LocationResult) {
                 super.onLocationResult(locationResult)
                 val temp = locationResult.locations[0]
-                Log.d(TAG, "onLocationResult: ${temp.latitude} , ${temp.longitude} , ${temp.time}")
 
-                val intent = Intent("currentLocation")
-                intent.putExtra("currentLocation", LatLng(temp.latitude, temp.longitude))
-                applicationContext.sendBroadcast(intent)
+                Log.d(TAG, "onLocationResult: ${temp.latitude} , ${temp.longitude}")
+                EventBus.getDefault().post(
+                    EventBusEvent.CurrentLocationEvent(
+                        LatLng(
+                            temp.latitude,
+                            temp.longitude
+                        )
+                    )
+                )
+
+                // walkingEventBusViewModel.currentLocation()
+
+//                val intent = Intent("currentLocation")
+//                intent.putExtra("currentLocation", LatLng(temp.latitude, temp.longitude))
+//                applicationContext.sendBroadcast(intent)
             }
         }
     } // End of onCreate()
@@ -94,18 +115,6 @@ class RecordingService : Service() { // End of RunningService class
         )
 
 
-//        getLastUserLocation(context, onGetLastLocationSuccess = {
-//            Log.d(TAG, "start: ${it.lat}, ${it.lng}")
-//        }, onGetLastLocationFailed = { exception ->
-//
-//        }, onGetLastLocationIsNull = {
-//            // Attempt to get the current user location
-//            getCurrentLocation(context, onGetCurrentLocationSuccess = {
-//            }, onGetCurrentLocationFailed = {
-//
-//            })
-//        })
-
         val notification = NotificationCompat.Builder(this, "walking_channel")
             .setSmallIcon(R.drawable.ic_home_logo).setContentTitle("산책중입니다!")
             .setContentIntent(pendingIntent).setContentText("Elapsed time").setOngoing(true).build()
@@ -113,10 +122,15 @@ class RecordingService : Service() { // End of RunningService class
         startForeground(1, notification)
     } // End of start()
 
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public fun onCurrentLocationEvent(event: EventBusEvent.CurrentLocationEvent) {
+        Log.d(TAG, "onMessage: $event")
+    }
 
     override fun onDestroy() {
         stopForeground(true)
         stopSelf()
+        EventBus.getDefault().unregister(this)
         super.onDestroy()
     }
 
