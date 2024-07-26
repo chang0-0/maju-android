@@ -1,15 +1,25 @@
 package com.app.majuapp.screen.walk
 
+import android.util.Log
+import androidx.compose.runtime.*
 import androidx.lifecycle.ViewModel
 import com.google.android.gms.maps.model.LatLng
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import org.greenrobot.eventbus.EventBus
 import javax.inject.Inject
+
+private const val TAG = "WalkingRecordViewModel_창영"
 
 @HiltViewModel
 class WalkingRecordViewModel @Inject constructor(
 ) : ViewModel() {
+
+    init {
+        Log.d(TAG, "언제 실행됩니까?: ")
+        Log.e(TAG, "already registered event bus for " + this);
+    }
 
     // 현재 걸음수
     private val _stepCount = MutableStateFlow<Int>(0)
@@ -51,4 +61,42 @@ class WalkingRecordViewModel @Inject constructor(
     fun setCurrentLocation(newLocation: LatLng) {
         _currentLocation.value = newLocation
     } // End of setCurrentLocation()
-} // End of WalkingRecordViewModel()
+
+
+    /* EventBus */
+    private var isEventBusRegistered by mutableStateOf(false)
+
+//    fun registerEventBus() {
+//        Log.d(TAG, "isEventBusRegistered: $isEventBusRegistered ")
+//
+//        if (!isEventBusRegistered) {
+//            EventBus.getDefault().register(this)
+//            isEventBusRegistered = true
+//            Log.d(TAG, "registerEventBus: ")
+//        }
+//    }
+
+//    fun unregisterEventBus() {
+//        if (isEventBusRegistered) {
+//            EventBus.getDefault().unregister(this)
+//            isEventBusRegistered = false
+//            Log.d(TAG, "unregisterEventBus: unregister ")
+//        }
+//    }
+
+//    @Subscribe
+//    fun EventBusObserver(event: EventBusEvent) {
+//        when (event) {
+//            is EventBusEvent.CurrentLocationEvent -> {
+//                setCurrentLocation(event.location)
+//                Log.d(TAG, "EventBusObserver: ${event.location}")
+//            }
+//        }
+//    }
+
+    override fun onCleared() {
+        // unregisterEventBus()
+        Log.d(TAG, "unregisterEventBus: ")
+        super.onCleared()
+    }
+} // End of WalkingRecordViewModel class

@@ -62,7 +62,6 @@ class MainActivity : ComponentActivity() { // End of MainActivity class
     } // End of onCreate()
 } // End of MainActivity class
 
-
 @Composable
 fun StatusBarColorChange() {
     // 상태바 컬러 변경

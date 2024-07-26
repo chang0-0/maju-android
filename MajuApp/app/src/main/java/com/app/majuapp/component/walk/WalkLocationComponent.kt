@@ -8,6 +8,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.core.app.ActivityCompat
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.app.majuapp.domain.model.walk.CoordinateData
 import com.app.majuapp.screen.walk.WalkViewModel
 import com.google.android.gms.location.FusedLocationProviderClient
@@ -78,8 +79,8 @@ fun getCurrentLocation(
     onGetCurrentLocationSuccess: (CoordinateData) -> Unit,
     onGetCurrentLocationFailed: (Exception) -> Unit,
     priority: Boolean = true,
-    walkViewModel: WalkViewModel
-) {
+    walkViewModel: WalkViewModel = hiltViewModel()
+): LatLng {
     val accuracy = if (priority) {
         Priority.PRIORITY_HIGH_ACCURACY
     } else {
@@ -94,7 +95,7 @@ fun getCurrentLocation(
         ).addOnSuccessListener { location ->
             location?.let {
                 onGetCurrentLocationSuccess(CoordinateData(it.latitude, it.longitude))
-                // result.value = LatLng(it.latitude, it.longitude)
+                result.value = LatLng(it.latitude, it.longitude)
                 walkViewModel.setCurrentLocation(LatLng(it.latitude, it.longitude))
             }?.run {
                 // Location null do something
@@ -104,7 +105,7 @@ fun getCurrentLocation(
         }
     }
 
-    // return result.value
+    return result.value ?: LatLng(0.0, 0.0)
 } // End of getCurrentLocation()
 
 private fun areLocationPermissionsGranted(context: Context): Boolean {

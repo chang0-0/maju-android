@@ -3,12 +3,15 @@ package com.app.majuapp.screen.walk
 import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Activity
+import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.net.Uri
 import android.os.Build
 import android.provider.Settings
 import android.util.Log
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.animateContentSize
@@ -17,6 +20,7 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -36,7 +40,6 @@ import androidx.compose.material3.rememberBottomSheetScaffoldState
 import androidx.compose.runtime.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
@@ -56,7 +59,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.app.majuapp.MainActivity
 import com.app.majuapp.R
-import com.app.majuapp.component.Loader
 import com.app.majuapp.component.walk.AccessFineLocationPermissionTextProvider
 import com.app.majuapp.component.walk.ActivityRecognitionPermissionTextProvider
 import com.app.majuapp.component.walk.BearingSensorManager
@@ -66,11 +68,10 @@ import com.app.majuapp.component.walk.PostNotificationPermissionTextProvider
 import com.app.majuapp.component.walk.StepCounterSensorManager
 import com.app.majuapp.component.walk.WalkRecordingBox
 import com.app.majuapp.component.walk.WalkScreenChooseStartDialog
-import com.app.majuapp.component.walk.WalkScreenInformDialogue
+import com.app.majuapp.component.walk.WalkScreenInformDialog
 import com.app.majuapp.component.walk.WalkingRecordingTimer
 import com.app.majuapp.component.walk.getCurrentLocation
 import com.app.majuapp.component.walk.getLastUserLocation
-import com.app.majuapp.domain.model.walk.eventbus.EventBusEvent
 import com.app.majuapp.service.RecordingService
 import com.app.majuapp.ui.theme.SpiroDiscoBall
 import com.app.majuapp.ui.theme.White
@@ -86,10 +87,9 @@ import com.google.maps.android.compose.MapProperties
 import com.google.maps.android.compose.MapType
 import com.google.maps.android.compose.MapUiSettings
 import com.google.maps.android.compose.rememberCameraPositionState
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import org.greenrobot.eventbus.EventBus
-import org.greenrobot.eventbus.Subscribe
-import org.greenrobot.eventbus.ThreadMode
+import java.util.TimeZone
 
 private const val TAG = "WalkScreen_창영"
 
@@ -99,8 +99,7 @@ fun WalkScreen(
     navController: NavController,
     walkViewModel: WalkViewModel = hiltViewModel(),
     walkingRecordViewModel: WalkingRecordViewModel = hiltViewModel()
-) {
-    /* Context */
+) {/* Context */
     val context = LocalContext.current
 
     /* LifeCycle */
@@ -127,20 +126,21 @@ fun WalkScreen(
 
             } else if (event == Lifecycle.Event.ON_DESTROY) {
                 // ON_STOP에서 Foreground Service 종료
-                Intent(
-                    context.applicationContext,
-                    RecordingService::class.java,
-                ).also {
-                    it.action = RecordingService.Actions.STOP.toString()
-                    context.applicationContext.startService(it)
-                }
+                walkingService(context, RecordingService.Actions.STOP.toString())
             }
         }
         lifeCycleOwner.lifecycle.addObserver(observer)
 
         onDispose {
             lifeCycleOwner.lifecycle.removeObserver(observer)
-            walkingService(context, RecordingService.Actions.STOP.toString())
+            // walkingService(context, RecordingService.Actions.STOP.toString())
+            Intent(
+                context.applicationContext,
+                RecordingService::class.java,
+            ).also {
+                it.action = RecordingService.Actions.STOP.toString()
+                context.applicationContext.startService(it)
+            }
         }
     }
 
@@ -148,82 +148,30 @@ fun WalkScreen(
     val coroutineScope = rememberCoroutineScope()
     getLastUserLocation(context, {}, {}, {})
     getCurrentLocation(context, {}, {}, walkViewModel = walkViewModel)
-    var currentLocation = walkViewModel.currentLocation.collectAsStateWithLifecycle()
-    Log.d(TAG, "WalkScreen: ${currentLocation.value}")
-
-    if (currentLocation.value != null) {
-        // 현재 위치 정보가 업데이트 되었을 때 현재 위치에 따른 산책로 추천
-        LaunchedEffect(Unit) {
-            walkViewModel.getWalkingTrails()
-            walkingRecordViewModel.setTodayStepCount(walkingRecordViewModel.moveStepCount.value)
-        }
-
-        val walkingTrailData by walkViewModel.walkingTrailData.collectAsState()
-        var showChooseStartDialog by rememberSaveable { mutableStateOf(true) }
-        when (walkingTrailData) {
-            is RequestState.Loading -> {
-                Column(
-                    modifier = Modifier.fillMaxSize(),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center
-                ) {
-                    Loader()
-                    Text(text = "현재 위치 정보를 가져오는 중입니다.")
-                }
-            }
-
-            is RequestState.Success -> {
-                if (walkingTrailData.getSuccessData() != null && showChooseStartDialog) {
-                    WalkScreenChooseStartDialog(context.getString(R.string.walk_screen_dialog_choose_promenade_title),
-                        context.getString(R.string.walk_screen_dialog_choose_promenade_content),
-                        walkingTrailData.getSuccessData()!!,
-                        onClickDismiss = {
-                            showChooseStartDialog = false
-                            navController.popBackStack()
-                        },
-                        onClickConfirm = {
-                            showChooseStartDialog = false
-                        })
-                } else {
-                    LaunchedEffect(Unit) {
-                        val currentChoose = walkViewModel.currentChooseWalkingTrail.value!!
-//                        walkViewModel.getWalkingTrailTrace(
-//                            currentChoose.startLat,
-//                            currentChoose.startLon,
-//                            currentChoose.endLat,
-//                            currentChoose.endLon,
-//                        )
-                    }
 
 
-                    WalkScreenContent(navController, walkViewModel)
-                }
-            }
+    /* State */
+    val currentLocation by remember { walkViewModel.currentLocation }.collectAsStateWithLifecycle()
+    // val walkingTrailData by remember { walkViewModel.walkingTrailData }.collectAsStateWithLifecycle()
+    var showChooseStartDialog by remember { mutableStateOf(true) }
 
-            is RequestState.Error -> {
-                Text(text = walkingTrailData.getErrorMessage())
-            }
+    LaunchedEffect(key1 = currentLocation != null, key2 = Unit) {
+        // walkViewModel.getWalkingTrails()
+        walkingRecordViewModel.setTodayStepCount(walkingRecordViewModel.moveStepCount.value)
+    }
 
-            else -> {
-                Column(
-                    modifier = Modifier.fillMaxSize(),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center
-                ) {
-                    Loader()
-                    Text(text = "현재 위치 정보를 가져오는 중입니다.")
-                }
-            }
-        }
-    } else {
-        Column(
-            modifier = Modifier.fillMaxSize(),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
-        ) {
-            Loader()
-            Text(text = "현재 위치 정보를 가져오는 중입니다.")
-        }
+    if (currentLocation != null && showChooseStartDialog) {
+        WalkScreenChooseStartDialog(context.getString(R.string.walk_screen_dialog_choose_promenade_title),
+            context.getString(R.string.walk_screen_dialog_choose_promenade_content),
+            onClickDismiss = {
+                showChooseStartDialog = false
+                navController.popBackStack()
+            },
+            onClickConfirm = {
+                showChooseStartDialog = false
+            })
+    } else if (currentLocation != null && showChooseStartDialog == false) {
+        WalkScreenContent(navController, walkViewModel)
     }
 } // End of WalkScreen()
 
@@ -236,8 +184,7 @@ private fun WalkScreenContent(
     walkViewModel: WalkViewModel,
     timerViewModel: TimerViewModel = hiltViewModel(),
     walkingRecordViewModel: WalkingRecordViewModel = hiltViewModel(),
-) {
-    /* Context */
+) {/* Context */
     val context = LocalContext.current
 
     /* BottomSheet*/
@@ -247,36 +194,27 @@ private fun WalkScreenContent(
 
     /* Icon Button */
     val rotationState by animateFloatAsState(
-        targetValue = if (scaffoldState.bottomSheetState.currentValue.ordinal == 1) 180f else 0f
+        targetValue = if (scaffoldState.bottomSheetState.currentValue.ordinal == 1) 180f else 0f,
+        label = ""
     )
+
+    /* GoogleMap */
+    val currentLocation by remember { walkingRecordViewModel.currentLocation }.collectAsStateWithLifecycle() // 사용자의 현재 위치 정보
+    val currentChooseWalkingTrail by remember { walkViewModel.currentChooseWalkingTrail }.collectAsStateWithLifecycle() // 사용자의 선택한 산책로 정보
 
     /* EventBus */
     val lifeCycleOwner = LocalLifecycleOwner.current
     DisposableEffect(lifeCycleOwner) {
-        val subscriber = object {
-            @Subscribe(threadMode = ThreadMode.MAIN)
-            fun onCurrentLocationEvent(event: EventBusEvent) {
-                when (event) {
-                    is EventBusEvent.CurrentLocationEvent -> {
-                        Log.d(TAG, "walkScreen -> onCurrentLocationEvent: $event")
-                        walkingRecordViewModel.setCurrentLocation(
-                            LatLng(event.location.latitude, event.location.longitude)
-                        )
-                    }
-                }
-
-            }
-        }
 
         val observer = LifecycleEventObserver { _, event ->
             if (event == Lifecycle.Event.ON_CREATE) {
                 walkingRecordViewModel.setCurrentLocationGenerate(walkViewModel.currentLocation.value!!)
-                EventBus.getDefault().register(subscriber)
             } else if (event == Lifecycle.Event.ON_START) {
 
-
+            } else if (event == Lifecycle.Event.ON_STOP) {
+                // walkingRecordViewModel.unregisterEventBus()
             } else if (event == Lifecycle.Event.ON_DESTROY) {
-                EventBus.getDefault().unregister(subscriber)
+                // walkingRecordViewModel.unregisterEventBus()
             }
         }
         lifeCycleOwner.lifecycle.addObserver(observer)
@@ -286,9 +224,17 @@ private fun WalkScreenContent(
         }
     }
 
-    /* 산책로 경로 가져오기 */
     LaunchedEffect(Unit) {
-        
+        if (walkViewModel.currentChooseWalkingTrail.value != null) {
+            val currentChoose = walkViewModel.currentChooseWalkingTrail.value!!
+            walkViewModel.getWalkingTrailTrace(
+                currentChoose.startLat,
+                currentChoose.startLon,
+                currentChoose.endLat,
+                currentChoose.endLon,
+            )
+            Log.d(TAG, "currentChoose 내가 선택한 산책지: $currentChoose")
+        }
     }
 
 
@@ -331,8 +277,7 @@ private fun WalkScreenContent(
             sheetContent = {
                 // BottomSheet Content
                 val moveDist by walkingRecordViewModel.moveDist.collectAsStateWithLifecycle()
-                val todayStepCount by
-                remember { mutableIntStateOf(walkingRecordViewModel.todayStepCount.value) }
+                val todayStepCount by remember { mutableIntStateOf(walkingRecordViewModel.todayStepCount.value) }
                 val moveStepCount = 0
 
                 Column(
@@ -373,11 +318,6 @@ private fun WalkScreenContent(
                 }
             } // End of SheetContent
         ) {
-            /* GoogleMap */
-            val currentLocation by
-            walkingRecordViewModel.currentLocation.collectAsStateWithLifecycle() // 사용자의 현재 위치 정보
-            val currentChooseWalkingTrail by walkViewModel.currentChooseWalkingTrail.collectAsStateWithLifecycle() // 사용자의 선택한 산책로 정보
-
             // 전체 산책 뷰
             Column(
                 modifier = Modifier.fillMaxSize(),
@@ -391,14 +331,15 @@ private fun WalkScreenContent(
                         startLocation = LatLng(
                             currentChooseWalkingTrail!!.startLat,
                             currentChooseWalkingTrail!!.startLon
-                        ), endLocation = LatLng(
+                        ),
+                        endLocation = LatLng(
                             currentChooseWalkingTrail!!.endLat, currentChooseWalkingTrail!!.endLon
                         ),
                         mapProperties = MapProperties(
-                            isMyLocationEnabled = true,
-                            isBuildingEnabled = true
+                            isMyLocationEnabled = true, isBuildingEnabled = true
                         ),
-                        mapUiSetting = MapUiSettings(compassEnabled = false)
+                        mapUiSetting = MapUiSettings(compassEnabled = false),
+                        eventBusEnable = true
                     )
 
                     LaunchedEffect(currentChooseWalkingTrail) {
@@ -425,14 +366,29 @@ private fun WalkScreenContent(
                     )
                 }
             }
+
+            ProvideCurrentLocation {
+                Box(
+                    modifier = Modifier.fillMaxSize()
+                ) {
+
+                }
+            }
+
+
         } // End of BottomSheetScaffold {}
+
+        /* BackHandle */
+        BackHandler(enabled = true) {
+            walkViewModel.setShowInfromDialog()
+        }
     } // End of Surface {}
 
 
     val showState = walkViewModel.showInformDialog.collectAsStateWithLifecycle()
     when (showState.value) {
         true -> {
-            WalkScreenInformDialogue(context.getString(R.string.walk_screen_inform_dialog_title),
+            WalkScreenInformDialog(context.getString(R.string.walk_screen_inform_dialog_title),
                 context.getString(R.string.walk_screen_inform_dialog_content),
                 leftButtonText = context.getString(R.string.walk_screen_inform_dialog_close_button_content),
                 rightButtonText = context.getString(R.string.walk_screen_inform_dialog_continue_button_content),
@@ -449,6 +405,39 @@ private fun WalkScreenContent(
     }
 
 } // End of WalkScreenContent()
+
+// val LocalTimeZone = compositionLocalOf { TimeZone.getDefault() }
+
+@Composable
+fun ProvideCurrentLocation(content: @Composable () -> Unit) {
+
+    val context = LocalContext.current
+    val coroutineScope = rememberCoroutineScope()
+    // var currentLocation: LatLng by remember { mutableStateOf(getCurrentLocation(context, {}, {})) }
+    var currentTimeZone: TimeZone by remember { mutableStateOf(TimeZone.getDefault()) }
+    val LocalTimeZone = compositionLocalOf { TimeZone.getDefault() }
+
+
+    DisposableEffect(Unit) {
+        val receiver = object : BroadcastReceiver() {
+            override fun onReceive(p0: Context?, p1: Intent?) {
+                Log.d(TAG, "onReceive : ")
+            }
+        }
+
+        coroutineScope.launch(Dispatchers.IO) {
+            context.registerReceiver(receiver, IntentFilter(Intent.ACTION_TIMEZONE_CHANGED))
+        }
+
+        onDispose {
+            context.unregisterReceiver(receiver)
+        }
+    }
+
+    CompositionLocalProvider(
+        value = LocalTimeZone provides currentTimeZone, content = content
+    )
+} // End of ProvideCurrentLocation()
 
 
 @Composable
@@ -513,10 +502,6 @@ private fun WalkingTrailgetPermission(
     }
 } // End of WalkingTrailgetPermission()
 
-@Subscribe(threadMode = ThreadMode.MAIN)
-public fun onCurrentLocationEvent(event: EventBusEvent.CurrentLocationEvent) {
-    Log.d(TAG, "onMessage: $event")
-}
 
 private fun walkingService(context: Context, option: String) {
     Intent(

@@ -108,16 +108,22 @@ class WalkViewModel @Inject constructor(
         endLon: Double,
     ) {
         viewModelScope.launch {
-            _walkingTrailTrace.collectLatest {
-                walkRepository.getWalkingTrailTrace(
-                    startLat,
-                    startLon,
-                    endLat,
-                    endLon
-                ).collectLatest { result ->
-                    _walkingTrailTrace.value = result
+            _walkingTrailData.collectLatest { choose ->
+                if (choose != null) {
+                    walkRepository.getWalkingTrailTrace(
+                        startLat,
+                        startLon,
+                        endLat,
+                        endLon
+                    ).distinctUntilChanged().collectLatest { result ->
+                        _walkingTrailTrace.value = result
+                    }
+                } else {
+                    _walkingTrailTrace.value = RequestState.Idle
                 }
             }
+
+
         }
     } // End of getWalkingTrailTrace()
 } // End of WalkViewModel
